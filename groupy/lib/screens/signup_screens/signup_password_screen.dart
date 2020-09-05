@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/destination_provider.dart';
+import '../../providers/country_provider.dart';
+import '../../screens/tab_bar_screen.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 
 class SignUpPasswordScreen extends StatefulWidget {
   static const routeName = '/signup-password-screen';
@@ -10,35 +15,83 @@ class SignUpPasswordScreen extends StatefulWidget {
 }
 
 class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
+  final _auth = FirebaseAuth.instance;
+
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
   final _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey();
   var _isLoading = false;
-  var userValues = User(
+  var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    password: '',
     location: [
-      Destination(
+      Country(
         id: null,
-        country: '',
-        city: '',
-        state: '',
+        country: null,
+        latitude: null,
+        longitude: null,
       ),
     ],
   );
 
-  void _saveEmail() {
+  void _submitUserData(BuildContext ctx) async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
-    // Navigator.of(context)
-    //     .pushNamed(SignUpEmailScreen.routeName, arguments: userValues);
+
+    UserCredential authResult;
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      authResult = await _auth.createUserWithEmailAndPassword(
+        email: userValues.email,
+        password: userValues.password,
+      );
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(authResult.user.uid)
+          .set({
+        'first_name': userValues.firstName,
+        'last_name': userValues.lastName,
+        'email': userValues.email,
+        'phone': userValues.phone,
+        'location': {
+          'country': userValues.location[0].country
+        },
+        'profile_pic_url': '',
+      });
+    } on PlatformException catch (error) {
+      var message = 'An error ocurred, please check your credentials!';
+      if (error.message != null) {
+        message = error.message;
+      }
+      Scaffold.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Theme.of(ctx).errorColor,
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      print(error);
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    Navigator.of(context).pushNamed(TabBarScreen.routeName);
   }
 
   @override
@@ -154,37 +207,38 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.password = value;
+                              userValues.password = value.trim();
                             },
                           ),
                           TextFormField(
-                              cursorColor: Theme.of(context).primaryColor,
-                              decoration: InputDecoration(
-                                labelText: 'Confirm Password',
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context)
-                                          .secondaryHeaderColor),
-                                ),
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Confirm Password',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
                               ),
-                              obscureText: true,
-                              focusNode: _confirmPasswordFocusNode,
-                              validator: (value) {
-                                if (value != _passwordController.text) {
-                                  return 'Passwords do not match!';
-                                }
-                              }),
+                            ),
+                            obscureText: true,
+                            focusNode: _confirmPasswordFocusNode,
+                            validator: (value) {
+                              if (value != _passwordController.text) {
+                                return 'Passwords do not match!';
+                              }
+                            },
+                          ),
                           Container(
                             padding: EdgeInsets.only(top: 40),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(
-                                'Next',
+                                'Create Profile',
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _saveEmail,
+                              onPressed: () => _submitUserData(context),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

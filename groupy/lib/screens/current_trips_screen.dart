@@ -1,25 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../widgets/new_trip.dart';
-import '../providers/trips_provider.dart';
 import '../widgets/current_trip_card_list.dart';
-import '../providers/auth.dart';
+import '../providers/trips_provider.dart';
 
 class CurrentTripsScreen extends StatefulWidget {
   static const routeName = '/current-trips';
 
-  void _addNewTrip() {
-    return;
-  }
+  // void _addNewTrip() {
+  //   return;
+  // }
 
-  void startAddNewTrip(BuildContext ctx) {
-    showModalBottomSheet(
-        context: ctx,
-        builder: (_) {
-          return NewTrip(_addNewTrip);
-        });
-  }
+  // void startAddNewTrip(BuildContext ctx) {
+  //   showModalBottomSheet(
+  //       context: ctx,
+  //       builder: (_) {
+  //         return NewTrip(_addNewTrip);
+  //       });
+  // }
 
   @override
   _CurrentTripsScreenState createState() => _CurrentTripsScreenState();
@@ -29,14 +29,16 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
   var _isInit = true;
   var _isLoading = false;
 
+//DO I WANT TO SET PROVIDER HERE???
+
   @override
   void didChangeDependencies() {
-    final authData = Provider.of<Auth>(context, listen: false);
+    User user = FirebaseAuth.instance.currentUser;
     if (_isInit) {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<TripsProvider>(context).fetchAndSetTrips(authData.userId).then((_) {
+      Provider.of<TripsProvider>(context, listen: false).fetchAndSetTrips(user).then((_) {
         setState(() {
           _isLoading = false;
         });

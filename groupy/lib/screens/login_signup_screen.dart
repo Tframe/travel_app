@@ -39,7 +39,7 @@ class LoginSignupScreen extends StatelessWidget {
                         size: screenHeight * 0.05,
                       ),
                       Text(
-                        'Group Travels',
+                        'Travi',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                           fontSize: 30,

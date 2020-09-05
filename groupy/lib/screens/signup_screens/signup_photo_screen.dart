@@ -1,24 +1,27 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
 import '../../providers/country_provider.dart';
-import './signup_email_screen.dart';
+import './signup_location_screen.dart';
+import '../../widgets/pickers/user_image_picker.dart';
 
-class SignUpPhoneScreen extends StatefulWidget {
-  static const routeName = '/signup-phone-screen';
+class SignUpPhotoScreen extends StatefulWidget {
+  static const routeName = '/signup-photo-screen';
   @override
-  _SignUpPhoneScreenState createState() => _SignUpPhoneScreenState();
+  _SignUpPhotoScreenState createState() => _SignUpPhotoScreenState();
 }
 
-class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
+class _SignUpPhotoScreenState extends State<SignUpPhotoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
+
   var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    profilePicUrl: '',
     location: [
       Country(
         id: null,
@@ -29,25 +32,30 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
     ],
   );
 
-  void _savePhone() {
+  File _userImageFile;
+
+  void _saveName() {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
-    Navigator.of(context)
-        .pushNamed(SignUpEmailScreen.routeName, arguments: userValues);
+    Navigator.of(context).pushNamed(SignUpLocationScreen.routeName,
+        arguments: {'user': userValues, 'image': _userImageFile});
+  }
+
+  void _pickedImage(File image) {
+    _userImageFile = image;
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    userValues = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Mobile Number',
+          'Profile Picture',
           style: TextStyle(
             color: Colors.black,
           ),
@@ -69,27 +77,14 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                     height: screenHeight * 0.055,
                   ),
                   Text(
-                    'Add your mobile number',
+                    'Add a profile picture',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
                   ),
                   SizedBox(
-                    height: screenHeight * 0.025,
-                  ),
-                  Container(
-                    width: screenWidth * 0.8,
-                    child: Text(
-                      'Adding your mobile number will help with authentication.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.025,
+                    height: screenHeight * 0.055,
                   ),
                   Container(
                     width: screenWidth * 0.85,
@@ -100,26 +95,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'Mobile number',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
-                              ),
-                            ),
-                            keyboardType: TextInputType.phone,
-                            validator: (value) {
-                              if (value.isEmpty || value.length != 10) {
-                                return 'Please enter a valid mobile number!';
-                              }
-                            },
-                            onSaved: (value) {
-                              userValues.phone = value.trim();
-                            },
-                          ),
+                          UserImagePicker(_pickedImage),
                           Container(
                             padding: EdgeInsets.only(top: 40),
                             width: screenWidth,
@@ -130,7 +106,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _savePhone,
+                              onPressed: _saveName,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -141,6 +117,26 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                           ),
                           SizedBox(
                             height: screenHeight * 0.025,
+                          ),
+                          Container(
+                            alignment: Alignment.bottomCenter,
+                            padding: EdgeInsets.only(
+                              bottom: 10,
+                            ),
+                            child: new InkWell(
+                              child: Text(
+                                'Skip',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              //TODO NAVIGATE TO NEXT SCREEN
+                              onTap: () => Navigator.of(context).pushNamed(
+                                  SignUpLocationScreen.routeName,
+                                  arguments: userValues),
+                            ),
                           ),
                         ],
                       ),

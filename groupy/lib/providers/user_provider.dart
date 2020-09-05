@@ -1,22 +1,18 @@
 import 'package:flutter/foundation.dart';
 
-import './destination_provider.dart';
+import 'country_provider.dart';
 
-enum Sex {
-  Female, Male,
-  }
-
-class User extends ChangeNotifier{
+class UserProvider extends ChangeNotifier{
   String id;
   String email;
   String phone;
   String password;
   String firstName;
   String lastName;
-  List<Destination> location;
-  String profilePic;
+  List<Country> location;
+  String profilePicUrl;
 
-  User({
+  UserProvider({
     this.id,
     this.email,
     this.phone,
@@ -24,7 +20,7 @@ class User extends ChangeNotifier{
     this.firstName,
     this.lastName,
     this.location,
-    this.profilePic,
+    this.profilePicUrl,
   });
 
 }

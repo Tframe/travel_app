@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
-
-import '../providers/auth.dart';
-import '../models/http_exception.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login-screen';
@@ -14,19 +12,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey();
-
-  final _firstNameFocusNode = FocusNode();
-
-  final _lastNameFocusNode = FocusNode();
-
   final _emailFocusNode = FocusNode();
-
   final _passwordFocusNode = FocusNode();
 
   Map<String, String> _authData = {
-    'firstName': '',
-    'lastName': '',
     'email': '',
     'password': '',
   };
@@ -37,8 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _firstNameFocusNode.dispose();
-    _lastNameFocusNode.dispose();
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
@@ -62,7 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(BuildContext ctx) async {
+    UserCredential authResult;
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -73,27 +63,31 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Provider.of<Auth>(context, listen: false).signin(
-        _authData['email'],
-        _authData['password'],
+      authResult = await _auth.signInWithEmailAndPassword(
+        email: _authData['email'],
+        password: _authData['password'],
       );
       Navigator.of(context).pop();
-    } on HttpException catch (error) {
-      var errorMessage = 'Authentication failed';
-      if (error.toString().contains('EMAIL_NOT_FOUND') ||
-          error.toString().contains('INVALID_PASSWORD')) {
-        errorMessage = 'Invalid email address or password.';
+    } on PlatformException catch (error) {
+      var message = 'An error ocurred, please check your credentials!';
+      if (error.message != null) {
+        message = error.message;
       }
-      _showErrorDialog(errorMessage);
+      Scaffold.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Theme.of(ctx).errorColor,
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
     } catch (error) {
-      const errorMessage = 'Could not authenticate. Please try again later.';
-      _showErrorDialog(errorMessage);
+      print(error);
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      _isLoading = false;
-    });
-
   }
 
   @override
@@ -207,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color: Theme.of(context).accentColor,
                                         ),
                                       ),
-                                      onPressed: _submit,
+                                      onPressed: () => _submit(context),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30),
                                       ),

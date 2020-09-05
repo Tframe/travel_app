@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/destination_provider.dart';
+import '../../providers/country_provider.dart';
 import './signup_password_screen.dart';
 
 class SignUpEmailScreen extends StatefulWidget {
@@ -13,18 +13,18 @@ class SignUpEmailScreen extends StatefulWidget {
 class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   var _isLoading = false;
-  var userValues = User(
+  var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     location: [
-      Destination(
+      Country(
         id: null,
-        country: '',
-        city: '',
-        state: '',
+        country: null,
+        latitude: null,
+        longitude: null,
       ),
     ],
   );
@@ -107,7 +107,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.email = value;
+                              userValues.email = value.trim();
                             },
                           ),
                           Container(

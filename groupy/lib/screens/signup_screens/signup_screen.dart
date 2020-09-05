@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:google_maps_webservice/places.dart';
+
 import '../../models/http_exception.dart';
 import '../../providers/auth.dart';
-import '../../providers/destination_provider.dart';
+import '../../providers/country_provider.dart';
 import '../../providers/user_provider.dart';
 
-const kGoogleApiKey = "AIzaSyCu9T1EYFgRVkWhtRrV0jCj-jK0pOh-A-M";
+const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
 
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 final searchScaffoldKey = GlobalKey<ScaffoldState>();
@@ -27,20 +26,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
-  Mode _mode = Mode.overlay;
+  // Mode _mode = Mode.overlay;
 
-  var userValues = User(
+  var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     location: [
-      Destination(
+      Country(
         id: null,
-        country: '',
-        city: '',
-        state: '',
+        country: null,
+        latitude: null,
+        longitude: null,
       ),
     ],
   );
@@ -119,33 +118,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  void onError(PlacesAutocompleteResponse response) {
-    homeScaffoldKey.currentState.showSnackBar(
-      SnackBar(content: Text(response.errorMessage)),
-    );
-  }
+  // void onError(PlacesAutocompleteResponse response) {
+  //   homeScaffoldKey.currentState.showSnackBar(
+  //     SnackBar(content: Text(response.errorMessage)),
+  //   );
+  // }
 
-  Object _parseDestination(String destination) {
-    var parsedDestination = destination.split(', ');
-    var lengthParsedDestination = parsedDestination.length;
-    var parsedCountry = parsedDestination[lengthParsedDestination - 1];
-    var parsedState = '';
-    var parsedCity = '';
-    if (lengthParsedDestination == 2) {
-      parsedCity = parsedDestination[0];
-    } else if (lengthParsedDestination > 2) {
-      parsedCity = parsedDestination[lengthParsedDestination - 3];
-      parsedState = parsedDestination[lengthParsedDestination - 2];
-    }
-    return [
-      Destination(
-        id: null,
-        country: parsedCountry,
-        state: parsedState,
-        city: parsedCity,
-      )
-    ];
-  }
+  // Object _parseDestination(String destination) {
+  //   var parsedDestination = destination.split(', ');
+  //   var lengthParsedDestination = parsedDestination.length;
+  //   var parsedCountry = parsedDestination[lengthParsedDestination - 1];
+  //   var parsedState = '';
+  //   var parsedCity = '';
+  //   if (lengthParsedDestination == 2) {
+  //     parsedCity = parsedDestination[0];
+  //   } else if (lengthParsedDestination > 2) {
+  //     parsedCity = parsedDestination[lengthParsedDestination - 3];
+  //     parsedState = parsedDestination[lengthParsedDestination - 2];
+  //   }
+  //   return [
+  //     Destination(
+  //       id: null,
+  //       country: parsedCountry,
+  //       state: parsedState,
+  //       city: parsedCity,
+  //     )
+  //   ];
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -236,29 +235,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   userValues.lastName = value;
                                 },
                               ),
-                              PlacesAutocompleteFormField(
-                                apiKey: kGoogleApiKey,
-                                onError: onError,
-                                mode: _mode,
-                                language: "en",
-                                inputDecoration: InputDecoration(
-                                  labelText: 'Location',
-                                  labelStyle: TextStyle(
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value.isEmpty) {
-                                    return 'Please provide your location';
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                onSaved: (value) async {
-                                  userValues.location =
-                                      _parseDestination(value);
-                                },
-                              ),
+                              // PlacesAutocompleteFormField(
+                              //   apiKey: kGoogleApiKey,
+                              //   onError: onError,
+                              //   mode: _mode,
+                              //   language: "en",
+                              //   inputDecoration: InputDecoration(
+                              //     labelText: 'Location',
+                              //     labelStyle: TextStyle(
+                              //       fontSize: 20,
+                              //     ),
+                              //   ),
+                              //   validator: (value) {
+                              //     if (value.isEmpty) {
+                              //       return 'Please provide your location';
+                              //     } else {
+                              //       return null;
+                              //     }
+                              //   },
+                              //   onSaved: (value) async {
+                              //     userValues.location =
+                              //         _parseDestination(value);
+                              //   },
+                              // ),
                               TextFormField(
                                 cursorColor: Theme.of(context).primaryColor,
                                 decoration: InputDecoration(

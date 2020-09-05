@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:google_maps_webservice/places.dart';
+
 import 'package:intl/intl.dart';
 
 import '../providers/trips_provider.dart';
 import '../providers/trip_provider.dart';
-import '../providers/destination_provider.dart';
+import '../providers/country_provider.dart';
 import '../providers/auth.dart';
 
-const kGoogleApiKey = "AIzaSyCu9T1EYFgRVkWhtRrV0jCj-jK0pOh-A-M";
+const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
 
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 final searchScaffoldKey = GlobalKey<ScaffoldState>();
@@ -21,7 +20,7 @@ class EditTripScreen extends StatefulWidget {
 }
 
 class _EditTripScreenState extends State<EditTripScreen> {
-  Mode _mode = Mode.overlay;
+  // Mode _mode = Mode.overlay;
   final _titleFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _startDateFocusNode = FocusNode();
@@ -35,7 +34,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
     title: '',
     startDate: null,
     endDate: null,
-    destinations: [],
+    countries: [],
     image: '',
     description: '',
     group: [],
@@ -93,9 +92,9 @@ class _EditTripScreenState extends State<EditTripScreen> {
           'description': _editedTrip.description,
         };
         _initDestinationValues = {
-          'city': _editedTrip.destinations[0].city,
-          'state': _editedTrip.destinations[0].state,
-          'country': _editedTrip.destinations[0].country,
+          // 'city': _editedTrip.destinations[0].city,
+          // 'state': _editedTrip.destinations[0].state,
+          // 'country': _editedTrip.destinations[0].country,
         };
       }
     }
@@ -160,38 +159,38 @@ class _EditTripScreenState extends State<EditTripScreen> {
     Navigator.of(context).pop();
   }
 
-  void onError(PlacesAutocompleteResponse response) {
-    homeScaffoldKey.currentState.showSnackBar(
-      SnackBar(content: Text(response.errorMessage)),
-    );
-  }
+  // void onError(PlacesAutocompleteResponse response) {
+  //   homeScaffoldKey.currentState.showSnackBar(
+  //     SnackBar(content: Text(response.errorMessage)),
+  //   );
+  // }
 
-  List<Destination> _parseDestination(String destination) {
-    var parsedDestination = destination.split(', ');
-    var lengthParsedDestination = parsedDestination.length;
-    var parsedCountry = parsedDestination[lengthParsedDestination - 1];
-    var parsedState = '';
-    var parsedCity = '';
-    if (lengthParsedDestination == 2) {
-      parsedCity = parsedDestination[0];
-    } else if (lengthParsedDestination > 2) {
-      parsedCity = parsedDestination[lengthParsedDestination - 3];
-      parsedState = parsedDestination[lengthParsedDestination - 2];
-    }
-    setState(() {
-      _editedTrip.destinations[0].city = parsedCity;
-      _editedTrip.destinations[0].state = parsedState;
-      _editedTrip.destinations[0].country = parsedCountry;
-    });
-    return [
-      Destination(
-        id: null,
-        country: parsedCountry,
-        city: parsedCity,
-        state: parsedState,
-      )
-    ];
-  }
+  // List<Destination> _parseDestination(String destination) {
+  //   var parsedDestination = destination.split(', ');
+  //   var lengthParsedDestination = parsedDestination.length;
+  //   var parsedCountry = parsedDestination[lengthParsedDestination - 1];
+  //   var parsedState = '';
+  //   var parsedCity = '';
+  //   if (lengthParsedDestination == 2) {
+  //     parsedCity = parsedDestination[0];
+  //   } else if (lengthParsedDestination > 2) {
+  //     parsedCity = parsedDestination[lengthParsedDestination - 3];
+  //     parsedState = parsedDestination[lengthParsedDestination - 2];
+  //   }
+  //   setState(() {
+  //     // _editedTrip.destinations[0].city = parsedCity;
+  //     // _editedTrip.destinations[0].state = parsedState;
+  //     // _editedTrip.destinations[0].country = parsedCountry;
+  //   });
+  //   return [
+  //     Destination(
+  //       id: null,
+  //       country: parsedCountry,
+  //       city: parsedCity,
+  //       state: parsedState,
+  //     )
+  //   ];
+  // }
 
   Future<void> _showStartDatePicker() async {
     await showDatePicker(
@@ -280,42 +279,42 @@ class _EditTripScreenState extends State<EditTripScreen> {
                           endDate: _editedTrip.endDate,
                           description: _editedTrip.description,
                           id: _editedTrip.id,
-                          destinations: _editedTrip.destinations,
+                          countries: _editedTrip.countries,
                         );
                       },
                     ),
-                    PlacesAutocompleteFormField(
-                      apiKey: kGoogleApiKey,
-                      onError: onError,
-                      mode: _mode,
-                      language: "en",
-                      initialValue:
-                          '${_initDestinationValues['city'] + (_initDestinationValues['state'] == null ? '' : ', ' + _initDestinationValues['state']) + ', ' + _initDestinationValues['country']}',
-                      inputDecoration: InputDecoration(
-                        labelText: 'Destination',
-                        labelStyle: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please provide a destination';
-                        } else {
-                          return null;
-                        }
-                      },
-                      onSaved: (value) async {
-                        _editedTrip = TripProvider(
-                          id: _editedTrip.id,
-                          image: _editedTrip.image,
-                          title: _editedTrip.title,
-                          startDate: _editedTrip.startDate,
-                          endDate: _editedTrip.endDate,
-                          destinations: _parseDestination(value),
-                          description: _editedTrip.description,
-                        );
-                      },
-                    ),
+                    // PlacesAutocompleteFormField(
+                    //   apiKey: kGoogleApiKey,
+                    //   onError: onError,
+                    //   mode: _mode,
+                    //   language: "en",
+                    //   initialValue:
+                    //       '${_initDestinationValues['city'] + (_initDestinationValues['state'] == null ? '' : ', ' + _initDestinationValues['state']) + ', ' + _initDestinationValues['country']}',
+                    //   inputDecoration: InputDecoration(
+                    //     labelText: 'Destination',
+                    //     labelStyle: TextStyle(
+                    //       fontSize: 20,
+                    //     ),
+                    //   ),
+                    //   validator: (value) {
+                    //     if (value.isEmpty) {
+                    //       return 'Please provide a destination';
+                    //     } else {
+                    //       return null;
+                    //     }
+                    //   },
+                    //   onSaved: (value) async {
+                    //     _editedTrip = TripProvider(
+                    //       id: _editedTrip.id,
+                    //       image: _editedTrip.image,
+                    //       title: _editedTrip.title,
+                    //       startDate: _editedTrip.startDate,
+                    //       endDate: _editedTrip.endDate,
+                    //       destinations: null,//_parseDestination(value),
+                    //       description: _editedTrip.description,
+                    //     );
+                    //   },
+                    // ),
                     TextFormField(
                       initialValue: _initValues['description'],
                       decoration: InputDecoration(labelText: 'Description'),
@@ -344,7 +343,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
                           image: _editedTrip.image,
                           startDate: _editedTrip.startDate,
                           endDate: _editedTrip.endDate,
-                          destinations: _editedTrip.destinations,
+                          countries: _editedTrip.countries,
                           description: value,
                         );
                       },

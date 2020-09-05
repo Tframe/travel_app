@@ -1,53 +1,55 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/user_provider.dart';
+import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import './signup_email_screen.dart';
+import 'add_trip_countries_screen.dart';
 
-class SignUpPhoneScreen extends StatefulWidget {
-  static const routeName = '/signup-phone-screen';
+class AddTripTitleScreen extends StatefulWidget {
+  static const routeName = '/add-trip-title-screen';
+
   @override
-  _SignUpPhoneScreenState createState() => _SignUpPhoneScreenState();
+  _AddTripTitleScreenState createState() => _AddTripTitleScreenState();
 }
 
-class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
+class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
-  var userValues = UserProvider(
+  final _titleFocusNode = FocusNode();
+
+  var tripValues = TripProvider(
     id: null,
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    title: null,
+    startDate: null,
+    endDate: null,
+    countries: null,
+    description: null,
   );
 
-  void _savePhone() {
+  @override
+  void dispose() {
+    _titleFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _saveName() {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
+    //TODO FIX THIS ROUTE
+
     Navigator.of(context)
-        .pushNamed(SignUpEmailScreen.routeName, arguments: userValues);
+         .pushNamed(AddTripCountriesScreen.routeName, arguments: tripValues);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    userValues = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Mobile Number',
+          'Title',
           style: TextStyle(
             color: Colors.black,
           ),
@@ -69,27 +71,11 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                     height: screenHeight * 0.055,
                   ),
                   Text(
-                    'Add your mobile number',
+                    'What should we call this next adventure?',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.025,
-                  ),
-                  Container(
-                    width: screenWidth * 0.8,
-                    child: Text(
-                      'Adding your mobile number will help with authentication.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.025,
                   ),
                   Container(
                     width: screenWidth * 0.85,
@@ -103,21 +89,22 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'Mobile number',
+                              labelText: 'Trip Title',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
-                            keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.done,
+                            focusNode: _titleFocusNode,
                             validator: (value) {
-                              if (value.isEmpty || value.length != 10) {
-                                return 'Please enter a valid mobile number!';
+                              if (value.isEmpty) {
+                                return 'Please enter a title!';
                               }
                             },
                             onSaved: (value) {
-                              userValues.phone = value.trim();
+                              tripValues.title = value;
                             },
                           ),
                           Container(
@@ -130,7 +117,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _savePhone,
+                              onPressed: _saveName,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -138,9 +125,6 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                                   horizontal: 30.0, vertical: 8.0),
                               color: Theme.of(context).primaryColor,
                             ),
-                          ),
-                          SizedBox(
-                            height: screenHeight * 0.025,
                           ),
                         ],
                       ),

@@ -106,7 +106,7 @@ class CurrentTripItem extends StatelessWidget {
                                   padding: EdgeInsets.only(bottom: 2.5),
                                   width: screenWidth * 0.85,
                                   child: Text(
-                                    '${foundTrip.destinations[0].city + ', '}${foundTrip.destinations[0].state != null ? foundTrip.destinations[0].state + ', ' : ''}${foundTrip.destinations[0].country}',
+                                    'hi',//'${foundTrip.destinations[0].city + ', '}${foundTrip.destinations[0].state != null ? foundTrip.destinations[0].state + ', ' : ''}${foundTrip.destinations[0].country}',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
                                       color: Theme.of(context)

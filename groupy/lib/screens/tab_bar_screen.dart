@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/add_trip_screen/add_trip_intro_screen.dart';
 import 'package:groupy/screens/current_trips_screen.dart';
 import 'package:groupy/screens/discover_screen.dart';
 import 'package:groupy/screens/past_trips_screen.dart';
@@ -57,7 +58,7 @@ class _TabBarScreenState extends State<TabBarScreen> {
               Icons.add,
               color: Theme.of(context).secondaryHeaderColor,
             ),
-            onPressed: () => CurrentTripsScreen().startAddNewTrip(ctx),
+            onPressed: () => Navigator.of(context).pushNamed(AddTripIntroScreen.routeName)
           ),
         ],
       );

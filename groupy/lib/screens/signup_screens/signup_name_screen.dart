@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/destination_provider.dart';
+import '../../providers/country_provider.dart';
 import './signup_location_screen.dart';
 
 class SignUpNameScreen extends StatefulWidget {
@@ -16,18 +16,18 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
   final _firstNameFocusNode = FocusNode();
   final _lastNameFocusNode = FocusNode();
 
-  var userValues = User(
+  var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     location: [
-      Destination(
+      Country(
         id: null,
-        country: '',
-        city: '',
-        state: '',
+        country: null,
+        latitude: null,
+        longitude: null,
       ),
     ],
   );

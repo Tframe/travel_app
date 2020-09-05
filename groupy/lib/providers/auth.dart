@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
-import '../providers/destination_provider.dart';
+import 'country_provider.dart';
 import '../providers/trips_provider.dart';
 
 class Auth with ChangeNotifier {
@@ -39,7 +39,7 @@ class Auth with ChangeNotifier {
 
   //Add user
   Future<void> addUser(String userId, String email, String firstName,
-      String lastName, List<Destination> location, String phone) async {
+      String lastName, List<Country> location, String phone) async {
     final url =
         'https://the-travel-app-0920.firebaseio.com/user/$userId.json?auth=$_token';
     try {
@@ -53,8 +53,6 @@ class Auth with ChangeNotifier {
           'phone': phone,
           'location': {
             'country': location[0].country,
-            'city': location[0].city,
-            'state': location[0].state,
           },
         }),
       );
@@ -65,7 +63,7 @@ class Auth with ChangeNotifier {
   }
 
   //Sign up using Firebase Authentication using email and password
-  Future<void> signup(String email, String password, List<Destination> location,
+  Future<void> signup(String email, String password, List<Country> location,
       String firstName, String lastName, String phone) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBl-AsESzqoRB94fU3LAk4XYm6FfbSaN88';

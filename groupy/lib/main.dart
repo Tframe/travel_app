@@ -2,33 +2,45 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import './screens/discover_screen.dart';
-import 'screens/current_trips_screen.dart';
+import './screens/current_trips_screen.dart';
 import './screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
 import './screens/edit_trip_screen.dart';
 import './screens/login_signup_screen.dart';
 import './screens/trip_detail_screen.dart';
-import './screens/splash_screen.dart';
-import './screens/contact_screen.dart';
 import './screens/login_screen.dart';
+
 import './screens/signup_screens/signup_screen.dart';
 import './screens/signup_screens/signup_intro_screen.dart';
 import './screens/signup_screens/signup_name_screen.dart';
+import './screens/signup_screens/signup_photo_screen.dart';
 import './screens/signup_screens/signup_location_screen.dart';
 import './screens/signup_screens/signup_email_screen.dart';
 import './screens/signup_screens/signup_phone_screen.dart';
 import './screens/signup_screens/signup_password_screen.dart';
+import './screens/add_trip_screen/add_trip_intro_screen.dart';
+import './screens/add_trip_screen/add_trip_title_screen.dart';
+import './screens/add_trip_screen/add_trip_countries_screen.dart';
+import './screens/add_trip_screen/add_trip_cities_screen.dart';
 
-import './providers/auth.dart';
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
+import './providers/countries_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DotEnv().load('.env');
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+
   static Map<int, Color> indiDye = {
     50: Color.fromRGBO(13, 59, 102, .1),
     100: Color.fromRGBO(13, 59, 102, .2),
@@ -85,61 +97,72 @@ class MyApp extends StatelessWidget {
   };
   MaterialColor sandyBrown = MaterialColor(0xFFEE964B, sanBrow);
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (ctx) => Auth(),
-        ),
-        ChangeNotifierProxyProvider<Auth, TripsProvider>(
-          // create: (_) => TripsProvider(),
-          update: (ctx, authData, previousTrips) => TripsProvider(
-            authData.token,
-            previousTrips == null ? [] : previousTrips.trips,
-          ),
+          create: (ctx) => TripsProvider(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => User(),
+          create: (ctx) => UserProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Countries(),
         ),
       ],
-      child: Consumer<Auth>(
-        builder: (ctx, authData, _) => MaterialApp(
-          theme: ThemeData(
-            //scaffoldBackgroundColor: lemonMeringue,
-            primarySwatch: sandyBrown,
-            secondaryHeaderColor: indigoDye,
-            accentColor: lemonMeringue,
-            buttonColor: lemonMeringue,
-            fontFamily: 'OpenSans',
+      child: MaterialApp(
+        theme: ThemeData(
+          //scaffoldBackgroundColor: lemonMeringue,
+          primarySwatch: sandyBrown,
+          secondaryHeaderColor: indigoDye,
+          accentColor: lemonMeringue,
+          buttonColor: lemonMeringue,
+          fontFamily: 'OpenSans',
+          buttonTheme: ButtonTheme.of(context).copyWith(
+            buttonColor: sandyBrown,
+            textTheme: ButtonTextTheme.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                20.0,
+              ),
+            ),
           ),
-          home: authData.isAuth
-              ? TabBarScreen()
-              : FutureBuilder(
-                  future: authData.tryAutoLogin(),
-                  builder: (ctx, authResultSnapshot) =>
-                      authResultSnapshot.connectionState ==
-                              ConnectionState.waiting
-                          ? SplashScreen()
-                          : LoginSignupScreen(),
-                ),
-          routes: {
-            DiscoverScreen.routeName: (ctx) => DiscoverScreen(),
-            CurrentTripsScreen.routeName: (ctx) => CurrentTripsScreen(),
-            PastTripsScreen.routeName: (ctx) => PastTripsScreen(),
-            TripDetailsScreen.routeName: (ctx) => TripDetailsScreen(),
-            EditTripScreen.routeName: (ctx) => EditTripScreen(),
-            LoginScreen.routeName: (ctx) => LoginScreen(),
-            SignUpScreen.routeName: (ctx) => SignUpScreen(),
-            SignUpIntroScreen.routeName: (ctx) => SignUpIntroScreen(),
-            SignUpNameScreen.routeName: (ctx) => SignUpNameScreen(),
-            SignUpLocationScreen.routeName: (ctx) => SignUpLocationScreen(),
-            SignUpPhoneScreen.routeName: (ctx) => SignUpPhoneScreen(),
-            SignUpEmailScreen.routeName: (ctx) => SignUpEmailScreen(),
-            SignUpPasswordScreen.routeName: (ctx) => SignUpPasswordScreen(),
+        ),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, userSnapshot) {
+            if (userSnapshot.hasData) {
+              //return Places();
+              return TabBarScreen();
+            }
+            return LoginSignupScreen();
           },
         ),
+        routes: {
+          TabBarScreen.routeName: (ctx) => TabBarScreen(),
+          DiscoverScreen.routeName: (ctx) => DiscoverScreen(),
+          CurrentTripsScreen.routeName: (ctx) => CurrentTripsScreen(),
+          PastTripsScreen.routeName: (ctx) => PastTripsScreen(),
+          TripDetailsScreen.routeName: (ctx) => TripDetailsScreen(),
+          EditTripScreen.routeName: (ctx) => EditTripScreen(),
+          LoginScreen.routeName: (ctx) => LoginScreen(),
+          SignUpScreen.routeName: (ctx) => SignUpScreen(),
+          SignUpIntroScreen.routeName: (ctx) => SignUpIntroScreen(),
+          SignUpNameScreen.routeName: (ctx) => SignUpNameScreen(),
+          SignUpPhotoScreen.routeName: (ctx) => SignUpPhotoScreen(),
+          SignUpLocationScreen.routeName: (ctx) => SignUpLocationScreen(),
+          SignUpPhoneScreen.routeName: (ctx) => SignUpPhoneScreen(),
+          SignUpEmailScreen.routeName: (ctx) => SignUpEmailScreen(),
+          SignUpPasswordScreen.routeName: (ctx) => SignUpPasswordScreen(),
+          AddTripIntroScreen.routeName: (ctx) => AddTripIntroScreen(),
+          AddTripTitleScreen.routeName: (ctx) => AddTripTitleScreen(),
+          AddTripCountriesScreen.routeName: (ctx) => AddTripCountriesScreen(),
+          AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
+        },
       ),
     );
   }

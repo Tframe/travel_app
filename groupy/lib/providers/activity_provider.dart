@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 
-import './destination_provider.dart';
+import 'country_provider.dart';
 
 class Activity extends ChangeNotifier{
   final String id;
   final String title;
-  final Destination location;
+  final Country location;
   final DateTime startingDateTime;
   final DateTime endingDateTime;
 

@@ -1,19 +1,19 @@
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:google_maps_webservice/places.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 
 //TODO LOOK INTO DATE RANGE
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import '../providers/destination_provider.dart';
+import '../providers/country_provider.dart';
 import '../providers/trip_provider.dart';
 import '../providers/trips_provider.dart';
-import '../providers/auth.dart';
+import './places.dart';
 
-const kGoogleApiKey = "AIzaSyCu9T1EYFgRVkWhtRrV0jCj-jK0pOh-A-M";
+const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
 
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 final searchScaffoldKey = GlobalKey<ScaffoldState>();
@@ -29,7 +29,7 @@ class NewTrip extends StatefulWidget {
 class _NewTripState extends State<NewTrip> {
   final _formKey = GlobalKey<FormState>();
   final _lastDate = DateTime.now().add(Duration(days: 365));
-  Mode _mode = Mode.overlay;
+  // Mode _mode = Mode.overlay;
   var _isLoading = false;
 
   var tripValues = TripProvider(
@@ -37,14 +37,15 @@ class _NewTripState extends State<NewTrip> {
     title: '',
     startDate: null,
     endDate: null,
-    destinations: [
-      Destination(
-        id: null,
-        country: '',
-        state: '',
-        city: '',
-      ),
+    countries: [
+      // Destination(
+      //   id: null,
+      //   country: '',
+      //   state: '',
+      //   city: '',
+      // ),
     ],
+    description: '',
   );
 
   Future<void> _showStartDatePicker() async {
@@ -87,11 +88,11 @@ class _NewTripState extends State<NewTrip> {
     });
   }
 
-  void onError(PlacesAutocompleteResponse response) {
-    homeScaffoldKey.currentState.showSnackBar(
-      SnackBar(content: Text(response.errorMessage)),
-    );
-  }
+  // void onError(PlacesAutocompleteResponse response) {
+  //   homeScaffoldKey.currentState.showSnackBar(
+  //     SnackBar(content: Text(response.errorMessage)),
+  //   );
+  // }
 
   Future<void> _saveForm(String userId) async {
     final isValid = _formKey.currentState.validate();
@@ -128,32 +129,33 @@ class _NewTripState extends State<NewTrip> {
     Navigator.of(context).pop();
   }
 
-  List<Destination> _parseDestination(String destination) {
-    var parsedDestination = destination.split(', ');
-    var lengthParsedDestination = parsedDestination.length;
-    var parsedCountry = parsedDestination[lengthParsedDestination - 1];
-    var parsedState = '';
-    var parsedCity = '';
-    if (lengthParsedDestination == 2) {
-      parsedCity = parsedDestination[0];
-    } else if (lengthParsedDestination > 2) {
-      parsedCity = parsedDestination[lengthParsedDestination - 3];
-      parsedState = parsedDestination[lengthParsedDestination - 2];
-    }
+  // List<String> _parseDestination(String destination) {
+  //   var parsedDestination = destination.split(', ');
+  //   var lengthParsedDestination = parsedDestination.length;
+  //   var parsedCountry = parsedDestination[lengthParsedDestination - 1];
+  //   var parsedState = '';
+  //   var parsedCity = '';
+  //   if (lengthParsedDestination == 2) {
+  //     parsedCity = parsedDestination[0];
+  //   } else if (lengthParsedDestination > 2) {
+  //     parsedCity = parsedDestination[lengthParsedDestination - 3];
+  //     parsedState = parsedDestination[lengthParsedDestination - 2];
+  //   }
 
-    return [
-      Destination(
-        id: null,
-        country: parsedCountry,
-        city: parsedCity,
-        state: parsedState,
-      )
-    ];
-  }
+  //   return [
+  //     // Destination(
+  //     //   id: null,
+  //     //   country: parsedCountry,
+  //     //   city: parsedCity,
+  //     //   state: parsedState,
+  //     // )
+  //     'string', 'String', 'string',
+  //   ];
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final authData = Provider.of<Auth>(context, listen: false);
+    User user = FirebaseAuth.instance.currentUser;
     return Card(
       elevation: 5,
       child: Container(
@@ -200,41 +202,14 @@ class _NewTripState extends State<NewTrip> {
                   tripValues = TripProvider(
                     id: null,
                     title: value,
-                    destinations: tripValues.destinations,
+                    countries: tripValues.countries,
                     startDate: tripValues.startDate,
                     endDate: tripValues.endDate,
+                    description: tripValues.description,
                   );
                 },
               ),
-              //Google Places autocomplete form field.
-              PlacesAutocompleteFormField(
-                apiKey: kGoogleApiKey,
-                onError: onError,
-                mode: _mode,
-                language: "en",
-                inputDecoration: InputDecoration(
-                  labelText: 'Destination',
-                  labelStyle: TextStyle(
-                    fontSize: 20,
-                  ),
-                ),
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please provide a destination';
-                  } else {
-                    return null;
-                  }
-                },
-                onSaved: (value) {
-                  tripValues = TripProvider(
-                    id: null,
-                    title: tripValues.title,
-                    destinations: _parseDestination(value),
-                    startDate: tripValues.startDate,
-                    endDate: tripValues.endDate,
-                  );
-                },
-              ),
+              // Places(),
               //Container for Start Date
               Container(
                 child: Row(
@@ -311,7 +286,7 @@ class _NewTripState extends State<NewTrip> {
                   child: Text('Create'),
                   color: Theme.of(context).primaryColor,
                   textColor: Colors.white,
-                  onPressed: () => _saveForm(authData.userId),
+                  onPressed: () => _saveForm(user.uid),
                 ),
               )
             ],

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "811217730459",
+    "firebase_url": "https://travi-mobi.firebaseio.com",
+    "project_id": "travi-mobi",
+    "storage_bucket": "travi-mobi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:811217730459:android:d23868e05ba498bd87bf3e",
+        "android_client_info": {
+          "package_name": "com.travi.mobi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "811217730459-bm6ah8e1j0o3okp42e5qu2ve8pjacl1q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2-_bU6QxzsXkTd8c9ZEQvc64nLei78MQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "811217730459-bm6ah8e1j0o3okp42e5qu2ve8pjacl1q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

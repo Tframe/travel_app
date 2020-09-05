@@ -6,33 +6,31 @@ import '../providers/trip_provider.dart';
 import '../providers/trips_provider.dart';
 import '../screens/edit_trip_screen.dart';
 
-class TripDetailsScreen extends StatelessWidget {
+
+class TripDetailsScreen extends StatefulWidget {
   static const routeName = '/trip-details';
 
-//   @override
-//   _TripDetailsScreenState createState() => _TripDetailsScreenState();
-// }
+  @override
+  _TripDetailsScreenState createState() => _TripDetailsScreenState();
+}
 
-// class _TripDetailsScreenState extends State<TripDetailsScreen> {
+class _TripDetailsScreenState extends State<TripDetailsScreen> {
   String tripId;
   // TripProvider trip;
   TripProvider loadedTrip;
   bool _loadedTrip = false;
 
-  // //get the trip details as arguments from trip list screen
-  // @override
-  // void didChangeDependencies() {
+  //get the trip details as arguments from trip list screen
+  @override
+  void didChangeDependencies() {
 
-  //   if (!_loadedTrip) {
-  //     final routeArgs =
-  //         ModalRoute.of(context).settings.arguments as Map<String, dynamic>;
-  //     trip = routeArgs['trip'];
-  //     // tripId = routeArgs['id'];
-
-  //     _loadedTrip = true;
-  //   }
-  //   super.didChangeDependencies();
-  // }
+    if (!_loadedTrip) {
+      tripId =
+          ModalRoute.of(context).settings.arguments;
+      _loadedTrip = true;
+    }
+    super.didChangeDependencies();
+  }
 
   //reusable function to create a badding container with text, padding, and height
   Widget paddingText(String text, double topPadding, double screenHeight,
@@ -289,7 +287,7 @@ class TripDetailsScreen extends StatelessWidget {
               TextAlign.center,
             ),
             paddingText(
-              '${loadedTrip.destinations[0].city}, ${loadedTrip.destinations[0].state == null ? '' : loadedTrip.destinations[0].state + ', '} ${loadedTrip.destinations[0].country}',
+              'hi',//'${loadedTrip.destinations[0].city}, ${loadedTrip.destinations[0].state == null ? '' : loadedTrip.destinations[0].state + ', '} ${loadedTrip.destinations[0].country}',
               6.5,
               screenHeight * 0.025,
               FontWeight.bold,

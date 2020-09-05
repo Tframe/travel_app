@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/destination_provider.dart';
+import '../../providers/country_provider.dart';
 import './signup_phone_screen.dart';
 
 class SignUpLocationScreen extends StatefulWidget {
@@ -14,18 +14,18 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   var _isLoading = false;
 
-  var userValues = User(
+  var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
     location: [
-      Destination(
+      Country(
         id: null,
-        country: '',
-        city: '',
-        state: '',
+        country: null,
+        latitude: null,
+        longitude: null,
       ),
     ],
   );
@@ -117,7 +117,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.location[0].city = value;
+                              userValues.location[0].country = value;
                             },
                           ),
                           TextFormField(
@@ -136,7 +136,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.location[0].state = value;
+                              userValues.location[0].country = value;
                             },
                           ),
                           Container(
