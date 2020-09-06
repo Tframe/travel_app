@@ -11,8 +11,7 @@ import '../providers/countries_provider.dart';
 
 class Places extends StatefulWidget {
   final countryPicker;
-  final presetCountry;
-  Places(this.countryPicker, this.presetCountry);
+  Places(this.countryPicker);
 
   @override
   _PlacesState createState() => _PlacesState();
@@ -113,7 +112,7 @@ class _PlacesState extends State<Places> {
                     title: Text(predictions[index].description),
                     onTap: () {
                       debugPrint(predictions[index].placeId);
-                      setDestination(predictions[index].placeId);
+                      setCountry(predictions[index].placeId);
                     },
                   );
                 },
@@ -156,7 +155,7 @@ class _PlacesState extends State<Places> {
   }
 
   //set destination for provider
-  void setDestination(String placeId) async {
+  void setCountry(String placeId) async {
     await getDetails(placeId);
     setState(() {
       _countryController.text = detailsResult.formattedAddress;
@@ -176,7 +175,7 @@ class _PlacesState extends State<Places> {
 
     country = tempCountry;
     await Provider.of<Countries>(context, listen: false)
-        .addDestination(country);
+        .addCountry(country);
     FocusScope.of(context).unfocus();
     setState(() {
       //predictions = result.predictions;

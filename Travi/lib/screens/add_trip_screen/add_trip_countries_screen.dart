@@ -16,7 +16,6 @@ class AddTripCountriesScreen extends StatefulWidget {
 }
 
 class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
-
   final _listViewController = ScrollController();
   bool _countryPicker = true;
   var _numberPlaces = List<Container>();
@@ -41,16 +40,18 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
   Future<void> _addCountry() async {
     final newCountry = Provider.of<Countries>(context, listen: false).countries;
     tripValues.countries = newCountry;
-    print(newCountry.length);
-    print(_placesIndex);
-    if (newCountry.length != _placesIndex) {
+    if (newCountry.length != _placesIndex || newCountry.length == 0) {
       return showDialog<void>(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Missing Selection'),
-              content: const Text(
-                  'Missing one or more selections. Tap any suggestion.'),
+              title: (newCountry.length == 0)
+                  ? const Text('Add a country')
+                  : const Text('Missing Selection'),
+              content: (newCountry.length == 0)
+                  ? const Text('Add a country')
+                  : const Text(
+                      'Missing one or more selections. Tap any suggestion.'),
               actions: [
                 FlatButton(
                   child: Text('Okay'),
@@ -68,7 +69,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
   }
 
   //adds a field for the country
-  Future<void> _addCountryField(String presetCountry) async {
+  Future<void> _addCountryField() async {
     _numberPlaces = List.from(_numberPlaces)
       ..add(
         Container(
@@ -80,7 +81,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Places(_countryPicker, presetCountry),
+              Places(_countryPicker),
             ],
           ),
         ),
@@ -111,10 +112,10 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     });
   }
 
-
   //Pop back a page and clear out provider
   void _backPage() async {
-    final removed = await Provider.of<Countries>(context, listen: false).removeAllCountries();
+    final removed = await Provider.of<Countries>(context, listen: false)
+        .removeAllCountries();
     Navigator.of(context).pop();
   }
 
@@ -125,7 +126,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     tripValues = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Countries',
           style: TextStyle(
             color: Colors.black,
@@ -142,7 +143,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
           Container(
             alignment: Alignment.center,
             margin: EdgeInsets.symmetric(
-              horizontal: 10,
+              horizontal: screenWidth * 0.05,
             ),
             width: screenWidth,
             decoration: BoxDecoration(
@@ -154,7 +155,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(
-                    height: screenHeight * 0.035,
+                    height: screenHeight * 0.015,
                   ),
                   Text(
                     'Which countries will you be traveling to?',
@@ -189,7 +190,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                           color: Theme.of(context).accentColor,
                         ),
                       ),
-                      onPressed:() => _addCountryField(''),
+                      onPressed: () => _addCountryField(),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

@@ -14,6 +14,7 @@ class AddTripTitleScreen extends StatefulWidget {
 class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _titleFocusNode = FocusNode();
+  final _descriptionFocusNode = FocusNode();
 
   var tripValues = TripProvider(
     id: null,
@@ -39,7 +40,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
     //TODO FIX THIS ROUTE
 
     Navigator.of(context)
-         .pushNamed(AddTripCountriesScreen.routeName, arguments: tripValues);
+        .pushNamed(AddTripCountriesScreen.routeName, arguments: tripValues);
   }
 
   @override
@@ -49,7 +50,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Title',
+          'About Trip',
           style: TextStyle(
             color: Colors.black,
           ),
@@ -63,74 +64,106 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                 // color: Theme.of(context).accentColor,
                 ),
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.055,
-                  ),
-                  Text(
-                    'What should we call this next adventure?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Container(
-                    width: screenWidth * 0.85,
-                    alignment: Alignment.center,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'Trip Title',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.done,
-                            focusNode: _titleFocusNode,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter a title!';
-                              }
-                            },
-                            onSaved: (value) {
-                              tripValues.title = value;
-                            },
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(top: 40),
-                            width: screenWidth,
-                            child: FlatButton(
-                              child: Text(
-                                'Next',
-                                style: TextStyle(
-                                  color: Theme.of(context).accentColor,
-                                ),
-                              ),
-                              onPressed: _saveName,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ],
+              child: Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: 25,
+                ),
+                width: screenWidth * 0.85,
+                alignment: Alignment.center,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        height: screenHeight * 0.055,
                       ),
-                    ),
+                      Text(
+                        'What should we call this next adventure?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      TextFormField(
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          labelText: 'Trip Title',
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).secondaryHeaderColor),
+                          ),
+                        ),
+                        textInputAction: TextInputAction.next,
+                        focusNode: _titleFocusNode,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a title!';
+                          }
+                        },
+                        onSaved: (value) {
+                          tripValues.title = value;
+                        },
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context)
+                              .requestFocus(_descriptionFocusNode);
+                        },
+                      ),
+                      SizedBox(
+                        height: screenHeight * 0.055,
+                      ),
+                      Text(
+                        'Give a quick description about this trip...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      TextFormField(
+                        cursorColor: Theme.of(context).primaryColor,
+                        maxLines: 7,
+                        minLines: 3,
+                        decoration: InputDecoration(
+                          labelText: 'Trip Description',
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).secondaryHeaderColor),
+                          ),
+                        ),
+                        textInputAction: TextInputAction.done,
+                        focusNode: _descriptionFocusNode,
+                        validator: (value) {
+                          if (value.isEmpty) {
+                            return 'Please enter a description!';
+                          }
+                        },
+                        onSaved: (value) {
+                          tripValues.description = value;
+                        },
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(top: 40),
+                        width: screenWidth,
+                        child: FlatButton(
+                          child: Text(
+                            'Next',
+                            style: TextStyle(
+                              color: Theme.of(context).accentColor,
+                            ),
+                          ),
+                          onPressed: _saveName,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30.0, vertical: 8.0),
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
