@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
@@ -15,6 +16,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _titleFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
+  final _lastDate = DateTime.now().add(Duration(days: 365));
 
   var tripValues = TripProvider(
     id: null,
@@ -31,6 +33,50 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
     super.dispose();
   }
 
+  //TODO PUT DATEPICKER IN HELPER
+
+  //Function to show start date picker
+  Future<void> _showStartDatePicker() async {
+    await showDatePicker(
+            context: context,
+            helpText: 'Start Date',
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: _lastDate)
+        .then((selectedDate) {
+      if (selectedDate == null) {
+        return;
+      } else {
+        setState(() {
+          tripValues.startDate = selectedDate;
+        });
+      }
+    });
+  }
+
+  //Function to show end date picker
+  Future<void> _showEndDatePicker() async {
+    if (tripValues.startDate == null) {
+      await _showStartDatePicker();
+    }
+    showDatePicker(
+            context: context,
+            helpText: 'End Date',
+            initialDate: tripValues.startDate,
+            firstDate: tripValues.startDate,
+            lastDate: _lastDate)
+        .then((selectedDate) {
+      if (selectedDate == null) {
+        return;
+      } else {
+        setState(() {
+          tripValues.endDate = selectedDate;
+        });
+      }
+    });
+  }
+
+  //saves form data
   void _saveName() {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -74,13 +120,13 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                   key: _formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       SizedBox(
                         height: screenHeight * 0.055,
                       ),
                       Text(
-                        'What should we call this next adventure?',
+                        'Title',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -114,7 +160,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         height: screenHeight * 0.055,
                       ),
                       Text(
-                        'Give a quick description about this trip...',
+                        'Description',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -141,6 +187,89 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         onSaved: (value) {
                           tripValues.description = value;
                         },
+                      ),
+                      SizedBox(
+                        height: screenHeight * 0.055,
+                      ),
+                      Text(
+                        'Dates',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(
+                          top: 10,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'Start Date:',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.center,
+                              child: IconButton(
+                                icon: Icon(Icons.calendar_today),
+                                color: Theme.of(context).primaryColor,
+                                onPressed: _showStartDatePicker,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(right: 20),
+                              width: 100,
+                              child: tripValues.startDate == null
+                                  ? Text('')
+                                  : Text(
+                                      '${DateFormat.yMd().format(tripValues.startDate)}',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      //Container for End Date
+                      Container(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              'End Date:',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            Container(
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(left: 5),
+                              child: IconButton(
+                                icon: Icon(Icons.calendar_today),
+                                color: Theme.of(context).primaryColor,
+                                onPressed: _showEndDatePicker,
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(right: 20),
+                              width: 100,
+                              child: tripValues.endDate == null
+                                  ? Text('')
+                                  : Text(
+                                      '${DateFormat.yMd().format(tripValues.endDate)}',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                      ),
+                                      textAlign: TextAlign.right,
+                                    ),
+                            ),
+                          ],
+                        ),
                       ),
                       Container(
                         padding: EdgeInsets.only(top: 40),

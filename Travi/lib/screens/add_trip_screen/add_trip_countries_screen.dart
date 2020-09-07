@@ -18,6 +18,7 @@ class AddTripCountriesScreen extends StatefulWidget {
 class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
   final _listViewController = ScrollController();
   bool _countryPicker = true;
+  bool _cityPicker = false;
   var _numberPlaces = List<Container>();
   int _placesIndex = 0;
 
@@ -81,7 +82,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Places(_countryPicker),
+              Places(_countryPicker, _cityPicker, null),
             ],
           ),
         ),
@@ -90,14 +91,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
       _placesIndex++;
     });
     Timer(Duration(milliseconds: 50), () => _scrollToBottom());
-  }
-
-  void _scrollToBottom() {
-    _listViewController.animateTo(
-      _listViewController.position.maxScrollExtent + 50,
-      duration: Duration(seconds: 1),
-      curve: Curves.fastOutSlowIn,
-    );
   }
 
   //Remove last country field.
@@ -112,12 +105,25 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     });
   }
 
+  //TODO below HELPERS
+
+  //function to scroll to bottom of page
+  void _scrollToBottom() {
+    _listViewController.animateTo(
+      _listViewController.position.maxScrollExtent + 50,
+      duration: Duration(seconds: 1),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
   //Pop back a page and clear out provider
   void _backPage() async {
     final removed = await Provider.of<Countries>(context, listen: false)
         .removeAllCountries();
     Navigator.of(context).pop();
   }
+
+  //TODO HELPERS ABOVE
 
   @override
   Widget build(BuildContext context) {
@@ -152,13 +158,13 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   SizedBox(
                     height: screenHeight * 0.015,
                   ),
                   Text(
-                    'Which countries will you be traveling to?',
+                    'Add Countries',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -185,7 +191,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                     width: screenWidth,
                     child: FlatButton(
                       child: Text(
-                        'Add Another Country',
+                        'Add Country',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),
@@ -204,7 +210,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                     width: screenWidth,
                     child: FlatButton(
                       child: Text(
-                        'Remove Last',
+                        'Remove Last Country',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),
