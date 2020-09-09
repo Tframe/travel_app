@@ -8,10 +8,14 @@ import 'package:google_place/google_place.dart';
 
 import '../providers/country_provider.dart';
 import '../providers/countries_provider.dart';
+import '../providers/city_provider.dart';
+import '../providers/cities_provider.dart';
 
 class Places extends StatefulWidget {
   final countryPicker;
-  Places(this.countryPicker);
+  final cityPicker;
+  String currentCountry;
+  Places(this.countryPicker, this.cityPicker, this.currentCountry);
 
   @override
   _PlacesState createState() => _PlacesState();
@@ -19,10 +23,18 @@ class Places extends StatefulWidget {
 
 class _PlacesState extends State<Places> {
   var _countryController = TextEditingController();
+  var _cityController = TextEditingController();
+  var _placeController = TextEditingController();
   final _listController = ScrollController();
   var country = Country(
     id: null,
     country: null,
+    latitude: null,
+    longitude: null,
+  );
+  var city = City(
+    id: null,
+    city: null,
     latitude: null,
     longitude: null,
   );
@@ -32,6 +44,7 @@ class _PlacesState extends State<Places> {
 
   List<AutocompletePrediction> predictions = [];
   List<AutocompletePrediction> predictionCountries = [];
+  List<AutocompletePrediction> predictionCities = [];
   GooglePlace googlePlace;
 
   void _scrollToBottom() {
@@ -66,9 +79,11 @@ class _PlacesState extends State<Places> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             TextField(
-              controller: _countryController,
+              controller: widget.countryPicker ? _countryController : (widget.cityPicker ? _cityController : _placeController),
               decoration: InputDecoration(
-                labelText: widget.countryPicker ? 'Countries' : 'Cities',
+                labelText: widget.countryPicker
+                    ? 'Country'
+                    : (widget.cityPicker ? 'City' : 'Place'),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme.of(context).primaryColor,
@@ -84,7 +99,13 @@ class _PlacesState extends State<Places> {
               ),
               onChanged: (value) {
                 if (value.isNotEmpty) {
-                  autoCompleteSearchCountries(value);
+                  if (widget.countryPicker == true) {
+                    autoCompleteSearchCountries(value);
+                  } else if (widget.cityPicker == true) {
+                    autoCompleteSearchCities(value);
+                  } else {
+                    autoCompleteSearch(value);
+                  }
                 } else {
                   if (predictions.length > 0 && mounted) {
                     setState(() {
@@ -112,7 +133,13 @@ class _PlacesState extends State<Places> {
                     title: Text(predictions[index].description),
                     onTap: () {
                       debugPrint(predictions[index].placeId);
-                      setCountry(predictions[index].placeId);
+                      if (widget.countryPicker) {
+                        setCountry(predictions[index].placeId);
+                      } else if (widget.cityPicker) {
+                        setCity(predictions[index].placeId);
+                      } else {
+                        //setPlace(predictions[index].placeId);
+                      }
                     },
                   );
                 },
@@ -143,6 +170,29 @@ class _PlacesState extends State<Places> {
     Timer(Duration(milliseconds: 100), () => _scrollToBottom());
   }
 
+  //Find list of countires to provide to user.
+  void autoCompleteSearchCities(String value) async {
+    print(widget.currentCountry);
+    var result = await googlePlace.autocomplete.get(value);
+    if (result != null && result.predictions != null && mounted) {
+      result.predictions.forEach((prediction) {
+        if (prediction.description.contains(widget.currentCountry)) {
+          prediction.types
+              .where((types) => types == 'locality')
+              .forEach((found) {
+            predictionCities.add(prediction);
+          });
+        }
+      });
+      setState(() {
+        //predictions = result.predictions;
+        predictions = predictionCities;
+      });
+      predictionCities = [];
+    }
+    Timer(Duration(milliseconds: 100), () => _scrollToBottom());
+  }
+
   //Find list possible places provide to user.
   void autoCompleteSearch(String value) async {
     var result = await googlePlace.autocomplete.get(value);
@@ -154,18 +204,12 @@ class _PlacesState extends State<Places> {
     }
   }
 
-  //set destination for provider
+  //set country for provider
   void setCountry(String placeId) async {
     await getDetails(placeId);
     setState(() {
       _countryController.text = detailsResult.formattedAddress;
     });
-    // print('${detailsResult.types}');
-    // print('${detailsResult.formattedAddress}');
-    // print('${detailsResult.geometry.location.lat.toString()}');
-    // print('${detailsResult.geometry.location.lng.toString()}');
-    // print('${detailsResult.rating.toString()}');
-    // print('${detailsResult.priceLevel.toString()}');
     var tempCountry = Country(
       id: null,
       country: detailsResult.formattedAddress,
@@ -174,11 +218,30 @@ class _PlacesState extends State<Places> {
     );
 
     country = tempCountry;
-    await Provider.of<Countries>(context, listen: false)
-        .addCountry(country);
+    await Provider.of<Countries>(context, listen: false).addCountry(country);
     FocusScope.of(context).unfocus();
     setState(() {
-      //predictions = result.predictions;
+      predictions = [];
+    });
+  }
+
+  //set city for provider
+  void setCity(String placeId) async {
+    await getDetails(placeId);
+    setState(() {
+      _cityController.text = detailsResult.formattedAddress;
+    });
+    var tempCity = City(
+      id: null,
+      city: detailsResult.formattedAddress,
+      latitude: detailsResult.geometry.location.lat,
+      longitude: detailsResult.geometry.location.lng,
+    );
+
+    city = tempCity;
+    await Provider.of<Cities>(context, listen: false).addCity(city);
+    FocusScope.of(context).unfocus();
+    setState(() {
       predictions = [];
     });
   }
@@ -208,202 +271,3 @@ class _PlacesState extends State<Places> {
     }
   }
 }
-
-// class DetailsPage extends StatefulWidget {
-//   final String placeId;
-//   final GooglePlace googlePlace;
-
-//   DetailsPage({Key key, this.placeId, this.googlePlace}) : super(key: key);
-
-//   @override
-//   _DetailsPageState createState() =>
-//       _DetailsPageState(this.placeId, this.googlePlace);
-// }
-
-// class _DetailsPageState extends State<DetailsPage> {
-//   final String placeId;
-//   final GooglePlace googlePlace;
-
-//   _DetailsPageState(this.placeId, this.googlePlace);
-
-//   DetailsResult detailsResult;
-//   List<Uint8List> images = [];
-
-//   @override
-//   void initState() {
-//     getDetails(this.placeId);
-//     super.initState();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Details"),
-//         backgroundColor: Colors.blueAccent,
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         backgroundColor: Colors.blueAccent,
-//         onPressed: () {
-//           getDetails(this.placeId);
-//         },
-//         child: Icon(Icons.refresh),
-//       ),
-//       body: SafeArea(
-//         child: Container(
-//           margin: EdgeInsets.only(right: 20, left: 20, top: 20),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: <Widget>[
-//               Container(
-//                 height: 200,
-//                 child: ListView.builder(
-//                   scrollDirection: Axis.horizontal,
-//                   itemCount: images.length,
-//                   itemBuilder: (context, index) {
-//                     return Container(
-//                       width: 250,
-//                       child: Card(
-//                         elevation: 4,
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius: BorderRadius.circular(10.0),
-//                         ),
-//                         child: ClipRRect(
-//                           borderRadius: BorderRadius.circular(10.0),
-//                           child: Image.memory(
-//                             images[index],
-//                             fit: BoxFit.fill,
-//                           ),
-//                         ),
-//                       ),
-//                     );
-//                   },
-//                 ),
-//               ),
-//               SizedBox(
-//                 height: 10,
-//               ),
-//               Expanded(
-//                 child: Card(
-//                   elevation: 4,
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(10.0),
-//                   ),
-//                   child: ListView(
-//                     children: <Widget>[
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: Text(
-//                           "Details",
-//                           style: TextStyle(
-//                             fontSize: 20,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ),
-//                       detailsResult != null && detailsResult.types != null
-//                           ? Container(
-//                               margin: EdgeInsets.only(left: 15, top: 10),
-//                               height: 50,
-//                               child: ListView.builder(
-//                                 scrollDirection: Axis.horizontal,
-//                                 itemCount: detailsResult.types.length,
-//                                 itemBuilder: (context, index) {
-//                                   return Container(
-//                                     margin: EdgeInsets.only(right: 10),
-//                                     child: Chip(
-//                                       label: Text(
-//                                         detailsResult.types[index],
-//                                         style: TextStyle(
-//                                           color: Colors.white,
-//                                         ),
-//                                       ),
-//                                       backgroundColor: Colors.blueAccent,
-//                                     ),
-//                                   );
-//                                 },
-//                               ),
-//                             )
-//                           : Container(),
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: ListTile(
-//                           leading: CircleAvatar(
-//                             child: Icon(Icons.location_on),
-//                           ),
-//                           title: Text(
-//                             detailsResult != null &&
-//                                     detailsResult.formattedAddress != null
-//                                 ? 'Address: ${detailsResult.formattedAddress}'
-//                                 : "Address: null",
-//                           ),
-//                         ),
-//                       ),
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: ListTile(
-//                           leading: CircleAvatar(
-//                             child: Icon(Icons.location_searching),
-//                           ),
-//                           title: Text(
-//                             detailsResult != null &&
-//                                     detailsResult.geometry != null &&
-//                                     detailsResult.geometry.location != null
-//                                 ? 'Geometry: ${detailsResult.geometry.location.lat.toString()},${detailsResult.geometry.location.lng.toString()}'
-//                                 : "Geometry: null",
-//                           ),
-//                         ),
-//                       ),
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: ListTile(
-//                           leading: CircleAvatar(
-//                             child: Icon(Icons.timelapse),
-//                           ),
-//                           title: Text(
-//                             detailsResult != null &&
-//                                     detailsResult.utcOffset != null
-//                                 ? 'UTC offset: ${detailsResult.utcOffset.toString()} min'
-//                                 : "UTC offset: null",
-//                           ),
-//                         ),
-//                       ),
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: ListTile(
-//                           leading: CircleAvatar(
-//                             child: Icon(Icons.rate_review),
-//                           ),
-//                           title: Text(
-//                             detailsResult != null &&
-//                                     detailsResult.rating != null
-//                                 ? 'Rating: ${detailsResult.rating.toString()}'
-//                                 : "Rating: null",
-//                           ),
-//                         ),
-//                       ),
-//                       Container(
-//                         margin: EdgeInsets.only(left: 15, top: 10),
-//                         child: ListTile(
-//                           leading: CircleAvatar(
-//                             child: Icon(Icons.attach_money),
-//                           ),
-//                           title: Text(
-//                             detailsResult != null &&
-//                                     detailsResult.priceLevel != null
-//                                 ? 'Price level: ${detailsResult.priceLevel.toString()}'
-//                                 : "Price level: null",
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

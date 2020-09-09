@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:groupy/screens/add_trip_screen/group_invite_screen.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
@@ -19,7 +20,7 @@ class AddTripCitiesScreen extends StatefulWidget {
 class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
   final _listViewController = ScrollController();
   bool _countryPicker = false;
-  bool _cityPicker = false;
+  bool _cityPicker = true;
   var _numberPlaces = List<Container>();
   var _numberCountries = 0;
   var _cityIndex = 0;
@@ -51,16 +52,27 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     description: null,
   );
 
-  void _addCity() {
+  //Function to add city to trip values.
+  Future<void> _addCity() async {
+    //get city saved in provider, asign to tripValues then remove city from
+    //provider to save next set of cities
     final newCity = Provider.of<Cities>(context, listen: false).cities;
     tripValues.countries[_countryIndex].cities = newCity;
+    final removed =
+        await Provider.of<Cities>(context, listen: false).removeAllCities();
 
-    print(tripValues.countries[0].country);
-    print(tripValues.countries[1].country);
-    print(tripValues.countries[2].country);
+    //Change country index to get list of cities for next country
+    if(_countryIndex < (tripValues.countries.length - 1)){
+      setState(() {
+        _countryIndex++;
+        _numberPlaces = [];
+      });
+      return;
+    }
 
-    // Navigator.of(context)
-    //      .pushNamed(SignUpLocationScreen.routeName, arguments: tripValues);
+    //After going through each country, navigate to group invite page
+    Navigator.of(context)
+          .pushNamed(GroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //adds a field for the country
@@ -76,7 +88,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Places(_countryPicker),
+              Places(_countryPicker, _cityPicker, tripValues.countries[_countryIndex].country),
             ],
           ),
         ),
@@ -124,9 +136,9 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() {
-    if (_countryIndex == _numberCountries - 1) {
-      // Navigator.of(context)
-      //     .pushNamed(SignUpLocationScreen.routeName, arguments: tripValues);
+    if (_cityIndex == _numberCountries - 1) {
+      Navigator.of(context)
+           .pushNamed(GroupInviteScreen.routeName, arguments: tripValues);
       return;
     }
     setState(() {
@@ -168,13 +180,13 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   SizedBox(
                     height: screenHeight * 0.015,
                   ),
                   Text(
-                    'Which cities do you want to see in ${tripValues.countries[_countryIndex].country}?',
+                    'Cities in ${tripValues.countries[_countryIndex].country}?',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -201,7 +213,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                     width: screenWidth,
                     child: FlatButton(
                       child: Text(
-                        'Add Another City',
+                        'Add City',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),
@@ -220,7 +232,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                     width: screenWidth,
                     child: FlatButton(
                       child: Text(
-                        'Remove Last',
+                        'Remove Last City',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),

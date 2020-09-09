@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:groupy/providers/country_provider.dart';
+import './activity_provider.dart';
+import './country_provider.dart';
+import './lodging_provider.dart';
+import './transportation_provider.dart';
+import './user_provider.dart';
 
 class TripProvider extends ChangeNotifier{
   String id;
@@ -9,10 +13,10 @@ class TripProvider extends ChangeNotifier{
   List<Country> countries; //HOW DO WE FIX LIST<DESTINATION> INSTEAD OF LIST<STRING>
   String image;
   String description;
-  List<String> group;
-  List<String> lodgings;
-  List<String> activities;
-  List<String> transportations;
+  List<UserProvider> group;
+  List<Lodging> lodgings;
+  List<Activity> activities;
+  List<Transportation> transportations;
 
   TripProvider({
     @required this.id,
