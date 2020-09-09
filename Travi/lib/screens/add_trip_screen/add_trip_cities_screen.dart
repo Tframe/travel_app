@@ -136,7 +136,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() {
-    if (_countryIndex == _numberCountries - 1) {
+    if (_cityIndex == _numberCountries - 1) {
       Navigator.of(context)
            .pushNamed(GroupInviteScreen.routeName, arguments: tripValues);
       return;

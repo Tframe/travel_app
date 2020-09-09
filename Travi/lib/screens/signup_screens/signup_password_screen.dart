@@ -61,15 +61,15 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
           .collection('users')
           .doc(authResult.user.uid)
           .set({
-        'first_name': userValues.firstName,
-        'last_name': userValues.lastName,
-        'email': userValues.email,
-        'phone': userValues.phone,
-        'location': {
-          'country': userValues.location[0].country
-        },
-        'profile_pic_url': '',
-      });
+            'firstName': userValues.firstName,
+            'lastName': userValues.lastName,
+            'email': userValues.email,
+            'phone': userValues.phone,
+            'location': {'country': userValues.location[0].country},
+            'profile_pic_url': '',
+          })
+          .then((value) => print('User added'))
+          .catchError((error) => print('Failed to add user: $error'));
     } on PlatformException catch (error) {
       var message = 'An error ocurred, please check your credentials!';
       if (error.message != null) {

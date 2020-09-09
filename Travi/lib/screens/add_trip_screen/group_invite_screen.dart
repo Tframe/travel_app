@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:groupy/screens/tab_bar_screen.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
@@ -64,17 +65,19 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
 
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
-    print('in add');
+    final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
       return;
     }
     _formKey.currentState.save();
-    print('in add 2');
     try {
-      print(tempGroup.length);
       for (int i = 0; i < tempGroup.length; i++) {
-        print(tempGroup[i]);
+        //Verify email or phone # is in firestore
+        await Provider.of<UserProvider>(context, listen: false)
+            .findUserByContactInfo(tempGroup[i], _searchUserEmail[i]);
+        tempCompanion
+            .add(Provider.of<UserProvider>(context, listen: false).users[0]);
       }
     } catch (error) {
       await showDialog<Null>(
@@ -94,11 +97,35 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
       );
     }
 
-    // final newGroup = Provider.of<UserProvider>(context, listen: false).users;
-    // tripValues.group = newGroup;
+    tripValues.group = tempCompanion;
+
+    print(tripValues.group[0].firstName);
+    print(tripValues.group[0].email);
+    print(tripValues.group[0].lastName);
+
+    print(tripValues.group[1].firstName);
+    print(tripValues.group[1].email);
+    print(tripValues.group[1].lastName);
+
+    //TODO ADD TRIP TO FIRESTORE
 
     // Navigator.of(context)
-    //       .pushNamed(SignUpLocationScreen.routeName, arguments: tripValues);
+    //        .pushNamed(TabBarScreen.routeName);
+
+    tempGroup = [];
+  }
+
+  //Skip button feature if user doesn't want to invite anyone on trip
+  void _skipCompanions() {
+    if (_companionsIndex == _numberCompanions.length) {
+      //TODO SET TRIPVALUES AND CREATE TRIP
+
+      Navigator.of(context).pushNamed(TabBarScreen.routeName);
+      return;
+    }
+    setState(() {
+      _companionsIndex++;
+    });
   }
 
   //adds a field for the country
@@ -107,7 +134,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
     setState(() {
       _searchUserEmail.add(true);
     });
-
     _numberCompanions = List.from(_numberCompanions)
       ..add(
         Container(
@@ -124,7 +150,7 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                 width: MediaQuery.of(context).size.width * 0.63,
                 child: TextFormField(
                   decoration: InputDecoration(
-                    labelText: 'Email or moible #',
+                    labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Theme.of(context).primaryColor,
@@ -148,6 +174,7 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                     if (!_searchUserEmail[index] && value.length != 10) {
                       return 'You must enter a valid mobile #';
                     }
+                    return null;
                   },
                   keyboardType: _searchUserEmail[index]
                       ? TextInputType.emailAddress
@@ -298,7 +325,9 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                                       MediaQuery.of(context).size.width * 0.63,
                                   child: TextFormField(
                                     decoration: InputDecoration(
-                                      labelText: 'Email or moible #',
+                                      labelText: _searchUserEmail[index]
+                                          ? 'Email'
+                                          : 'Moible #',
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
                                           color: Theme.of(context).primaryColor,
@@ -324,12 +353,13 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                                           value.length != 10) {
                                         return 'You must enter a valid mobile #';
                                       }
+                                      return null;
                                     },
                                     keyboardType: _searchUserEmail[index]
                                         ? TextInputType.emailAddress
                                         : TextInputType.phone,
                                     onSaved: (value) {
-                                      tempGroup[index] = value;
+                                      tempGroup.add(value);
                                     },
                                   ),
                                 ),
@@ -401,12 +431,14 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                     width: screenWidth,
                     child: FlatButton(
                       child: Text(
-                        'Next',
+                        _numberCompanions.length == 0 ? 'Skip' : 'Next',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),
                       ),
-                      onPressed: _addCompanions,
+                      onPressed: _numberCompanions.length == 0
+                          ? _skipCompanions
+                          : _addCompanions,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
