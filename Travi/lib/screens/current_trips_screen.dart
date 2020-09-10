@@ -9,18 +9,6 @@ import '../providers/trips_provider.dart';
 class CurrentTripsScreen extends StatefulWidget {
   static const routeName = '/current-trips';
 
-  // void _addNewTrip() {
-  //   return;
-  // }
-
-  // void startAddNewTrip(BuildContext ctx) {
-  //   showModalBottomSheet(
-  //       context: ctx,
-  //       builder: (_) {
-  //         return NewTrip(_addNewTrip);
-  //       });
-  // }
-
   @override
   _CurrentTripsScreenState createState() => _CurrentTripsScreenState();
 }

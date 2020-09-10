@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:groupy/screens/tab_bar_screen.dart';
+
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
@@ -10,6 +11,7 @@ import '../../providers/countries_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
+import '../../screens/tab_bar_screen.dart';
 
 class GroupInviteScreen extends StatefulWidget {
   static const routeName = '/group-invite-screen';
@@ -21,7 +23,7 @@ class GroupInviteScreen extends StatefulWidget {
 class _GroupInviteScreenState extends State<GroupInviteScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _listViewController = ScrollController();
-  var _numberCompanions = List<Container>();
+  var _numberCompanions = List<Widget>();
   var _companionsIndex = 0;
 
   List<String> tempGroup = [];
@@ -65,6 +67,8 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
 
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
+    User user = FirebaseAuth.instance.currentUser;
+
     final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
@@ -79,15 +83,52 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
         tempCompanion
             .add(Provider.of<UserProvider>(context, listen: false).users[0]);
       }
+      for (int j = 0; j < tempCompanion.length; j++) {
+        if (tempCompanion[j].id == user.uid) {
+          await showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(
+                'Can\'t invite youself',
+              ),
+              content: const Text(
+                'You cannot invite yourself. Remove yourself before proceeding',
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: const Text('Okay'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+        for (int k = 0; k < tempCompanion.length; k++) {
+          if (j != k) {
+            if (tempCompanion[j].id == tempCompanion[k].id) {
+              tempCompanion.removeAt(k);
+              break;
+            }
+          }
+        }
+      }
     } catch (error) {
       await showDialog<Null>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: Text('An error occured'),
-          content: Text('Something went wrong'),
+          title: const Text(
+            'Please verify',
+          ),
+          content: const Text(
+            'Verify the contact information is correct.',
+          ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Okay'),
+              child: const Text(
+                'Okay',
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -98,15 +139,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
     }
 
     tripValues.group = tempCompanion;
-
-    print(tripValues.group[0].firstName);
-    print(tripValues.group[0].email);
-    print(tripValues.group[0].lastName);
-
-    print(tripValues.group[1].firstName);
-    print(tripValues.group[1].email);
-    print(tripValues.group[1].lastName);
-
     //TODO ADD TRIP TO FIRESTORE
 
     // Navigator.of(context)
@@ -135,73 +167,62 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
       _searchUserEmail.add(true);
     });
     _numberCompanions = List.from(_numberCompanions)
-      ..add(
-        Container(
-          width: MediaQuery.of(context).size.width * 0.85,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+      ..add(ListTile(
+        title: TextFormField(
+          decoration: InputDecoration(
+            labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Theme.of(context).primaryColor,
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: Colors.black54,
+                width: 1.5,
+              ),
+            ),
           ),
-          margin: EdgeInsets.only(right: 5, left: 5, top: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.63,
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Theme.of(context).primaryColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.black54,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Enter an email or mobile #';
-                    }
-                    if (_searchUserEmail[index] && !value.contains('@')) {
-                      return 'You must enter a valid email address';
-                    }
-                    if (!_searchUserEmail[index] && value.length != 10) {
-                      return 'You must enter a valid mobile #';
-                    }
-                    return null;
-                  },
-                  keyboardType: _searchUserEmail[index]
-                      ? TextInputType.emailAddress
-                      : TextInputType.phone,
-                  onSaved: (value) {
-                    tempGroup[index] = value;
-                  },
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.email),
-                onPressed: () => _switchSeachBy(index),
-                color: _searchUserEmail[index]
-                    ? Theme.of(context).primaryColor
-                    : Colors.black,
-              ),
-              IconButton(
-                icon: Icon(Icons.phone_android),
-                onPressed: () => _switchSeachBy(index),
-                color: !_searchUserEmail[index]
-                    ? Theme.of(context).primaryColor
-                    : Colors.black,
-              ),
-            ],
-          ),
+          validator: (value) {
+            if (value.isEmpty) {
+              return 'Enter an email or mobile #';
+            }
+            if (_searchUserEmail[index] && !value.contains('@')) {
+              return 'You must enter a valid email address';
+            }
+            if (!_searchUserEmail[index] && value.length != 10) {
+              return 'You must enter a valid mobile #';
+            }
+            return null;
+          },
+          keyboardType: _searchUserEmail[index]
+              ? TextInputType.emailAddress
+              : TextInputType.phone,
+          onSaved: (value) {
+            tempGroup.add(value);
+          },
         ),
-      );
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.email),
+              onPressed: () => _switchSeachBy(index),
+              color: _searchUserEmail[index]
+                  ? Theme.of(context).primaryColor
+                  : Colors.black,
+            ),
+            IconButton(
+              icon: Icon(Icons.phone_android),
+              onPressed: () => _switchSeachBy(index),
+              color: !_searchUserEmail[index]
+                  ? Theme.of(context).primaryColor
+                  : Colors.black,
+            ),
+          ],
+        ),
+      ));
     setState(() {
       _companionsIndex++;
     });
@@ -224,19 +245,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
       duration: Duration(seconds: 1),
       curve: Curves.fastOutSlowIn,
     );
-  }
-
-  //Removes the last city field
-  void _removeCompanionField() {
-    // if (_companionsIndex == _numberCompanions.length) {
-    //   Provider.of<Cities>(context, listen: false)
-    //       .removeCity(_numberCompanions.length - 1);
-    // }
-    setState(() {
-      _numberCompanions = List.from(_numberCompanions)..removeLast();
-      _companionsIndex--;
-      _searchUserEmail.removeLast();
-    });
   }
 
   //Pop back a page and clear out provider
@@ -275,9 +283,9 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            margin: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.05,
-            ),
+            // margin: EdgeInsets.symmetric(
+            //   horizontal: screenWidth * 0.05,
+            // ),
             width: screenWidth,
             decoration: BoxDecoration(
                 // color: Theme.of(context).accentColor,
@@ -287,25 +295,30 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.015,
-                  ),
-                  Text(
-                    'Send invites to...',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20.0,
+                      bottom: 12.0,
+                      top: 5.0,
+                    ),
+                    child: Text(
+                      'Send invites to...',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   Divider(
-                    thickness: 3,
+                    thickness: 5,
                     color: Theme.of(context).primaryColor,
                   ),
                   Container(
                     height: screenHeight * 0.50,
-                    width: screenWidth * 0.9,
+                    width: screenWidth,
                     margin: EdgeInsets.only(
                       bottom: 25,
+                      top: 15,
                     ),
                     child: Form(
                       key: _formKey,
@@ -313,79 +326,88 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                         itemCount: _searchUserEmail.length,
                         controller: _listViewController,
                         itemBuilder: (BuildContext ctx, int index) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width * 0.85,
-                            margin: EdgeInsets.only(right: 5, left: 5, top: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.63,
-                                  child: TextFormField(
-                                    decoration: InputDecoration(
-                                      labelText: _searchUserEmail[index]
-                                          ? 'Email'
-                                          : 'Moible #',
-                                      focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Theme.of(context).primaryColor,
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: Colors.black54,
-                                          width: 1.5,
-                                        ),
-                                      ),
+                          return Dismissible(
+                            key: ValueKey(_numberCompanions),
+                            child: ListTile(
+                              title: TextFormField(
+                                decoration: InputDecoration(
+                                  labelText: _searchUserEmail[index]
+                                      ? 'Email'
+                                      : 'Moible #',
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor,
+                                      width: 1.5,
                                     ),
-                                    validator: (value) {
-                                      if (value.isEmpty) {
-                                        return 'Enter an email or mobile #';
-                                      }
-                                      if (_searchUserEmail[index] &&
-                                          !value.contains('@')) {
-                                        return 'You must enter a valid email address';
-                                      }
-                                      if (!_searchUserEmail[index] &&
-                                          value.length != 10) {
-                                        return 'You must enter a valid mobile #';
-                                      }
-                                      return null;
-                                    },
-                                    keyboardType: _searchUserEmail[index]
-                                        ? TextInputType.emailAddress
-                                        : TextInputType.phone,
-                                    onSaved: (value) {
-                                      tempGroup.add(value);
-                                    },
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.black54,
+                                      width: 1.5,
+                                    ),
                                   ),
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.email),
-                                  onPressed: () => _switchSeachBy(index),
-                                  color: _searchUserEmail[index]
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.black,
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.phone_android),
-                                  onPressed: () => _switchSeachBy(index),
-                                  color: !_searchUserEmail[index]
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.black,
-                                ),
-                              ],
+                                validator: (value) {
+                                  if (value.isEmpty) {
+                                    return 'Enter an email or mobile #';
+                                  }
+                                  if (_searchUserEmail[index] &&
+                                      !value.contains('@')) {
+                                    return 'You must enter a valid email address';
+                                  }
+                                  if (!_searchUserEmail[index] &&
+                                      value.length != 10) {
+                                    return 'You must enter a valid mobile #';
+                                  }
+                                  return null;
+                                },
+                                keyboardType: _searchUserEmail[index]
+                                    ? TextInputType.emailAddress
+                                    : TextInputType.phone,
+                                onSaved: (value) {
+                                  tempGroup.add(value);
+                                },
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.email),
+                                    onPressed: () => _switchSeachBy(index),
+                                    color: _searchUserEmail[index]
+                                        ? Theme.of(context).primaryColor
+                                        : Colors.black,
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.phone_android),
+                                    onPressed: () => _switchSeachBy(index),
+                                    color: !_searchUserEmail[index]
+                                        ? Theme.of(context).primaryColor
+                                        : Colors.black,
+                                  ),
+                                ],
+                              ),
                             ),
+                            background: Container(
+                              color: Colors.red,
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                            onDismissed: (direction) {
+                              _numberCompanions = List.from(_numberCompanions)
+                                ..removeAt(index);
+                              _companionsIndex--;
+                              _searchUserEmail.removeAt(index);
+                            },
                           );
                         },
                       ),
                     ),
                   ),
                   Divider(
-                    thickness: 3,
+                    thickness: 5,
                     color: Theme.of(context).primaryColor,
                   ),
                   Container(
@@ -399,25 +421,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                         ),
                       ),
                       onPressed: () => _addGroupField(),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
-                    child: FlatButton(
-                      child: Text(
-                        'Remove Last Companion',
-                        style: TextStyle(
-                          color: Theme.of(context).accentColor,
-                        ),
-                      ),
-                      onPressed: _removeCompanionField,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
