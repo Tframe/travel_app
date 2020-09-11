@@ -73,8 +73,8 @@ class _PlacesState extends State<Places> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         height: screenHeight * 0.1 * (predictions.length + 1),
-        width: screenWidth * 0.8,
-        margin: EdgeInsets.only(right: 5, left: 5, top: 10),
+        width: screenWidth,
+        margin: EdgeInsets.only(right: 5, left: 5, top: 10,),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[

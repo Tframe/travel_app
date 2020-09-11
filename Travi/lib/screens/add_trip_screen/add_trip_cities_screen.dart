@@ -1,7 +1,6 @@
 import 'dart:async';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:groupy/screens/add_trip_screen/group_invite_screen.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
@@ -9,6 +8,7 @@ import '../../providers/country_provider.dart';
 import '../../providers/countries_provider.dart';
 import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
+import './add_trip_group_invite_screen.dart';
 
 class AddTripCitiesScreen extends StatefulWidget {
   static const routeName = '/add-trip-cities-screen';
@@ -21,7 +21,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
   final _listViewController = ScrollController();
   bool _countryPicker = false;
   bool _cityPicker = true;
-  var _numberPlaces = List<Container>();
+  var _numberPlaces = List<Widget>();
   var _numberCountries = 0;
   var _cityIndex = 0;
   var _countryIndex = 0;
@@ -62,7 +62,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
         await Provider.of<Cities>(context, listen: false).removeAllCities();
 
     //Change country index to get list of cities for next country
-    if(_countryIndex < (tripValues.countries.length - 1)){
+    if (_countryIndex < (tripValues.countries.length - 1)) {
       setState(() {
         _countryIndex++;
         _numberPlaces = [];
@@ -72,24 +72,31 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
 
     //After going through each country, navigate to group invite page
     Navigator.of(context)
-          .pushNamed(GroupInviteScreen.routeName, arguments: tripValues);
+        .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //adds a field for the country
   void _addCityField() {
     _numberPlaces = List.from(_numberPlaces)
       ..add(
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Places(_countryPicker, _cityPicker, tripValues.countries[_countryIndex].country),
-            ],
+        Dismissible(
+          key: ValueKey(_numberPlaces),
+          child: ListTile(
+            title: Places(_countryPicker, _cityPicker,
+                tripValues.countries[_countryIndex].country),
+            trailing: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Transform.rotate(
+                  angle: 90 * math.pi / 180,
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -109,18 +116,6 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     );
   }
 
-  //Removes the last city field
-  void _removeCityField() {
-    if (_placesIndex == _numberPlaces.length) {
-      Provider.of<Cities>(context, listen: false)
-          .removeCity(_numberPlaces.length - 1);
-    }
-    setState(() {
-      _numberPlaces = List.from(_numberPlaces)..removeLast();
-      _placesIndex--;
-    });
-  }
-
   //Pop back a page and clear out provider
   void _backPage() async {
     if (_countryIndex > 0) {
@@ -138,7 +133,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
   void _skipButton() {
     if (_cityIndex == _numberCountries - 1) {
       Navigator.of(context)
-           .pushNamed(GroupInviteScreen.routeName, arguments: tripValues);
+          .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
       return;
     }
     setState(() {
@@ -170,9 +165,6 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            margin: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.05,
-            ),
             width: screenWidth,
             decoration: BoxDecoration(
                 // color: Theme.of(context).accentColor,
@@ -180,37 +172,79 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.015,
-                  ),
-                  Text(
-                    'Cities in ${tripValues.countries[_countryIndex].country}?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: 200.0,
+                      bottom: 12.0,
+                      top: 5.0,
+                    ),
+                    child: Text(
+                      'Cities in ${tripValues.countries[_countryIndex].country}?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   Divider(
-                    thickness: 3,
+                    thickness: 5,
                     color: Theme.of(context).primaryColor,
                   ),
                   Container(
                     height: screenHeight * 0.50,
-                    margin: EdgeInsets.only(bottom: 25),
-                    child: ListView(
+                    margin: EdgeInsets.only(
+                      bottom: 25,
+                      top: 15,
+                    ),
+                    child: ListView.builder(
+                      itemCount: _numberPlaces.length,
                       controller: _listViewController,
-                      children: _numberPlaces,
+                      itemBuilder: (BuildContext ctx, int index) {
+                        return Dismissible(
+                          key: ValueKey(_numberPlaces),
+                          child: ListTile(
+                            title: Places(_countryPicker, _cityPicker,
+                                tripValues.countries[_countryIndex].country),
+                            trailing: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Transform.rotate(
+                                  angle: 90 * math.pi / 180,
+                                  child: Icon(
+                                    Icons.drag_handle,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          background: Container(
+                            color: Colors.red,
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                          onDismissed: (direction) {
+                            setState(() {
+                              _numberPlaces = List.from(_numberPlaces)
+                                ..removeAt(index);
+                            });
+                          },
+                        );
+                      },
                     ),
                   ),
                   Divider(
-                    thickness: 3,
+                    thickness: 5,
                     color: Theme.of(context).primaryColor,
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
+                    width: screenWidth * 0.85,
                     child: FlatButton(
                       child: Text(
                         'Add City',
@@ -229,26 +263,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
-                    child: FlatButton(
-                      child: Text(
-                        'Remove Last City',
-                        style: TextStyle(
-                          color: Theme.of(context).accentColor,
-                        ),
-                      ),
-                      onPressed: _removeCityField,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
+                    width: screenWidth * 0.85,
                     child: FlatButton(
                       child: Text(
                         _numberPlaces.length == 0 ? 'Skip' : 'Next',

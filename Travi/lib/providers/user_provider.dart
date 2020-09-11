@@ -48,17 +48,6 @@ class UserProvider extends ChangeNotifier {
           .get()
           .then((QuerySnapshot querySnapshot) => {
                 querySnapshot.docs.forEach((doc) {
-                  
-                  //If user already exists on list
-                  loadedUsers.forEach((user) {
-                    if(user.id == doc.reference.id){
-                      print('User is already being added');
-                      return;
-                    }
-                    //Check if user already on trip for once trip is already made
-                  });
-
-
                   loadedUsers.add(UserProvider(
                     id: doc.reference.id,
                     firstName: doc.data()['firstName'],
