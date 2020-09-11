@@ -1,11 +1,12 @@
 import 'dart:async';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
+import '../../providers/trips_provider.dart';
 import '../../providers/country_provider.dart';
 import '../../providers/countries_provider.dart';
 import '../../providers/user_provider.dart';
@@ -13,14 +14,15 @@ import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
 import '../../screens/tab_bar_screen.dart';
 
-class GroupInviteScreen extends StatefulWidget {
+class AddTripGroupInviteScreen extends StatefulWidget {
   static const routeName = '/group-invite-screen';
 
   @override
-  _GroupInviteScreenState createState() => _GroupInviteScreenState();
+  _AddTripGroupInviteScreenState createState() =>
+      _AddTripGroupInviteScreenState();
 }
 
-class _GroupInviteScreenState extends State<GroupInviteScreen> {
+class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _listViewController = ScrollController();
   var _numberCompanions = List<Widget>();
@@ -68,7 +70,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
     User user = FirebaseAuth.instance.currentUser;
-
     final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
@@ -139,25 +140,42 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
     }
 
     tripValues.group = tempCompanion;
-    //TODO ADD TRIP TO FIRESTORE
+
+    print(tripValues.title);
+    print(tripValues.description);
+    print(tripValues.startDate);
+    print(tripValues.endDate);
+    print(tripValues.countries[0].country);
+    print(tripValues.countries[0].cities[0].city);
+    print(tripValues.group[0].firstName);
+
+    // //TODO ADD TRIP TO FIRESTORE
+      try {
+        await Provider.of<TripsProvider>(context, listen: false)
+            .addTrip(tripValues, user.uid);
+        Navigator.of(context).pushNamed(TabBarScreen.routeName);
+      } catch (error) {
+        await showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('An error occured'),
+            content: Text('Something went wrong'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      }
 
     // Navigator.of(context)
     //        .pushNamed(TabBarScreen.routeName);
 
     tempGroup = [];
-  }
-
-  //Skip button feature if user doesn't want to invite anyone on trip
-  void _skipCompanions() {
-    if (_companionsIndex == _numberCompanions.length) {
-      //TODO SET TRIPVALUES AND CREATE TRIP
-
-      Navigator.of(context).pushNamed(TabBarScreen.routeName);
-      return;
-    }
-    setState(() {
-      _companionsIndex++;
-    });
   }
 
   //adds a field for the country
@@ -254,12 +272,6 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
     Navigator.of(context).pop();
   }
 
-  //Skip button feature if user doesn't know any cities to stop.
-  void _skipButton() {
-    // Navigator.of(context)
-    //     .pushNamed(SignUpLocationScreen.routeName, arguments: tripValues);
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -293,11 +305,11 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.only(
-                      left: 20.0,
+                      right: 200.0,
                       bottom: 12.0,
                       top: 5.0,
                     ),
@@ -385,6 +397,13 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                                         ? Theme.of(context).primaryColor
                                         : Colors.black,
                                   ),
+                                  Transform.rotate(
+                                    angle: 90 * math.pi / 180,
+                                    child: Icon(
+                                      Icons.drag_handle,
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -396,10 +415,12 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                               ),
                             ),
                             onDismissed: (direction) {
-                              _numberCompanions = List.from(_numberCompanions)
-                                ..removeAt(index);
-                              _companionsIndex--;
-                              _searchUserEmail.removeAt(index);
+                              setState(() {
+                                _numberCompanions = List.from(_numberCompanions)
+                                  ..removeAt(index);
+                                _companionsIndex--;
+                                _searchUserEmail.removeAt(index);
+                              });
                             },
                           );
                         },
@@ -412,7 +433,7 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
+                    width: screenWidth * 0.85,
                     child: FlatButton(
                       child: Text(
                         'Add Companion',
@@ -431,17 +452,15 @@ class _GroupInviteScreenState extends State<GroupInviteScreen> {
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
-                    width: screenWidth,
+                    width: screenWidth * 0.85,
                     child: FlatButton(
                       child: Text(
-                        _numberCompanions.length == 0 ? 'Skip' : 'Next',
+                        'Create Trip',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),
                       ),
-                      onPressed: _numberCompanions.length == 0
-                          ? _skipCompanions
-                          : _addCompanions,
+                      onPressed: _addCompanions,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),

@@ -27,7 +27,7 @@ import './screens/add_trip_screen/add_trip_intro_screen.dart';
 import './screens/add_trip_screen/add_trip_title_screen.dart';
 import './screens/add_trip_screen/add_trip_countries_screen.dart';
 import './screens/add_trip_screen/add_trip_cities_screen.dart';
-import './screens/add_trip_screen/group_invite_screen.dart';
+import './screens/add_trip_screen/add_trip_group_invite_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
@@ -167,7 +167,7 @@ class MyApp extends StatelessWidget {
           AddTripTitleScreen.routeName: (ctx) => AddTripTitleScreen(),
           AddTripCountriesScreen.routeName: (ctx) => AddTripCountriesScreen(),
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
-          GroupInviteScreen.routeName: (ctx) => GroupInviteScreen(),
+          AddTripGroupInviteScreen.routeName: (ctx) => AddTripGroupInviteScreen(),
         },
       ),
     );
