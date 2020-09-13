@@ -5,14 +5,16 @@ import 'country_provider.dart';
 class Lodging extends ChangeNotifier{
   final String id;
   final String name;
-  final Country country;
+  final String locationID;
+  final String reservationID;
   final DateTime checkInDateTime;
   final DateTime checkOutDateTime;
 
   Lodging({
     @required this.id,
     @required this.name,
-    @required this.country,
+    @required this.locationID,
+    @required this.reservationID,
     @required this.checkInDateTime,
     @required this.checkOutDateTime,
   });

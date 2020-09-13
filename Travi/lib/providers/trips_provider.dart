@@ -4,13 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:groupy/providers/address_provider.dart';
 
 import './trip_provider.dart';
 import './user_provider.dart';
 import './lodging_provider.dart';
 import './activity_provider.dart';
 import './transportation_provider.dart';
-import 'country_provider.dart';
+import './city_provider.dart';
+import './country_provider.dart';
 
 class TripsProvider extends ChangeNotifier {
   List<TripProvider> _trips = [];
@@ -28,7 +30,6 @@ class TripsProvider extends ChangeNotifier {
 
   //Adds a user created trip to their trips list in Firebase Firestore DB
   Future<void> addTrip(TripProvider tripValues, String userId) async {
-    print('$userId');
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -36,6 +37,7 @@ class TripsProvider extends ChangeNotifier {
           .collection('trips')
           .add({
         'title': tripValues.title,
+        'creator': userId,
         'startDate': tripValues.startDate,
         'endDate': tripValues.endDate,
         'countries': tripValues.countries
@@ -46,6 +48,14 @@ class TripsProvider extends ChangeNotifier {
                             'city': cities.city,
                             'latitude': cities.latitude,
                             'longitude': cities.longitude,
+                            'places': cities.places
+                                .map((places) => {
+                                      'title': '',
+                                      'address': '',
+                                      'latitude': 0.00,
+                                      'longitude': 0.00,
+                                    })
+                                .toList(),
                           })
                       .toList(),
                   'latitude': countries.latitude,
@@ -55,12 +65,43 @@ class TripsProvider extends ChangeNotifier {
         'description': tripValues.description,
         'group': tripValues.group
             .map((group) => {
+                  'id': group.id,
                   'firstName': group.firstName,
                   'lastName': group.lastName,
                   'email': group.email,
                   'phone': group.phone,
+                  'profilePicUrl': group.profilePicUrl,
                 })
             .toList(),
+        'activities': tripValues.activities
+        .map((activity) => {
+          'id': activity.id,
+          'title': activity.title,
+          'reservationID': activity.reservationID,
+          'startingDateTime': activity.startingDateTime,
+          'endingDateTime': activity.endingDateTime,
+          'locationIDs': activity.locationIDs
+        }),
+        'lodgings': tripValues.lodgings
+        .map((lodging) => {
+          'id': lodging.id,
+          'name': lodging.name,
+          'checkInDateTime': lodging.checkInDateTime,
+          'checkOutDateTime': lodging.checkOutDateTime,
+          'locationId': lodging.locationID,
+          'reservationID': lodging.reservationID,
+        }),
+        'tranportations': tripValues.transportations
+        .map((transportation) => {
+          'id': transportation.id,
+          'company': transportation.company,
+          'reservationID': transportation.reservationID,
+          'startingLocation': transportation.startingLocation,
+          'endingLocation': transportation.endingLocation,
+          'startingDateTime': transportation.startingDateTime,
+          'endingDateTime': transportation.endingDateTime
+        }),
+        'isPrivate': true,
       }).then((value) {
         print('Trip added');
       }).catchError((onError) {
@@ -79,6 +120,7 @@ class TripsProvider extends ChangeNotifier {
         description: tripValues.description,
         group: tripValues.group,
       );
+
       _trips.add(newTrip);
 
       notifyListeners();
@@ -98,7 +140,9 @@ class TripsProvider extends ChangeNotifier {
     _trips = [];
     try {
       FirebaseFirestore.instance
-          .collection('/users/${user.uid}/trips')
+          .collection('users')
+          .doc('${user.uid}')
+          .collection('trips')
           .snapshots()
           .forEach((trip) {
         trip.docs.asMap().forEach((index, data) {
@@ -108,12 +152,93 @@ class TripsProvider extends ChangeNotifier {
             startDate: trip.docs[index].data()['startDate'].toDate(),
             endDate: trip.docs[index].data()['endDate'].toDate(),
             description: trip.docs[index].data()['description'],
-            group: List.from(trip.docs[index].data()['group']),
-            countries: List.from(trip.docs[index].data()['destinations']),
-            activities: List.from(trip.docs[index].data()['activities']),
-            lodgings: List.from(trip.docs[index].data()['lodgings']),
-            transportations:
-                List.from(trip.docs[index].data()['transportations']),
+            group: trip.docs[index]
+                .data()['group']
+                .asMap()
+                .forEach((groupIndex, groupData) {
+              UserProvider(
+                id: groupData['id'],
+                firstName: groupData['firstName'],
+                lastName: groupData['lastName'],
+                email: groupData['email'],
+                phone: groupData['phone'],
+                profilePicUrl: groupData['profilePicUrl'],
+              );
+            }),
+            countries: trip.docs[index]
+                .data()['countries']
+                .asMap()
+                .forEach((countryIndex, countryData) {
+              Country(
+                id: null,
+                country: countryData['country'],
+                latitude: countryData['latitude'],
+                longitude: countryData['longitude'],
+                cities: countryData['cities']
+                    .asMap()
+                    .forEach((cityIndex, cityData) {
+                  City(
+                    id: null,
+                    city: cityData['city'],
+                    latitude: cityData['latitude'],
+                    longitude: cityData['longitude'],
+                    places: cityData['places']
+                        .asMap()
+                        .forEach((placeIndex, placeData) {
+                      Address(
+                        id: null,
+                        title: placeData['title'],
+                        address: placeData['address'],
+                        latitude: placeData['latitude'],
+                        longitude: placeData['longitude'],
+                      );
+                    }),
+                  );
+                }),
+              );
+            }),
+            activities: trip.docs[index]
+                .data()['activities']
+                .asMap()
+                .forEach((activitiesIndex, activitiesData) {
+              Activity(
+                id: null,
+                title: activitiesData['title'],
+                reservationID: activitiesData['reservationID'],
+                locationIDs: activitiesData['locationIDs'],
+                startingDateTime: activitiesData['startingDateTime'],
+                endingDateTime: activitiesData['endingDateTime'],
+              );
+            }),
+            lodgings: trip.docs[index]
+                .data()['lodgings']
+                .asMap()
+                .forEach((lodgingsIndex, lodgingsData) {
+              Lodging(
+                id: null,
+                name: lodgingsData['name'],
+                locationID: lodgingsData['locationID'],
+                reservationID: lodgingsData['reservationID'],
+                checkInDateTime: lodgingsData['checkInDateTime'],
+                checkOutDateTime: lodgingsData['checkOutDateTime'],
+              );
+            }),
+            transportations: trip.docs[index]
+                .data()['transportations']
+                .asMap()
+                .forEach((transportationsIndex, transportationsData) {
+              Transportation(
+                id: transportationsData['id'],
+                company: transportationsData['company'],
+                reservationID: transportationsData['reservationID'],
+                startingLocation: transportationsData['startingLocation'],
+                startingDateTime: transportationsData['startingDateTime'],
+                endingLocation: transportationsData['endingLocation'],
+                endingDateTime: transportationsData['endingDateTime'],
+                transportationType: transportationsData['transportationType'],
+              );
+            }),
+            isPrivate: trip.docs[index].data()['isPrivate'],
             image: trip.docs[index].data()['imageUrl'],
           ));
         });

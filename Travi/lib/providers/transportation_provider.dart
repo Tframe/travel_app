@@ -12,16 +12,18 @@ enum TransportationType {
 
 class Transportation extends ChangeNotifier{
   final String id;
-  final String title;
-  Country startingLocation;
+  final String company;
+  final String reservationID;
+  String startingLocation;
   DateTime startingDateTime;
-  Country endingLocation;
+  String endingLocation;
   DateTime endingDateTime;
   TransportationType transportationType;
   
   Transportation({
     @required this.id,
-    @required this.title,
+    @required this.company,
+    @required this.reservationID,
     @required this.startingLocation,
     @required this.startingDateTime,
     @required this.endingLocation,

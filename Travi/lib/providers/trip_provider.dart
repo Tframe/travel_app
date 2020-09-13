@@ -17,6 +17,7 @@ class TripProvider extends ChangeNotifier{
   List<Lodging> lodgings;
   List<Activity> activities;
   List<Transportation> transportations;
+  bool isPrivate;
 
   TripProvider({
     @required this.id,
@@ -30,6 +31,7 @@ class TripProvider extends ChangeNotifier{
     this.lodgings,
     this.activities,
     this.transportations,
+    this.isPrivate,
   });
 
 }

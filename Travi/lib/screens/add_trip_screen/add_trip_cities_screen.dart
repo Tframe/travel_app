@@ -82,8 +82,11 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
         Dismissible(
           key: ValueKey(_numberPlaces),
           child: ListTile(
-            title: Places(_countryPicker, _cityPicker,
-                tripValues.countries[_countryIndex].country),
+            title: Places(
+              _countryPicker,
+              _cityPicker,
+              tripValues.countries[_countryIndex].country,
+            ),
             trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -174,18 +177,11 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      right: 200.0,
-                      bottom: 12.0,
-                      top: 5.0,
-                    ),
-                    child: Text(
-                      'Cities in ${tripValues.countries[_countryIndex].country}?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                  Text(
+                    'Cities in ${tripValues.countries[_countryIndex].country}?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                   Divider(
@@ -205,8 +201,11 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                         return Dismissible(
                           key: ValueKey(_numberPlaces),
                           child: ListTile(
-                            title: Places(_countryPicker, _cityPicker,
-                                tripValues.countries[_countryIndex].country),
+                            title: Places(
+                              _countryPicker,
+                              _cityPicker,
+                              tripValues.countries[_countryIndex].country,
+                            ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,

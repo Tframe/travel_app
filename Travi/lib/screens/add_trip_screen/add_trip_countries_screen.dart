@@ -114,10 +114,10 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() async {
-      final removed = await Provider.of<Countries>(context, listen: false)
+    final removed = await Provider.of<Countries>(context, listen: false)
         .removeAllCountries();
-      Navigator.of(context)
-          .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
+    Navigator.of(context)
+        .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //Pop back a page and clear out provider
@@ -161,18 +161,11 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      right: 200.0,
-                      bottom: 12.0,
-                      top: 5.0,
-                    ),
-                    child: Text(
-                      'Add Countries',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                  Text(
+                    'Add Countries',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                   Divider(

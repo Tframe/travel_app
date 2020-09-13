@@ -15,7 +15,11 @@ class Places extends StatefulWidget {
   final countryPicker;
   final cityPicker;
   String currentCountry;
-  Places(this.countryPicker, this.cityPicker, this.currentCountry);
+  Places(
+    this.countryPicker,
+    this.cityPicker,
+    this.currentCountry,
+  );
 
   @override
   _PlacesState createState() => _PlacesState();
@@ -44,6 +48,7 @@ class _PlacesState extends State<Places> {
 
   List<AutocompletePrediction> predictions = [];
   List<AutocompletePrediction> predictionCountries = [];
+  List<AutocompletePrediction> predictionStates = [];
   List<AutocompletePrediction> predictionCities = [];
   GooglePlace googlePlace;
 
@@ -74,12 +79,18 @@ class _PlacesState extends State<Places> {
         ),
         height: screenHeight * 0.1 * (predictions.length + 1),
         width: screenWidth,
-        margin: EdgeInsets.only(right: 5, left: 5, top: 10,),
+        margin: EdgeInsets.only(
+          right: 5,
+          left: 5,
+          top: 10,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             TextField(
-              controller: widget.countryPicker ? _countryController : (widget.cityPicker ? _cityController : _placeController),
+              controller: widget.countryPicker
+                  ? _countryController
+                  : (widget.cityPicker ? _cityController : _placeController),
               decoration: InputDecoration(
                 labelText: widget.countryPicker
                     ? 'Country'
@@ -172,17 +183,23 @@ class _PlacesState extends State<Places> {
 
   //Find list of countires to provide to user.
   void autoCompleteSearchCities(String value) async {
-    print(widget.currentCountry);
     var result = await googlePlace.autocomplete.get(value);
     if (result != null && result.predictions != null && mounted) {
       result.predictions.forEach((prediction) {
-        if (prediction.description.contains(widget.currentCountry)) {
+        var countryCheck = '';
+        if(widget.currentCountry == 'United States'){
+          countryCheck = 'USA';
+        }else{
+          countryCheck = widget.currentCountry;
+        }
+        if (prediction.description.contains(countryCheck)) {
           prediction.types
               .where((types) => types == 'locality')
               .forEach((found) {
             predictionCities.add(prediction);
           });
         }
+
       });
       setState(() {
         //predictions = result.predictions;

@@ -141,15 +141,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
 
     tripValues.group = tempCompanion;
 
-    print(tripValues.title);
-    print(tripValues.description);
-    print(tripValues.startDate);
-    print(tripValues.endDate);
-    print(tripValues.countries[0].country);
-    print(tripValues.countries[0].cities[0].city);
-    print(tripValues.group[0].firstName);
-
-    // //TODO ADD TRIP TO FIRESTORE
+      //Adds data to firestore
       try {
         await Provider.of<TripsProvider>(context, listen: false)
             .addTrip(tripValues, user.uid);
@@ -172,8 +164,8 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         );
       }
 
-    // Navigator.of(context)
-    //        .pushNamed(TabBarScreen.routeName);
+    Navigator.of(context)
+           .pushNamed(TabBarScreen.routeName);
 
     tempGroup = [];
   }

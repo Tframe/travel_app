@@ -168,6 +168,7 @@ class MyApp extends StatelessWidget {
           AddTripCountriesScreen.routeName: (ctx) => AddTripCountriesScreen(),
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
           AddTripGroupInviteScreen.routeName: (ctx) => AddTripGroupInviteScreen(),
+
         },
       ),
     );

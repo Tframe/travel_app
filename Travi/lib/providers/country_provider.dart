@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'city_provider.dart';
+import './city_provider.dart';
 
 class Country extends ChangeNotifier {
   String id;

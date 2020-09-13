@@ -5,14 +5,16 @@ import 'country_provider.dart';
 class Activity extends ChangeNotifier{
   final String id;
   final String title;
-  final Country location;
+  final String reservationID;
+  final List<String> locationIDs;
   final DateTime startingDateTime;
   final DateTime endingDateTime;
 
   Activity({
     @required this.id,
     @required this.title,
-    @required this.location,
+    @required this.reservationID,
+    @required this.locationIDs,
     @required this.startingDateTime,
     this.endingDateTime,
   });
