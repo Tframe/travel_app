@@ -39,7 +39,7 @@ class Auth with ChangeNotifier {
 
   //Add user
   Future<void> addUser(String userId, String email, String firstName,
-      String lastName, List<Country> location, String phone) async {
+      String lastName, String address, String phone) async {
     final url =
         'https://the-travel-app-0920.firebaseio.com/user/$userId.json?auth=$_token';
     try {
@@ -51,9 +51,7 @@ class Auth with ChangeNotifier {
           'lastName': lastName,
           'email': email,
           'phone': phone,
-          'location': {
-            'country': location[0].country,
-          },
+          'location': address,
         }),
       );
       notifyListeners();
@@ -63,7 +61,7 @@ class Auth with ChangeNotifier {
   }
 
   //Sign up using Firebase Authentication using email and password
-  Future<void> signup(String email, String password, List<Country> location,
+  Future<void> signup(String email, String password, String address,
       String firstName, String lastName, String phone) async {
     final url =
         'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyBl-AsESzqoRB94fU3LAk4XYm6FfbSaN88';
@@ -95,7 +93,7 @@ class Auth with ChangeNotifier {
         ),
       );
       _autoLogout();
-      addUser(userId, email, firstName, lastName, location, phone);
+      addUser(userId, email, firstName, lastName, address, phone);
       notifyListeners();
       //Stores userdata on device storage to be used for autologin
       final prefs = await SharedPreferences.getInstance();

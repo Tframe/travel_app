@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:groupy/providers/activity_provider.dart';
+import 'package:groupy/providers/lodging_provider.dart';
+import 'package:groupy/providers/transportation_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,7 +52,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             city: null,
             longitude: null,
             latitude: null,
-            places: null,
+            places: [],
           ),
         ],
       ),
@@ -61,9 +64,11 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         lastName: null,
         email: null,
         phone: null,
-        location: null,
+        address: null,
       ),
     ],
+    isPrivate: true,
+    image: null,
     description: null,
   );
 
@@ -141,31 +146,30 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
 
     tripValues.group = tempCompanion;
 
-      //Adds data to firestore
-      try {
-        await Provider.of<TripsProvider>(context, listen: false)
-            .addTrip(tripValues, user.uid);
-        Navigator.of(context).pushNamed(TabBarScreen.routeName);
-      } catch (error) {
-        await showDialog<Null>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('An error occured'),
-            content: Text('Something went wrong'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Okay'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      }
+    //Adds data to firestore
+    try {
+      await Provider.of<TripsProvider>(context, listen: false)
+          .addTrip(tripValues, user.uid);
+      Navigator.of(context).pushNamed(TabBarScreen.routeName);
+    } catch (error) {
+      await showDialog<Null>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('An error occured'),
+          content: Text('Something went wrong'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
 
-    Navigator.of(context)
-           .pushNamed(TabBarScreen.routeName);
+    Navigator.of(context).pushNamed(TabBarScreen.routeName);
 
     tempGroup = [];
   }

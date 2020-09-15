@@ -19,14 +19,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _savePhone() {

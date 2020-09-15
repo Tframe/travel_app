@@ -19,14 +19,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: ''
   );
 
   void _saveEmail() {

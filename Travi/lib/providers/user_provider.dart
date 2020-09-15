@@ -11,7 +11,7 @@ class UserProvider extends ChangeNotifier {
   String password;
   String firstName;
   String lastName;
-  List<Country> location;
+  String address;
   String profilePicUrl;
 
   UserProvider({
@@ -21,7 +21,7 @@ class UserProvider extends ChangeNotifier {
     this.password,
     this.firstName,
     this.lastName,
-    this.location,
+    this.address,
     this.profilePicUrl,
   });
 

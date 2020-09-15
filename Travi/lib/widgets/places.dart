@@ -48,7 +48,6 @@ class _PlacesState extends State<Places> {
 
   List<AutocompletePrediction> predictions = [];
   List<AutocompletePrediction> predictionCountries = [];
-  List<AutocompletePrediction> predictionStates = [];
   List<AutocompletePrediction> predictionCities = [];
   GooglePlace googlePlace;
 
@@ -187,9 +186,9 @@ class _PlacesState extends State<Places> {
     if (result != null && result.predictions != null && mounted) {
       result.predictions.forEach((prediction) {
         var countryCheck = '';
-        if(widget.currentCountry == 'United States'){
+        if (widget.currentCountry == 'United States') {
           countryCheck = 'USA';
-        }else{
+        } else {
           countryCheck = widget.currentCountry;
         }
         if (prediction.description.contains(countryCheck)) {
@@ -199,7 +198,6 @@ class _PlacesState extends State<Places> {
             predictionCities.add(prediction);
           });
         }
-
       });
       setState(() {
         //predictions = result.predictions;
@@ -224,43 +222,44 @@ class _PlacesState extends State<Places> {
   //set country for provider
   void setCountry(String placeId) async {
     await getDetails(placeId);
-    setState(() {
-      _countryController.text = detailsResult.formattedAddress;
-    });
     var tempCountry = Country(
-      id: null,
+      id: placeId,
       country: detailsResult.formattedAddress,
       latitude: detailsResult.geometry.location.lat,
       longitude: detailsResult.geometry.location.lng,
+      cities: null,
     );
 
     country = tempCountry;
     await Provider.of<Countries>(context, listen: false).addCountry(country);
-    FocusScope.of(context).unfocus();
+
     setState(() {
+      _countryController.text = detailsResult.formattedAddress;
       predictions = [];
     });
+    FocusScope.of(context).unfocus();
   }
 
   //set city for provider
   void setCity(String placeId) async {
     await getDetails(placeId);
-    setState(() {
-      _cityController.text = detailsResult.formattedAddress;
-    });
+
     var tempCity = City(
       id: null,
       city: detailsResult.formattedAddress,
       latitude: detailsResult.geometry.location.lat,
       longitude: detailsResult.geometry.location.lng,
+      places: null,
     );
 
     city = tempCity;
     await Provider.of<Cities>(context, listen: false).addCity(city);
-    FocusScope.of(context).unfocus();
+
     setState(() {
+      _cityController.text = detailsResult.formattedAddress;
       predictions = [];
     });
+    FocusScope.of(context).unfocus();
   }
 
   Future<void> getDetails(String placeId) async {
@@ -271,20 +270,20 @@ class _PlacesState extends State<Places> {
         images = [];
       });
 
-      if (details.result.photos != null) {
-        for (var photo in details.result.photos) {
-          getPhoto(photo.photoReference);
-        }
-      }
+      // if (details.result.photos != null) {
+      //   for (var photo in details.result.photos) {
+      //     getPhoto(photo.photoReference);
+      //   }
+      // }
     }
   }
 
-  void getPhoto(String photoReference) async {
-    var photos = await this.googlePlace.photos.get(photoReference, null, 400);
-    if (photos != null && mounted) {
-      setState(() {
-        images.add(photos);
-      });
-    }
-  }
+  // void getPhoto(String photoReference) async {
+  //   var photos = await this.googlePlace.photos.get(photoReference, null, 400);
+  //   if (photos != null && mounted) {
+  //     setState(() {
+  //       images.add(photos);
+  //     });
+  //   }
+  // }
 }

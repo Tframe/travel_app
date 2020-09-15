@@ -6,7 +6,7 @@ class Activity extends ChangeNotifier{
   final String id;
   final String title;
   final String reservationID;
-  final List<String> locationIDs;
+  final String address;
   final DateTime startingDateTime;
   final DateTime endingDateTime;
 
@@ -14,7 +14,7 @@ class Activity extends ChangeNotifier{
     @required this.id,
     @required this.title,
     @required this.reservationID,
-    @required this.locationIDs,
+    @required this.address,
     @required this.startingDateTime,
     this.endingDateTime,
   });

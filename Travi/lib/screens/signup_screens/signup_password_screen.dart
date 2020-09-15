@@ -29,14 +29,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
     email: '',
     phone: '',
     password: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _submitUserData(BuildContext ctx) async {
@@ -65,7 +58,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
             'lastName': userValues.lastName,
             'email': userValues.email,
             'phone': userValues.phone,
-            'location': {'country': userValues.location[0].country},
+            'location': {'country': userValues.address},
             'profile_pic_url': '',
           })
           .then((value) => print('User added'))

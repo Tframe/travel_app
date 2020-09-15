@@ -22,14 +22,7 @@ class _SignUpPhotoScreenState extends State<SignUpPhotoScreen> {
     email: '',
     phone: '',
     profilePicUrl: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   File _userImageFile;

@@ -34,14 +34,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   var _isLoading = false;
@@ -89,7 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await Provider.of<Auth>(context, listen: false).signup(
         userValues.email,
         userValues.password,
-        userValues.location,
+        userValues.address,
         userValues.firstName,
         userValues.lastName,
         userValues.phone,

@@ -67,6 +67,9 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
           });
     }
 
+     final removed =
+        await Provider.of<Countries>(context, listen: false).removeAllCountries();
+
     Navigator.of(context)
         .pushNamed(AddTripCitiesScreen.routeName, arguments: tripValues);
   }
@@ -211,6 +214,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                             setState(() {
                               _numberPlaces = List.from(_numberPlaces)
                                 ..removeAt(index);
+                              _placesIndex--;
                             });
                           },
                         );

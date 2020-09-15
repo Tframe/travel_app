@@ -14,9 +14,9 @@ class Transportation extends ChangeNotifier{
   final String id;
   final String company;
   final String reservationID;
-  String startingLocation;
+  String startingAddress;
   DateTime startingDateTime;
-  String endingLocation;
+  String endingAddress;
   DateTime endingDateTime;
   TransportationType transportationType;
   
@@ -24,9 +24,9 @@ class Transportation extends ChangeNotifier{
     @required this.id,
     @required this.company,
     @required this.reservationID,
-    @required this.startingLocation,
+    @required this.startingAddress,
     @required this.startingDateTime,
-    @required this.endingLocation,
+    @required this.endingAddress,
     @required this.endingDateTime,
     @required this.transportationType,
   });

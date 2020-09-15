@@ -20,14 +20,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _saveLocation() {
@@ -117,7 +110,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.location[0].country = value;
+                              userValues.address = value;
                             },
                           ),
                           TextFormField(
@@ -136,7 +129,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               }
                             },
                             onSaved: (value) {
-                              userValues.location[0].country = value;
+                              userValues.address = value;
                             },
                           ),
                           Container(

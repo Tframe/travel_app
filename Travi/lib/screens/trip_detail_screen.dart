@@ -6,7 +6,6 @@ import '../providers/trip_provider.dart';
 import '../providers/trips_provider.dart';
 import '../screens/edit_trip_screen.dart';
 
-
 class TripDetailsScreen extends StatefulWidget {
   static const routeName = '/trip-details';
 
@@ -23,13 +22,20 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   //get the trip details as arguments from trip list screen
   @override
   void didChangeDependencies() {
-
     if (!_loadedTrip) {
-      tripId =
-          ModalRoute.of(context).settings.arguments;
+      tripId = ModalRoute.of(context).settings.arguments;
       _loadedTrip = true;
     }
     super.didChangeDependencies();
+  }
+
+  String listCountries(TripProvider loadedTrip) {
+    String textString = '';
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      textString = textString +
+          '${loadedTrip.countries[i].country}${loadedTrip.countries.length > 1 && loadedTrip.countries.length != i + 1 ? ', ' : ''}';
+    }
+    return textString;
   }
 
   //reusable function to create a badding container with text, padding, and height
@@ -287,7 +293,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               TextAlign.center,
             ),
             paddingText(
-              'hi',//'${loadedTrip.destinations[0].city}, ${loadedTrip.destinations[0].state == null ? '' : loadedTrip.destinations[0].state + ', '} ${loadedTrip.destinations[0].country}',
+              listCountries(loadedTrip),
               6.5,
               screenHeight * 0.025,
               FontWeight.bold,

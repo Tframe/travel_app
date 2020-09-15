@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/trip_provider.dart';
+import '../providers/country_provider.dart';
 import '../screens/trip_detail_screen.dart';
+import './places_images.dart';
 
 class CurrentTripItem extends StatelessWidget {
   @override
@@ -11,13 +13,30 @@ class CurrentTripItem extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final foundTrip = Provider.of<TripProvider>(context, listen: false);
+    final foundTrip = Provider.of<TripProvider>(context);
 
     void selectTrip(BuildContext ctx) {
       Navigator.of(ctx).pushNamed(
         TripDetailsScreen.routeName,
         arguments: foundTrip.id,
       );
+    }
+
+    List<Widget> listCountries() {
+      List<Widget> textList = [];
+      for (int i = 0; i < foundTrip.countries.length; i++) {
+        textList.add(
+          Text(
+            '${foundTrip.countries[i].country}${foundTrip.countries.length > 1 && foundTrip.countries.length != i + 1 ? ', ' : ''}',
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              color: Theme.of(context).secondaryHeaderColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        );
+      }
+      return textList;
     }
 
     return Column(
@@ -41,39 +60,45 @@ class CurrentTripItem extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     Container(
-                      height: screenHeight * 0.20,
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: foundTrip.image == null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                10,
-                              ),
-                              child: Container(
-                                child: IconButton(
-                                  icon: Icon(Icons.photo_camera),
-                                  //TODO
-                                  onPressed: () {},
+                        height: screenHeight * 0.30,
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: foundTrip.image == null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(8.0),
+                                  topRight: Radius.circular(8.0),
                                 ),
-                                color: Colors.grey,
-                                height: double.infinity,
-                                width: double.infinity,
-                              ),
-                            )
-                          : ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8.0),
-                                topRight: Radius.circular(8.0),
-                              ),
-                              child: Hero(
-                                tag: foundTrip.id,
-                                child: Image.network(
-                                  foundTrip.image,
-                                  fit: BoxFit.cover,
+                                child: Hero(
+                                  tag: foundTrip.id,
+                                  child:
+                                      PlacesImages(foundTrip.countries[0].id),
                                 ),
-                              ),
-                            ),
-                    ),
+                              )
+                            : (foundTrip.countries[0].id != ''
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(8.0),
+                                      topRight: Radius.circular(8.0),
+                                    ),
+                                    child: Hero(
+                                      tag: foundTrip.id,
+                                      child: Image.network(
+                                        foundTrip.image,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    child: IconButton(
+                                      icon: Icon(Icons.photo_camera),
+                                      //TODO
+                                      onPressed: () {},
+                                    ),
+                                    color: Colors.grey,
+                                    height: double.infinity,
+                                    width: double.infinity,
+                                  ))),
                     Padding(
                       padding: const EdgeInsets.only(
                         top: 10.0,
@@ -105,13 +130,8 @@ class CurrentTripItem extends StatelessWidget {
                                 Container(
                                   padding: EdgeInsets.only(bottom: 2.5),
                                   width: screenWidth * 0.85,
-                                  child: Text(
-                                    '${foundTrip.countries}',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                      color: Theme.of(context)
-                                          .secondaryHeaderColor,
-                                    ),
+                                  child: Row(
+                                    children: listCountries(),
                                   ),
                                 ),
                                 Container(
