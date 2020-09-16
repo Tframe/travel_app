@@ -14,7 +14,6 @@ class CurrentTripItem extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final foundTrip = Provider.of<TripProvider>(context);
-
     void selectTrip(BuildContext ctx) {
       Navigator.of(ctx).pushNamed(
         TripDetailsScreen.routeName,

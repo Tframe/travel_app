@@ -9,24 +9,20 @@ import 'package:google_place/google_place.dart';
 class PlacesImages extends StatefulWidget {
   final String placeID;
   PlacesImages(this.placeID);
-
   @override
-  _PlacesImagesState createState() => _PlacesImagesState(placeID);
+  _PlacesImagesState createState() => _PlacesImagesState();
 }
 
 class _PlacesImagesState extends State<PlacesImages> {
   DetailsResult detailsResult;
   List<Uint8List> images = [];
   GooglePlace googlePlace;
-  final String placeID;
-  bool _isLoading = true;
-  _PlacesImagesState(this.placeID);
 
   @override
   void initState() {
     String apiKey = DotEnv().env['GOOGLE_PLACES_API_KEY'];
     googlePlace = GooglePlace(apiKey);
-    getDetails(this.placeID);
+    getDetails(widget.placeID);
     super.initState();
   }
 
@@ -35,15 +31,17 @@ class _PlacesImagesState extends State<PlacesImages> {
     return ListView.builder(
         itemCount: 1,
         itemBuilder: (context, index) {
-          return Image.memory(
-            images[index],
-          );
+          return images.length == 0
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Image.memory(
+                  images[index],
+                );
         });
   }
 
   void getDetails(String placeId) async {
-    placeId = 'ChIJA9KNRIL-1BIRb15jJFz1LOI';
-    print('in details $placeId');
     var details = await this.googlePlace.details.get(placeId);
     if (details != null && details.result != null && mounted) {
       setState(() {

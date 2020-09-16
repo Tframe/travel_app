@@ -67,9 +67,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
           });
     }
 
-     final removed =
-        await Provider.of<Countries>(context, listen: false).removeAllCountries();
-
     Navigator.of(context)
         .pushNamed(AddTripCitiesScreen.routeName, arguments: tripValues);
   }
@@ -81,7 +78,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
         Dismissible(
           key: ValueKey(_numberPlaces),
           child: ListTile(
-            title: Places(_countryPicker, _cityPicker, null),
+            title: Places(_countryPicker, _cityPicker, null, null),
             trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -137,6 +134,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
+    final newCountry = Provider.of<Countries>(context, listen: false).countries;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -164,11 +162,18 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    'Add Countries',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      right: 200.0,
+                      bottom: 12.0,
+                      top: 5.0,
+                    ),
+                    child: Text(
+                      'Add Countries',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   Divider(
@@ -188,7 +193,14 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                         return Dismissible(
                           key: ValueKey(_numberPlaces),
                           child: ListTile(
-                            title: Places(_countryPicker, _cityPicker, null),
+                            title: Places(
+                              _countryPicker,
+                              _cityPicker,
+                              newCountry.length <= index
+                                  ? null
+                                  : (newCountry[index].country == '' ? null : newCountry[index].country ),
+                              null,
+                            ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,

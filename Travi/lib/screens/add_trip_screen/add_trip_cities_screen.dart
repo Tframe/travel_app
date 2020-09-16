@@ -86,6 +86,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
               _countryPicker,
               _cityPicker,
               tripValues.countries[_countryIndex].country,
+              null,
             ),
             trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +135,8 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() {
-    if (_cityIndex == _numberCountries - 1) {
+    print('$_countryIndex  and $_numberCountries');
+    if (_countryIndex == _numberCountries - 1) {
       Navigator.of(context)
           .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
       return;
@@ -150,6 +152,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
     _numberCountries = tripValues.countries.length;
+    final newCity = Provider.of<Cities>(context, listen: false).cities;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -205,6 +208,9 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                               _countryPicker,
                               _cityPicker,
                               tripValues.countries[_countryIndex].country,
+                              newCity.length <= index
+                                  ? null
+                                  : (newCity[index].city == '' ? null : newCity[index].city ),
                             ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,

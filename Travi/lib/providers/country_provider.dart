@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import './city_provider.dart';
 
@@ -7,12 +8,14 @@ class Country extends ChangeNotifier {
   double latitude;
   double longitude;
   List<City> cities;
+  List<Uint8List> googleImages;
+
   Country({
     @required this.id,
     @required this.country,
     @required this.latitude,
     @required this.longitude,
     this.cities,
+    this.googleImages,
   });
-
 }

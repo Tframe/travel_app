@@ -5,12 +5,13 @@ import './lodging_provider.dart';
 import './transportation_provider.dart';
 import './user_provider.dart';
 
-class TripProvider extends ChangeNotifier{
+class TripProvider extends ChangeNotifier {
   String id;
   String title;
   DateTime startDate;
   DateTime endDate;
-  List<Country> countries; //HOW DO WE FIX LIST<DESTINATION> INSTEAD OF LIST<STRING>
+  List<Country>
+      countries;
   String image;
   String description;
   List<UserProvider> group;
@@ -33,5 +34,4 @@ class TripProvider extends ChangeNotifier{
     this.transportations,
     this.isPrivate,
   });
-
 }

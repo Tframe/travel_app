@@ -15,10 +15,12 @@ class Places extends StatefulWidget {
   final countryPicker;
   final cityPicker;
   String currentCountry;
+  String currentCity;
   Places(
     this.countryPicker,
     this.cityPicker,
     this.currentCountry,
+    this.currentCity,
   );
 
   @override
@@ -30,6 +32,7 @@ class _PlacesState extends State<Places> {
   var _cityController = TextEditingController();
   var _placeController = TextEditingController();
   final _listController = ScrollController();
+
   var country = Country(
     id: null,
     country: null,
@@ -63,6 +66,13 @@ class _PlacesState extends State<Places> {
   void initState() {
     String apiKey = DotEnv().env['GOOGLE_PLACES_API_KEY'];
     googlePlace = GooglePlace(apiKey);
+    if (widget.countryPicker == true && widget.currentCountry != null) {
+      _countryController.text = widget.currentCountry;
+    }
+    if (widget.cityPicker == true && widget.currentCity != null) {
+      print(widget.currentCity);
+      _cityController.text = widget.currentCity;
+    }
     super.initState();
   }
 
@@ -222,6 +232,9 @@ class _PlacesState extends State<Places> {
   //set country for provider
   void setCountry(String placeId) async {
     await getDetails(placeId);
+    setState(() {
+      _countryController.text = detailsResult.formattedAddress;
+    });
     var tempCountry = Country(
       id: placeId,
       country: detailsResult.formattedAddress,
@@ -231,10 +244,10 @@ class _PlacesState extends State<Places> {
     );
 
     country = tempCountry;
+
     await Provider.of<Countries>(context, listen: false).addCountry(country);
 
     setState(() {
-      _countryController.text = detailsResult.formattedAddress;
       predictions = [];
     });
     FocusScope.of(context).unfocus();
@@ -269,16 +282,21 @@ class _PlacesState extends State<Places> {
         detailsResult = details.result;
         images = [];
       });
-
-      // if (details.result.photos != null) {
-      //   for (var photo in details.result.photos) {
-      //     getPhoto(photo.photoReference);
-      //   }
-      // }
+      //number of photos we want from google
+    //   int numPhotos = 1;
+    //   if (details.result.photos != null) {
+    //     for (var photo in details.result.photos) {
+    //       if(numPhotos == 0){
+    //         return;
+    //       }
+    //       await getPhoto(photo.photoReference);
+    //       numPhotos--;
+    //     }
+    //   }
     }
   }
 
-  // void getPhoto(String photoReference) async {
+  // Future<void> getPhoto(String photoReference) async {
   //   var photos = await this.googlePlace.photos.get(photoReference, null, 400);
   //   if (photos != null && mounted) {
   //     setState(() {
