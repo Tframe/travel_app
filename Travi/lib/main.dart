@@ -12,7 +12,7 @@ import './screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
 import './screens/edit_trip_screen.dart';
 import './screens/login_signup_screen.dart';
-import './screens/trip_detail_screen.dart';
+import './screens/trip_details_screens/trip_detail_screen.dart';
 import './screens/login_screen.dart';
 
 import './screens/signup_screens/signup_screen.dart';
@@ -23,11 +23,12 @@ import './screens/signup_screens/signup_location_screen.dart';
 import './screens/signup_screens/signup_email_screen.dart';
 import './screens/signup_screens/signup_phone_screen.dart';
 import './screens/signup_screens/signup_password_screen.dart';
-import './screens/add_trip_screen/add_trip_intro_screen.dart';
-import './screens/add_trip_screen/add_trip_title_screen.dart';
-import './screens/add_trip_screen/add_trip_countries_screen.dart';
-import './screens/add_trip_screen/add_trip_cities_screen.dart';
-import './screens/add_trip_screen/add_trip_group_invite_screen.dart';
+import './screens/add_trip_screens/add_trip_intro_screen.dart';
+import './screens/add_trip_screens/add_trip_title_screen.dart';
+import './screens/add_trip_screens/add_trip_countries_screen.dart';
+import './screens/add_trip_screens/add_trip_cities_screen.dart';
+import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
+import './screens/account_info_screens/account_profile_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
@@ -168,7 +169,7 @@ class MyApp extends StatelessWidget {
           AddTripCountriesScreen.routeName: (ctx) => AddTripCountriesScreen(),
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
           AddTripGroupInviteScreen.routeName: (ctx) => AddTripGroupInviteScreen(),
-
+          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
         },
       ),
     );

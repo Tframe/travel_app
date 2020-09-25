@@ -10,8 +10,7 @@ class TripProvider extends ChangeNotifier {
   String title;
   DateTime startDate;
   DateTime endDate;
-  List<Country>
-      countries;
+  List<Country> countries;
   String image;
   String description;
   List<UserProvider> group;
@@ -19,6 +18,10 @@ class TripProvider extends ChangeNotifier {
   List<Activity> activities;
   List<Transportation> transportations;
   bool isPrivate;
+  bool destinationsComplete;
+  bool transportationsComplete;
+  bool lodgingsComplete;
+  bool activitiesComplete;
 
   TripProvider({
     @required this.id,
@@ -33,5 +36,9 @@ class TripProvider extends ChangeNotifier {
     this.activities,
     this.transportations,
     this.isPrivate,
+    this.destinationsComplete,
+    this.activitiesComplete,
+    this.lodgingsComplete,
+    this.transportationsComplete,
   });
 }

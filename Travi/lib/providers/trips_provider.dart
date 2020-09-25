@@ -40,6 +40,10 @@ class TripsProvider extends ChangeNotifier {
         'creator': userId,
         'startDate': tripValues.startDate,
         'endDate': tripValues.endDate,
+        'destinationsComplete': tripValues.destinationsComplete,
+        'transportationsComplete': tripValues.transportationsComplete,
+        'lodgingsComplete': tripValues.lodgingsComplete,
+        'activitiesComplete': tripValues.activitiesComplete,
         'countries': tripValues.countries != null
             ? tripValues.countries
                 .map((countries) => {
@@ -82,6 +86,7 @@ class TripsProvider extends ChangeNotifier {
                       'profilePicUrl': group.profilePicUrl == null
                           ? null
                           : group.profilePicUrl,
+                      'requestAccepted': false,
                     })
                 .toList()
             : [],
@@ -191,6 +196,9 @@ class TripsProvider extends ChangeNotifier {
                 startDate: trip.docs[index].data()['startDate'].toDate(),
                 endDate: trip.docs[index].data()['endDate'].toDate(),
                 description: trip.docs[index].data()['description'],
+                transportationsComplete: trip.docs[index].data()['transportationsComplete'],
+                lodgingsComplete: trip.docs[index].data()['lodgingsComplete'],
+                activitiesComplete: trip.docs[index].data()['activitiesComplete'],
                 group: trip.docs[index].data()['group'] != null
                     ? trip.docs[index]
                         .data()['group']
@@ -239,9 +247,14 @@ class TripsProvider extends ChangeNotifier {
                                           })
                                         : [],
                                   ));
+                                  loadedCities[cityIndex].places =
+                                      loadedAddresses;
+                                  loadedAddresses = [];
                                 })
                               : [],
                         ));
+                        loadedCountries[countryIndex].cities = loadedCities;
+                        loadedCities = [];
                       })
                     : [],
                 activities: trip.docs[index].data()['activities'] != null
@@ -327,13 +340,32 @@ class TripsProvider extends ChangeNotifier {
   }
 
   //Update user specified trip in Firebase Firestore
-  Future<void> updateTrip(
-      String id, TripProvider newTrip, String userId) async {
-    final tripIndex = _trips.indexWhere((trip) => trip.id == id);
+  Future<void> updateTripCompleted(
+      String tripId, String taskCompleted, bool mark, User userId) async {
+    final tripIndex = _trips.indexWhere((trip) => trip.id == tripId);
     if (tripIndex >= 0) {
-      try {} catch (error) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc('${userId.uid}')
+            .collection('trips')
+            .doc('$tripId')
+            .update({'$taskCompleted': mark}).then(
+          (value) {
+            print('Trip updated');
+          },
+        );
+      } catch (error) {
         throw error;
       }
     }
+    if (taskCompleted == 'activitiesComplete') {
+      _trips[tripIndex].activitiesComplete = mark;
+    } else if (taskCompleted == 'lodgingsComplete') {
+      _trips[tripIndex].lodgingsComplete = mark;
+    } else if (taskCompleted == 'transportationsComplete') {
+      _trips[tripIndex].transportationsComplete = mark;
+    }
+    notifyListeners();
   }
 }

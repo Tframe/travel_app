@@ -37,6 +37,49 @@ class UserProvider extends ChangeNotifier {
     _users = loadedUser;
   }
 
+  //Add user info to Firestore
+  Future<void> addUser(UserProvider userInfo, String userId) async{
+    await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .set({
+            'firstName': userInfo.firstName,
+            'lastName': userInfo.lastName,
+            'email': userInfo.email,
+            'phone': userInfo.phone,
+            'address': userInfo.address,
+            'profilePicUrl': userInfo.profilePicUrl,
+          })
+          .then((value) => print('User added'))
+          .catchError((error) => print('Failed to add user: $error'));
+  }
+
+
+  //Get single user info by ID
+  Future<UserProvider> findUserById(String userId) async {
+    print(userId);
+    UserProvider loadedUser;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get()
+          .then((doc) => {
+                loadedUser = UserProvider(
+                    id: doc.reference.id,
+                    firstName: doc.data()['firstName'],
+                    lastName: doc.data()['lastName'],
+                    address: doc.data()['address'],
+                    email: doc.data()['email'],
+                    phone: doc.data()['phone'],
+                    profilePicUrl: doc.data()['profilePicUrl'])
+              });
+    } catch (error) {
+      throw error;
+    }
+    return loadedUser;
+  }
+
   //Get users list by email
   Future<void> findUserByContactInfo(String contactInfo, bool email) async {
     final List<UserProvider> loadedUsers = [];
@@ -52,6 +95,7 @@ class UserProvider extends ChangeNotifier {
                     id: doc.reference.id,
                     firstName: doc.data()['firstName'],
                     lastName: doc.data()['lastName'],
+                    address: doc.data()['address'],
                     email: doc.data()['email'],
                     phone: doc.data()['phone'],
                     profilePicUrl: doc.data()['profilePicUrl'],

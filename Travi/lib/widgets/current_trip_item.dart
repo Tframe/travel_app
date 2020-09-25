@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../providers/trip_provider.dart';
 import '../providers/country_provider.dart';
-import '../screens/trip_detail_screen.dart';
+import '../screens/trip_details_screens/trip_detail_screen.dart';
 import './places_images.dart';
 
 class CurrentTripItem extends StatelessWidget {
@@ -59,45 +59,57 @@ class CurrentTripItem extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     Container(
-                        height: screenHeight * 0.30,
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: foundTrip.image == null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(8.0),
-                                  topRight: Radius.circular(8.0),
-                                ),
-                                child: Hero(
-                                  tag: foundTrip.id,
-                                  child:
-                                      PlacesImages(foundTrip.countries[0].id),
-                                ),
-                              )
-                            : (foundTrip.countries[0].id != ''
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8.0),
-                                      topRight: Radius.circular(8.0),
-                                    ),
-                                    child: Hero(
-                                      tag: foundTrip.id,
-                                      child: Image.network(
-                                        foundTrip.image,
-                                        fit: BoxFit.cover,
+                      height: screenHeight * 0.25,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: foundTrip.image == null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8.0),
+                                topRight: Radius.circular(8.0),
+                              ),
+                              child: Hero(
+                                tag: foundTrip.id,
+                                child:
+                                    Container(
+                                      child: IconButton(
+                                        icon: Icon(Icons.photo_camera),
+                                        //TODO
+                                        onPressed: () {},
                                       ),
+                                      color: Colors.grey,
+                                      height: double.infinity,
+                                      width: double.infinity,
                                     ),
-                                  )
-                                : Container(
-                                    child: IconButton(
-                                      icon: Icon(Icons.photo_camera),
-                                      //TODO
-                                      onPressed: () {},
+                                    //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                                    //PlacesImages(foundTrip.countries[0].id),
+                              ),
+                            )
+                          : (foundTrip.countries[0].id != ''
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8.0),
+                                    topRight: Radius.circular(8.0),
+                                  ),
+                                  child: Hero(
+                                    tag: foundTrip.id,
+                                    child: Image.network(
+                                      foundTrip.image,
+                                      fit: BoxFit.cover,
                                     ),
-                                    color: Colors.grey,
-                                    height: double.infinity,
-                                    width: double.infinity,
-                                  ))),
+                                  ),
+                                )
+                              : Container(
+                                  child: IconButton(
+                                    icon: Icon(Icons.photo_camera),
+                                    //TODO
+                                    onPressed: () {},
+                                  ),
+                                  color: Colors.grey,
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                )),
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(
                         top: 10.0,
@@ -185,7 +197,9 @@ class CurrentTripItem extends StatelessWidget {
                             child: Column(
                               children: <Widget>[
                                 Icon(
-                                  Icons.check_circle,
+                                  foundTrip.transportationsComplete
+                                      ? Icons.check_circle
+                                      : Icons.check_circle_outline,
                                   color: Theme.of(context).secondaryHeaderColor,
                                 ),
                                 Text(
@@ -203,7 +217,9 @@ class CurrentTripItem extends StatelessWidget {
                             child: Column(
                               children: <Widget>[
                                 Icon(
-                                  Icons.check_circle_outline,
+                                  foundTrip.lodgingsComplete
+                                      ? Icons.check_circle
+                                      : Icons.check_circle_outline,
                                   color: Theme.of(context).secondaryHeaderColor,
                                 ),
                                 Text(
@@ -224,7 +240,9 @@ class CurrentTripItem extends StatelessWidget {
                             child: Column(
                               children: <Widget>[
                                 Icon(
-                                  Icons.check_circle_outline,
+                                  foundTrip.activitiesComplete
+                                      ? Icons.check_circle
+                                      : Icons.check_circle_outline,
                                   color: Theme.of(context).secondaryHeaderColor,
                                 ),
                                 Text(

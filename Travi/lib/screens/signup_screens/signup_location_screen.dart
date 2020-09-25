@@ -97,7 +97,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'City',
+                              labelText: 'Address',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -106,26 +106,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                             ),
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Please enter the city!';
-                              }
-                            },
-                            onSaved: (value) {
-                              userValues.address = value;
-                            },
-                          ),
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'State',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter the state!';
+                                return 'Please enter the address!';
                               }
                             },
                             onSaved: (value) {

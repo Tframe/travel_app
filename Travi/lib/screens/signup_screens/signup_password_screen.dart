@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../providers/user_provider.dart';
 import '../../providers/country_provider.dart';
@@ -50,19 +51,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
         email: userValues.email,
         password: userValues.password,
       );
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(authResult.user.uid)
-          .set({
-            'firstName': userValues.firstName,
-            'lastName': userValues.lastName,
-            'email': userValues.email,
-            'phone': userValues.phone,
-            'location': {'country': userValues.address},
-            'profile_pic_url': '',
-          })
-          .then((value) => print('User added'))
-          .catchError((error) => print('Failed to add user: $error'));
+      await Provider.of<UserProvider>(context, listen: false).addUser(userValues, authResult.user.uid);
     } on PlatformException catch (error) {
       var message = 'An error ocurred, please check your credentials!';
       if (error.message != null) {

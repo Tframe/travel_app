@@ -126,8 +126,8 @@ class _EditTripScreenState extends State<EditTripScreen> {
     });
     if (_editedTrip.id != null) {
       try {
-        await Provider.of<TripsProvider>(context, listen: false)
-            .updateTrip(_editedTrip.id, _editedTrip, userId);
+        //await Provider.of<TripsProvider>(context, listen: false)
+            //.updateTrip(_editedTrip.id, _editedTrip, userId);
       } catch (error) {
         throw error;
       }

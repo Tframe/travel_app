@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../screens/current_trips_screen.dart';
+import '../screens/account_info_screens/account_profile_screen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -27,7 +29,7 @@ class AppDrawer extends StatelessWidget {
               color: Theme.of(context).secondaryHeaderColor,
             ),
             title: Text(
-              'Account Information',
+              'Account Profile',
               style: TextStyle(
                 color: Theme.of(context).secondaryHeaderColor,
               ),
@@ -35,7 +37,7 @@ class AppDrawer extends StatelessWidget {
             //NAVIGATION TO NEW SCREEN
             onTap: () {
               Navigator.of(context)
-                  .pushReplacementNamed(CurrentTripsScreen.routeName);
+                  .pushNamed(AccountProfileScreen.routeName);
             },
           ),
           Divider(

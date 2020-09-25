@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'country_provider.dart';
 
-class Activity extends ChangeNotifier{
+class Activity extends ChangeNotifier {
   final String id;
   final String title;
   final String reservationID;
@@ -18,5 +18,4 @@ class Activity extends ChangeNotifier{
     @required this.startingDateTime,
     this.endingDateTime,
   });
-
 }
