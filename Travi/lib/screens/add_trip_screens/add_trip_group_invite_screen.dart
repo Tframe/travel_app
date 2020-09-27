@@ -4,13 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/countries_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
 import '../../screens/tab_bar_screen.dart';
 
@@ -49,7 +46,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             city: null,
             longitude: null,
             latitude: null,
-            places: null,
+            places: [],
           ),
         ],
       ),
@@ -61,9 +58,11 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         lastName: null,
         email: null,
         phone: null,
-        location: null,
+        address: null,
       ),
     ],
+    isPrivate: true,
+    image: null,
     description: null,
   );
 
@@ -141,39 +140,30 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
 
     tripValues.group = tempCompanion;
 
-    print(tripValues.title);
-    print(tripValues.description);
-    print(tripValues.startDate);
-    print(tripValues.endDate);
-    print(tripValues.countries[0].country);
-    print(tripValues.countries[0].cities[0].city);
-    print(tripValues.group[0].firstName);
+    //Adds data to firestore
+    try {
+      await Provider.of<TripsProvider>(context, listen: false)
+          .addTrip(tripValues, user.uid);
+      Navigator.of(context).pushNamed(TabBarScreen.routeName);
+    } catch (error) {
+      await showDialog<Null>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('An error occured'),
+          content: Text('Something went wrong'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
 
-    // //TODO ADD TRIP TO FIRESTORE
-      try {
-        await Provider.of<TripsProvider>(context, listen: false)
-            .addTrip(tripValues, user.uid);
-        Navigator.of(context).pushNamed(TabBarScreen.routeName);
-      } catch (error) {
-        await showDialog<Null>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('An error occured'),
-            content: Text('Something went wrong'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Okay'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      }
-
-    // Navigator.of(context)
-    //        .pushNamed(TabBarScreen.routeName);
+    Navigator.of(context).pushNamed(TabBarScreen.routeName);
 
     tempGroup = [];
   }

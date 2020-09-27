@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'country_provider.dart';
-
 enum TransportationType {
   Flight,
   Train,
@@ -12,19 +10,21 @@ enum TransportationType {
 
 class Transportation extends ChangeNotifier{
   final String id;
-  final String title;
-  Country startingLocation;
+  final String company;
+  final String reservationID;
+  String startingAddress;
   DateTime startingDateTime;
-  Country endingLocation;
+  String endingAddress;
   DateTime endingDateTime;
   TransportationType transportationType;
   
   Transportation({
     @required this.id,
-    @required this.title,
-    @required this.startingLocation,
+    @required this.company,
+    @required this.reservationID,
+    @required this.startingAddress,
     @required this.startingDateTime,
-    @required this.endingLocation,
+    @required this.endingAddress,
     @required this.endingDateTime,
     @required this.transportationType,
   });

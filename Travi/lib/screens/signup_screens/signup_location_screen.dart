@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
 import './signup_phone_screen.dart';
 
 class SignUpLocationScreen extends StatefulWidget {
@@ -12,7 +11,6 @@ class SignUpLocationScreen extends StatefulWidget {
 
 class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
 
   var userValues = UserProvider(
     id: null,
@@ -20,14 +18,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _saveLocation() {
@@ -104,7 +95,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'City',
+                              labelText: 'Address',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -113,30 +104,12 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                             ),
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Please enter the city!';
+                                return 'Please enter the address!';
                               }
+                              return null;
                             },
                             onSaved: (value) {
-                              userValues.location[0].country = value;
-                            },
-                          ),
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'State',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter the state!';
-                              }
-                            },
-                            onSaved: (value) {
-                              userValues.location[0].country = value;
+                              userValues.address = value;
                             },
                           ),
                           Container(

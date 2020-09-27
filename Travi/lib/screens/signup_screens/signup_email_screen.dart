@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
 import './signup_password_screen.dart';
 
 class SignUpEmailScreen extends StatefulWidget {
@@ -12,21 +11,13 @@ class SignUpEmailScreen extends StatefulWidget {
 
 class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
   var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _saveEmail() {
@@ -105,6 +96,7 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                               if (value.isEmpty || !value.contains('@')) {
                                 return 'Please enter a valid email';
                               }
+                              return null;
                             },
                             onSaved: (value) {
                               userValues.email = value.trim();

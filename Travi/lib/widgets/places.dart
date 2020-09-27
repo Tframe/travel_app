@@ -14,8 +14,14 @@ import '../providers/cities_provider.dart';
 class Places extends StatefulWidget {
   final countryPicker;
   final cityPicker;
-  String currentCountry;
-  Places(this.countryPicker, this.cityPicker, this.currentCountry);
+  final String currentCountry;
+  final String currentCity;
+  Places(
+    this.countryPicker,
+    this.cityPicker,
+    this.currentCountry,
+    this.currentCity,
+  );
 
   @override
   _PlacesState createState() => _PlacesState();
@@ -26,6 +32,7 @@ class _PlacesState extends State<Places> {
   var _cityController = TextEditingController();
   var _placeController = TextEditingController();
   final _listController = ScrollController();
+
   var country = Country(
     id: null,
     country: null,
@@ -59,6 +66,13 @@ class _PlacesState extends State<Places> {
   void initState() {
     String apiKey = DotEnv().env['GOOGLE_PLACES_API_KEY'];
     googlePlace = GooglePlace(apiKey);
+    if (widget.countryPicker == true && widget.currentCountry != null) {
+      _countryController.text = widget.currentCountry;
+    }
+    if (widget.cityPicker == true && widget.currentCity != null) {
+      print(widget.currentCity);
+      _cityController.text = widget.currentCity;
+    }
     super.initState();
   }
 
@@ -74,12 +88,18 @@ class _PlacesState extends State<Places> {
         ),
         height: screenHeight * 0.1 * (predictions.length + 1),
         width: screenWidth,
-        margin: EdgeInsets.only(right: 5, left: 5, top: 10,),
+        margin: EdgeInsets.only(
+          right: 5,
+          left: 5,
+          top: 10,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             TextField(
-              controller: widget.countryPicker ? _countryController : (widget.cityPicker ? _cityController : _placeController),
+              controller: widget.countryPicker
+                  ? _countryController
+                  : (widget.cityPicker ? _cityController : _placeController),
               decoration: InputDecoration(
                 labelText: widget.countryPicker
                     ? 'Country'
@@ -172,11 +192,16 @@ class _PlacesState extends State<Places> {
 
   //Find list of countires to provide to user.
   void autoCompleteSearchCities(String value) async {
-    print(widget.currentCountry);
     var result = await googlePlace.autocomplete.get(value);
     if (result != null && result.predictions != null && mounted) {
       result.predictions.forEach((prediction) {
-        if (prediction.description.contains(widget.currentCountry)) {
+        var countryCheck = '';
+        if (widget.currentCountry == 'United States') {
+          countryCheck = 'USA';
+        } else {
+          countryCheck = widget.currentCountry;
+        }
+        if (prediction.description.contains(countryCheck)) {
           prediction.types
               .where((types) => types == 'locality')
               .forEach((found) {
@@ -211,39 +236,43 @@ class _PlacesState extends State<Places> {
       _countryController.text = detailsResult.formattedAddress;
     });
     var tempCountry = Country(
-      id: null,
+      id: placeId,
       country: detailsResult.formattedAddress,
       latitude: detailsResult.geometry.location.lat,
       longitude: detailsResult.geometry.location.lng,
+      cities: null,
     );
 
     country = tempCountry;
+
     await Provider.of<Countries>(context, listen: false).addCountry(country);
-    FocusScope.of(context).unfocus();
+
     setState(() {
       predictions = [];
     });
+    FocusScope.of(context).unfocus();
   }
 
   //set city for provider
   void setCity(String placeId) async {
     await getDetails(placeId);
-    setState(() {
-      _cityController.text = detailsResult.formattedAddress;
-    });
+
     var tempCity = City(
       id: null,
       city: detailsResult.formattedAddress,
       latitude: detailsResult.geometry.location.lat,
       longitude: detailsResult.geometry.location.lng,
+      places: null,
     );
 
     city = tempCity;
     await Provider.of<Cities>(context, listen: false).addCity(city);
-    FocusScope.of(context).unfocus();
+
     setState(() {
+      _cityController.text = detailsResult.formattedAddress;
       predictions = [];
     });
+    FocusScope.of(context).unfocus();
   }
 
   Future<void> getDetails(String placeId) async {
@@ -253,21 +282,26 @@ class _PlacesState extends State<Places> {
         detailsResult = details.result;
         images = [];
       });
-
-      if (details.result.photos != null) {
-        for (var photo in details.result.photos) {
-          getPhoto(photo.photoReference);
-        }
-      }
+      //number of photos we want from google
+    //   int numPhotos = 1;
+    //   if (details.result.photos != null) {
+    //     for (var photo in details.result.photos) {
+    //       if(numPhotos == 0){
+    //         return;
+    //       }
+    //       await getPhoto(photo.photoReference);
+    //       numPhotos--;
+    //     }
+    //   }
     }
   }
 
-  void getPhoto(String photoReference) async {
-    var photos = await this.googlePlace.photos.get(photoReference, null, 400);
-    if (photos != null && mounted) {
-      setState(() {
-        images.add(photos);
-      });
-    }
-  }
+  // Future<void> getPhoto(String photoReference) async {
+  //   var photos = await this.googlePlace.photos.get(photoReference, null, 400);
+  //   if (photos != null && mounted) {
+  //     setState(() {
+  //       images.add(photos);
+  //     });
+  //   }
+  // }
 }

@@ -12,10 +12,9 @@ import './screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
 import './screens/edit_trip_screen.dart';
 import './screens/login_signup_screen.dart';
-import './screens/trip_detail_screen.dart';
+import './screens/trip_details_screens/trip_detail_screen.dart';
 import './screens/login_screen.dart';
 
-import './screens/signup_screens/signup_screen.dart';
 import './screens/signup_screens/signup_intro_screen.dart';
 import './screens/signup_screens/signup_name_screen.dart';
 import './screens/signup_screens/signup_photo_screen.dart';
@@ -23,11 +22,14 @@ import './screens/signup_screens/signup_location_screen.dart';
 import './screens/signup_screens/signup_email_screen.dart';
 import './screens/signup_screens/signup_phone_screen.dart';
 import './screens/signup_screens/signup_password_screen.dart';
-import './screens/add_trip_screen/add_trip_intro_screen.dart';
-import './screens/add_trip_screen/add_trip_title_screen.dart';
-import './screens/add_trip_screen/add_trip_countries_screen.dart';
-import './screens/add_trip_screen/add_trip_cities_screen.dart';
-import './screens/add_trip_screen/add_trip_group_invite_screen.dart';
+import './screens/add_trip_screens/add_trip_intro_screen.dart';
+import './screens/add_trip_screens/add_trip_title_screen.dart';
+import './screens/add_trip_screens/add_trip_countries_screen.dart';
+import './screens/add_trip_screens/add_trip_cities_screen.dart';
+import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
+import './screens/account_info_screens/account_profile_screen.dart';
+import './screens/account_info_screens/edit_personal_info_screen.dart';
+import './screens/account_info_screens/edit_contact_info_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
@@ -42,8 +44,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-
-  static Map<int, Color> indiDye = {
+  static const Map<int, Color> indiDye = {
     50: Color.fromRGBO(13, 59, 102, .1),
     100: Color.fromRGBO(13, 59, 102, .2),
     200: Color.fromRGBO(13, 59, 102, .3),
@@ -55,9 +56,9 @@ class MyApp extends StatelessWidget {
     800: Color.fromRGBO(13, 59, 102, .9),
     900: Color.fromRGBO(13, 59, 102, 1),
   };
-  MaterialColor indigoDye = MaterialColor(0xFF0D3B66, indiDye);
+  final MaterialColor indigoDye = MaterialColor(0xFF0D3B66, indiDye);
 
-  static Map<int, Color> lemonMeri = {
+  static const Map<int, Color> lemonMeri = {
     50: Color.fromRGBO(250, 240, 202, .1),
     100: Color.fromRGBO(250, 240, 202, .2),
     200: Color.fromRGBO(250, 240, 202, .3),
@@ -69,9 +70,9 @@ class MyApp extends StatelessWidget {
     800: Color.fromRGBO(250, 240, 202, .9),
     900: Color.fromRGBO(250, 240, 202, 1),
   };
-  MaterialColor lemonMeringue = MaterialColor(0xFFFAF0CA, lemonMeri);
+  final MaterialColor lemonMeringue = MaterialColor(0xFFFAF0CA, lemonMeri);
 
-  static Map<int, Color> oraYell = {
+  static const Map<int, Color> oraYell = {
     50: Color.fromRGBO(244, 211, 94, .1),
     100: Color.fromRGBO(244, 211, 94, .2),
     200: Color.fromRGBO(244, 211, 94, .3),
@@ -83,9 +84,9 @@ class MyApp extends StatelessWidget {
     800: Color.fromRGBO(244, 211, 94, .9),
     900: Color.fromRGBO(244, 211, 94, 1),
   };
-  MaterialColor orangeYellow = MaterialColor(0xFFF4D35E, oraYell);
+  final MaterialColor orangeYellow = MaterialColor(0xFFF4D35E, oraYell);
 
-  static Map<int, Color> sanBrow = {
+  static const Map<int, Color> sanBrow = {
     50: Color.fromRGBO(238, 150, 75, .1),
     100: Color.fromRGBO(238, 150, 75, .2),
     200: Color.fromRGBO(238, 150, 75, .3),
@@ -97,13 +98,11 @@ class MyApp extends StatelessWidget {
     800: Color.fromRGBO(238, 150, 75, .9),
     900: Color.fromRGBO(238, 150, 75, 1),
   };
-  MaterialColor sandyBrown = MaterialColor(0xFFEE964B, sanBrow);
-
+  final MaterialColor sandyBrown = MaterialColor(0xFFEE964B, sanBrow);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -155,7 +154,6 @@ class MyApp extends StatelessWidget {
           TripDetailsScreen.routeName: (ctx) => TripDetailsScreen(),
           EditTripScreen.routeName: (ctx) => EditTripScreen(),
           LoginScreen.routeName: (ctx) => LoginScreen(),
-          SignUpScreen.routeName: (ctx) => SignUpScreen(),
           SignUpIntroScreen.routeName: (ctx) => SignUpIntroScreen(),
           SignUpNameScreen.routeName: (ctx) => SignUpNameScreen(),
           SignUpPhotoScreen.routeName: (ctx) => SignUpPhotoScreen(),
@@ -167,7 +165,11 @@ class MyApp extends StatelessWidget {
           AddTripTitleScreen.routeName: (ctx) => AddTripTitleScreen(),
           AddTripCountriesScreen.routeName: (ctx) => AddTripCountriesScreen(),
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
-          AddTripGroupInviteScreen.routeName: (ctx) => AddTripGroupInviteScreen(),
+          AddTripGroupInviteScreen.routeName: (ctx) =>
+              AddTripGroupInviteScreen(),
+          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
+          EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
+          EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
         },
       ),
     );

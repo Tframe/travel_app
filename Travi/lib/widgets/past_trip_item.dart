@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/trip_provider.dart';
-import '../screens/trip_detail_screen.dart';
+import '../screens/trip_details_screens/trip_detail_screen.dart';
 
 
 class PastTripItem extends StatelessWidget {

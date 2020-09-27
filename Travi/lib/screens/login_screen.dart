@@ -33,25 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('An Error Occured'),
-        content: Text(message),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Okay'),
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-          )
-        ],
-      ),
-    );
-  }
-
   Future<void> _submit(BuildContext ctx) async {
+    // ignore: unused_local_variable
     UserCredential authResult;
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -152,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (value.isEmpty || !value.contains('@')) {
                                   return 'Invalid email!';
                                 }
+                                return null;
                               },
                               onSaved: (value) {
                                 _authData['email'] = value;
@@ -179,6 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     !value.contains(new RegExp(r'[0-9]'))) {
                                   return 'Password must meet all requirements';
                                 }
+                                return null;
                               },
                               onSaved: (value) {
                                 _authData['password'] = value;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
 import './signup_email_screen.dart';
 
 class SignUpPhoneScreen extends StatefulWidget {
@@ -12,21 +11,13 @@ class SignUpPhoneScreen extends StatefulWidget {
 
 class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
   var userValues = UserProvider(
     id: null,
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _savePhone() {
@@ -115,6 +106,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                               if (value.isEmpty || value.length != 10) {
                                 return 'Please enter a valid mobile number!';
                               }
+                              return null;
                             },
                             onSaved: (value) {
                               userValues.phone = value.trim();

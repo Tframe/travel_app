@@ -5,13 +5,11 @@ import 'package:provider/provider.dart';
 
 
 //TODO LOOK INTO DATE RANGE
-import 'package:syncfusion_flutter_core/core.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+// import 'package:syncfusion_flutter_core/core.dart';
+// import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import '../providers/country_provider.dart';
 import '../providers/trip_provider.dart';
 import '../providers/trips_provider.dart';
-import './places.dart';
 
 const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
 
@@ -30,6 +28,7 @@ class _NewTripState extends State<NewTrip> {
   final _formKey = GlobalKey<FormState>();
   final _lastDate = DateTime.now().add(Duration(days: 365));
   // Mode _mode = Mode.overlay;
+  // ignore: unused_field
   var _isLoading = false;
 
   var tripValues = TripProvider(

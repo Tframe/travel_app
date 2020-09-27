@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/add_trip_screen/add_trip_intro_screen.dart';
+import '../screens/add_trip_screens/add_trip_intro_screen.dart';
 import 'package:groupy/screens/current_trips_screen.dart';
 import 'package:groupy/screens/discover_screen.dart';
 import 'package:groupy/screens/past_trips_screen.dart';

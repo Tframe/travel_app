@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
 import '../../screens/tab_bar_screen.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
 class SignUpPasswordScreen extends StatefulWidget {
@@ -21,6 +20,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
   final _confirmPasswordFocusNode = FocusNode();
   final _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey();
+  // ignore: unused_field
   var _isLoading = false;
   var userValues = UserProvider(
     id: null,
@@ -29,14 +29,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
     email: '',
     phone: '',
     password: '',
-    location: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-      ),
-    ],
+    address: '',
   );
 
   void _submitUserData(BuildContext ctx) async {
@@ -57,19 +50,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
         email: userValues.email,
         password: userValues.password,
       );
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(authResult.user.uid)
-          .set({
-            'firstName': userValues.firstName,
-            'lastName': userValues.lastName,
-            'email': userValues.email,
-            'phone': userValues.phone,
-            'location': {'country': userValues.location[0].country},
-            'profile_pic_url': '',
-          })
-          .then((value) => print('User added'))
-          .catchError((error) => print('Failed to add user: $error'));
+      await Provider.of<UserProvider>(context, listen: false).addUser(userValues, authResult.user.uid);
     } on PlatformException catch (error) {
       var message = 'An error ocurred, please check your credentials!';
       if (error.message != null) {
@@ -205,6 +186,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
                                   !value.contains(new RegExp(r'[0-9]'))) {
                                 return 'Password must meet all requirements';
                               }
+                              return null;
                             },
                             onSaved: (value) {
                               userValues.password = value.trim();
@@ -226,6 +208,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
                               if (value != _passwordController.text) {
                                 return 'Passwords do not match!';
                               }
+                              return null;
                             },
                           ),
                           Container(

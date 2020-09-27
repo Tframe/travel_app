@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/new_trip.dart';
 import '../widgets/current_trip_card_list.dart';
 import '../providers/trips_provider.dart';
 

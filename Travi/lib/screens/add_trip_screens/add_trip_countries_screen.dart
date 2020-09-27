@@ -78,7 +78,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
         Dismissible(
           key: ValueKey(_numberPlaces),
           child: ListTile(
-            title: Places(_countryPicker, _cityPicker, null),
+            title: Places(_countryPicker, _cityPicker, null, null),
             trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -114,15 +114,15 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() async {
-      final removed = await Provider.of<Countries>(context, listen: false)
+    await Provider.of<Countries>(context, listen: false)
         .removeAllCountries();
-      Navigator.of(context)
-          .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
+    Navigator.of(context)
+        .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //Pop back a page and clear out provider
   void _backPage() async {
-    final removed = await Provider.of<Countries>(context, listen: false)
+    await Provider.of<Countries>(context, listen: false)
         .removeAllCountries();
     Navigator.of(context).pop();
   }
@@ -134,6 +134,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
+    final newCountry = Provider.of<Countries>(context, listen: false).countries;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -192,7 +193,14 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                         return Dismissible(
                           key: ValueKey(_numberPlaces),
                           child: ListTile(
-                            title: Places(_countryPicker, _cityPicker, null),
+                            title: Places(
+                              _countryPicker,
+                              _cityPicker,
+                              newCountry.length <= index
+                                  ? null
+                                  : (newCountry[index].country == '' ? null : newCountry[index].country ),
+                              null,
+                            ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,
@@ -218,6 +226,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                             setState(() {
                               _numberPlaces = List.from(_numberPlaces)
                                 ..removeAt(index);
+                              _placesIndex--;
                             });
                           },
                         );

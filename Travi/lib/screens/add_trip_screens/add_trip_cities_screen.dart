@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/countries_provider.dart';
 import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
 import './add_trip_group_invite_screen.dart';
@@ -23,8 +22,8 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
   bool _cityPicker = true;
   var _numberPlaces = List<Widget>();
   var _numberCountries = 0;
-  var _cityIndex = 0;
   var _countryIndex = 0;
+  // ignore: unused_field
   int _placesIndex = 0;
 
   var tripValues = TripProvider(
@@ -58,8 +57,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     //provider to save next set of cities
     final newCity = Provider.of<Cities>(context, listen: false).cities;
     tripValues.countries[_countryIndex].cities = newCity;
-    final removed =
-        await Provider.of<Cities>(context, listen: false).removeAllCities();
+    await Provider.of<Cities>(context, listen: false).removeAllCities();
 
     //Change country index to get list of cities for next country
     if (_countryIndex < (tripValues.countries.length - 1)) {
@@ -82,8 +80,12 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
         Dismissible(
           key: ValueKey(_numberPlaces),
           child: ListTile(
-            title: Places(_countryPicker, _cityPicker,
-                tripValues.countries[_countryIndex].country),
+            title: Places(
+              _countryPicker,
+              _cityPicker,
+              tripValues.countries[_countryIndex].country,
+              null,
+            ),
             trailing: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -124,14 +126,14 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
       });
       return;
     }
-    final removed =
-        await Provider.of<Cities>(context, listen: false).removeAllCities();
+    await Provider.of<Cities>(context, listen: false).removeAllCities();
     Navigator.of(context).pop();
   }
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() {
-    if (_cityIndex == _numberCountries - 1) {
+    print('$_countryIndex  and $_numberCountries');
+    if (_countryIndex == _numberCountries - 1) {
       Navigator.of(context)
           .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
       return;
@@ -147,6 +149,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
     _numberCountries = tripValues.countries.length;
+    final newCity = Provider.of<Cities>(context, listen: false).cities;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -174,18 +177,11 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      right: 200.0,
-                      bottom: 12.0,
-                      top: 5.0,
-                    ),
-                    child: Text(
-                      'Cities in ${tripValues.countries[_countryIndex].country}?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                  Text(
+                    'Cities in ${tripValues.countries[_countryIndex].country}?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
                     ),
                   ),
                   Divider(
@@ -205,8 +201,14 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                         return Dismissible(
                           key: ValueKey(_numberPlaces),
                           child: ListTile(
-                            title: Places(_countryPicker, _cityPicker,
-                                tripValues.countries[_countryIndex].country),
+                            title: Places(
+                              _countryPicker,
+                              _cityPicker,
+                              tripValues.countries[_countryIndex].country,
+                              newCity.length <= index
+                                  ? null
+                                  : (newCity[index].city == '' ? null : newCity[index].city ),
+                            ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,
