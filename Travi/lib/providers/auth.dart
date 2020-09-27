@@ -8,8 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/http_exception.dart';
-import 'country_provider.dart';
-import '../providers/trips_provider.dart';
 
 class Auth with ChangeNotifier {
   String _token;
@@ -54,6 +52,7 @@ class Auth with ChangeNotifier {
           'location': address,
         }),
       );
+      print(response);
       notifyListeners();
     } catch (error) {
       throw error;

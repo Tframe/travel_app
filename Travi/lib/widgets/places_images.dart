@@ -1,7 +1,6 @@
-import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_place/google_place.dart';
@@ -17,7 +16,7 @@ class _PlacesImagesState extends State<PlacesImages> {
   DetailsResult detailsResult;
   List<Uint8List> images = [];
   GooglePlace googlePlace;
-
+  File fileName;
   @override
   void initState() {
     String apiKey = DotEnv().env['GOOGLE_PLACES_API_KEY'];
@@ -52,6 +51,7 @@ class _PlacesImagesState extends State<PlacesImages> {
       if (details.result.photos != null) {
         for (var photo in details.result.photos) {
           getPhoto(photo.photoReference);
+
         }
       }
     }
@@ -63,6 +63,9 @@ class _PlacesImagesState extends State<PlacesImages> {
       setState(() {
         images.add(photos);
       });
+      //Convert Unit8List bytes data to a file to be stored
+      //onto Firebase storage
+      //await fileName.writeAsBytes(photos);
     }
   }
 }

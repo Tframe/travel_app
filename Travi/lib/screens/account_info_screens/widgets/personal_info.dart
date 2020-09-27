@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../providers/user_provider.dart';
 
 class PersonalInfo extends StatelessWidget {
-
-  UserProvider _loadedUser;
-
-  PersonalInfo(this._loadedUser);
+  final UserProvider _loadedUser;
+  final User user;
+  PersonalInfo(this._loadedUser, this.user);
 
   //padding for text widgets
   Widget _paddingText(
@@ -25,50 +24,44 @@ class PersonalInfo extends StatelessWidget {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    return Stack(
-      alignment: Alignment.topRight,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          height: screenHeight * 0.23,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _paddingText('${_loadedUser.firstName} ${_loadedUser.lastName}', screenHeight, screenWidth, 20),
-              _paddingText('${_loadedUser.address}', screenHeight, screenWidth, 15),
-              _paddingText('www.webite.com', screenHeight, screenWidth, 15),
-              _paddingText('Number Followers', screenHeight, screenWidth, 15),
-              Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  FlatButton(
-                    onPressed: () {},
-                    child: Text('Message'),
-                    color: Colors.blue,
-                  ),
-                  FlatButton(
-                    onPressed: () {},
-                    child: Text('Photots'),
-                    color: Colors.blue,
-                  ),
-                  FlatButton(
-                    onPressed: () {},
-                    child: Text('More'),
-                    color: Colors.blue,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () {},
+
+        _paddingText('${_loadedUser.firstName} ${_loadedUser.lastName}',
+            screenHeight, screenWidth, 20),
+        _paddingText('${_loadedUser.address}', screenHeight, screenWidth, 15),
+        _loadedUser.sites != null
+            ? _paddingText('www.webite.com', screenHeight, screenWidth, 15)
+            : new Container(),
+        _loadedUser.followers != null
+            ? _paddingText('Number Followers', screenHeight, screenWidth, 15)
+            : new Container(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            FlatButton(
+              onPressed: () {},
+              child: Text('Message'),
+              color: Colors.blue,
+            ),
+            FlatButton(
+              onPressed: () {},
+              child: Text('Photots'),
+              color: Colors.blue,
+            ),
+            FlatButton(
+              onPressed: () {},
+              child: Text('More'),
+              color: Colors.blue,
+            ),
+          ],
         ),
       ],
     );

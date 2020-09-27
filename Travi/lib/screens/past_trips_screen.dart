@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 
-import '../providers/trips_provider.dart';
 import '../widgets/past_trip_card_list.dart';
 
 class PastTripsScreen extends StatefulWidget {

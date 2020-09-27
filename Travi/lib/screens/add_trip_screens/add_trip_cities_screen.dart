@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/countries_provider.dart';
 import '../../providers/cities_provider.dart';
 import '../../providers/city_provider.dart';
 import './add_trip_group_invite_screen.dart';
@@ -23,8 +22,8 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
   bool _cityPicker = true;
   var _numberPlaces = List<Widget>();
   var _numberCountries = 0;
-  var _cityIndex = 0;
   var _countryIndex = 0;
+  // ignore: unused_field
   int _placesIndex = 0;
 
   var tripValues = TripProvider(
@@ -58,8 +57,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
     //provider to save next set of cities
     final newCity = Provider.of<Cities>(context, listen: false).cities;
     tripValues.countries[_countryIndex].cities = newCity;
-    final removed =
-        await Provider.of<Cities>(context, listen: false).removeAllCities();
+    await Provider.of<Cities>(context, listen: false).removeAllCities();
 
     //Change country index to get list of cities for next country
     if (_countryIndex < (tripValues.countries.length - 1)) {
@@ -128,8 +126,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
       });
       return;
     }
-    final removed =
-        await Provider.of<Cities>(context, listen: false).removeAllCities();
+    await Provider.of<Cities>(context, listen: false).removeAllCities();
     Navigator.of(context).pop();
   }
 

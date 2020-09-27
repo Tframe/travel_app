@@ -1,8 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'country_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   String id;
@@ -13,6 +10,9 @@ class UserProvider extends ChangeNotifier {
   String lastName;
   String address;
   String profilePicUrl;
+  String about;
+  List<String> sites;
+  List<String> followers;
 
   UserProvider({
     this.id,
@@ -23,6 +23,9 @@ class UserProvider extends ChangeNotifier {
     this.lastName,
     this.address,
     this.profilePicUrl,
+    this.about,
+    this.sites,
+    this.followers,
   });
 
   List<UserProvider> _users = [];
@@ -38,22 +41,22 @@ class UserProvider extends ChangeNotifier {
   }
 
   //Add user info to Firestore
-  Future<void> addUser(UserProvider userInfo, String userId) async{
+  Future<void> addUser(UserProvider userInfo, String userId) async {
     await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .set({
-            'firstName': userInfo.firstName,
-            'lastName': userInfo.lastName,
-            'email': userInfo.email,
-            'phone': userInfo.phone,
-            'address': userInfo.address,
-            'profilePicUrl': userInfo.profilePicUrl,
-          })
-          .then((value) => print('User added'))
-          .catchError((error) => print('Failed to add user: $error'));
+        .collection('users')
+        .doc(userId)
+        .set({
+          'id': userId,
+          'firstName': userInfo.firstName,
+          'lastName': userInfo.lastName,
+          'email': userInfo.email,
+          'phone': userInfo.phone,
+          'address': userInfo.address,
+          'profilePicUrl': userInfo.profilePicUrl,
+        })
+        .then((value) => print('User added'))
+        .catchError((error) => print('Failed to add user: $error'));
   }
-
 
   //Get single user info by ID
   Future<UserProvider> findUserById(String userId) async {
@@ -111,4 +114,39 @@ class UserProvider extends ChangeNotifier {
       throw error;
     }
   }
+
+  //Update user name and address
+  Future<void> updateUserNameAddress(
+      UserProvider userValues, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'firstName': userValues.firstName,
+        'lastName': userValues.lastName,
+        'address': userValues.address,
+      }).then((value) => print('User updated'));
+    } catch (error) {
+      throw error;
+    }
+    _users = [];
+    _users.add(userValues);
+    notifyListeners();
+  }
+
+
+  //Update user name and address
+  Future<void> updateUserContact(
+      UserProvider userValues, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'phone': userValues.phone,
+        'email': userValues.email,
+      }).then((value) => print('User updated'));
+    } catch (error) {
+      throw error;
+    }
+    _users = [];
+    _users.add(userValues);
+    notifyListeners();
+  }
+
 }

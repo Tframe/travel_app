@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../providers/trips_provider.dart';
 import '../providers/trip_provider.dart';
-import '../providers/country_provider.dart';
 import '../providers/auth.dart';
 
 const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
@@ -63,11 +62,6 @@ class _EditTripScreenState extends State<EditTripScreen> {
     'transportations': [],
   };
 
-  var _initDestinationValues = {
-    'city': '',
-    'state': '',
-    'country': '',
-  };
 
   var _isLoading = false;
 
@@ -91,11 +85,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
           // ],
           'description': _editedTrip.description,
         };
-        _initDestinationValues = {
-          // 'city': _editedTrip.destinations[0].city,
-          // 'state': _editedTrip.destinations[0].state,
-          // 'country': _editedTrip.destinations[0].country,
-        };
+        
       }
     }
 

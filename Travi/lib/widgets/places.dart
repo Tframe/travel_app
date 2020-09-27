@@ -14,8 +14,8 @@ import '../providers/cities_provider.dart';
 class Places extends StatefulWidget {
   final countryPicker;
   final cityPicker;
-  String currentCountry;
-  String currentCity;
+  final String currentCountry;
+  final String currentCity;
   Places(
     this.countryPicker,
     this.cityPicker,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
 import './signup_phone_screen.dart';
 
 class SignUpLocationScreen extends StatefulWidget {
@@ -12,7 +11,6 @@ class SignUpLocationScreen extends StatefulWidget {
 
 class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  var _isLoading = false;
 
   var userValues = UserProvider(
     id: null,
@@ -108,6 +106,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               if (value.isEmpty) {
                                 return 'Please enter the address!';
                               }
+                              return null;
                             },
                             onSaved: (value) {
                               userValues.address = value;

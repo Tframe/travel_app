@@ -1,20 +1,23 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../providers/user_provider.dart';
-import './signup_location_screen.dart';
+import './widgets/user_image_picker.dart';
 
-class SignUpNameScreen extends StatefulWidget {
-  static const routeName = '/signup-name-screen';
-
+class EditPersonalInfoScreen extends StatefulWidget {
+  static const routeName = '/edit-personal-info-screen';
   @override
-  _SignUpNameScreenState createState() => _SignUpNameScreenState();
+  _EditPersonalInfoScreenState createState() => _EditPersonalInfoScreenState();
 }
 
-class _SignUpNameScreenState extends State<SignUpNameScreen> {
+class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _firstNameFocusNode = FocusNode();
   final _lastNameFocusNode = FocusNode();
-
+  final _addressFocusNode = FocusNode();
+  User user;
   var userValues = UserProvider(
     id: null,
     firstName: '',
@@ -24,35 +27,53 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
     address: '',
   );
 
+  // ignore: unused_field
+  File _userImageFile;
+  UserProvider _loadedUser;
+
+  //sets image picked
+  void _pickedImage(File image) {
+    _userImageFile = image;
+  }
+
   @override
   void dispose() {
     _firstNameFocusNode.dispose();
     _lastNameFocusNode.dispose();
+    _addressFocusNode.dispose();
     super.dispose();
   }
 
-  void _saveName() {
+  void _saveNameAddress() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
-    Navigator.of(context)
-        .pushNamed(SignUpLocationScreen.routeName, arguments: userValues);
+
+    try {
+      await Provider.of<UserProvider>(context, listen: false)
+          .updateUserNameAddress(userValues, user.uid);
+    } catch (error) {
+      print(error);
+      return;
+    }
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
+    //final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    user = arguments['user'];
+    _loadedUser = arguments['loadedUser'];
+    setState(() {
+      userValues = _loadedUser;
+    });
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Name',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
+        title: Text('Edit Personal Information'),
       ),
       body: Stack(
         children: <Widget>[
@@ -66,16 +87,7 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.055,
-                  ),
-                  Text(
-                    'What\'s your name?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
+                  UserImagePicker(_pickedImage, user, _loadedUser),
                   Container(
                     width: screenWidth * 0.85,
                     alignment: Alignment.center,
@@ -87,6 +99,7 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                         children: <Widget>[
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.firstName,
                             decoration: InputDecoration(
                               labelText: 'First Name',
                               enabledBorder: UnderlineInputBorder(
@@ -113,6 +126,7 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                           ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.lastName,
                             decoration: InputDecoration(
                               labelText: 'Last Name',
                               enabledBorder: UnderlineInputBorder(
@@ -121,8 +135,12 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
-                            textInputAction: TextInputAction.done,
+                            textInputAction: TextInputAction.next,
                             focusNode: _lastNameFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_addressFocusNode);
+                            },
                             validator: (value) {
                               if (value.isEmpty) {
                                 return 'Please enter your Last name!';
@@ -133,17 +151,40 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                               userValues.lastName = value;
                             },
                           ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.address,
+                            decoration: InputDecoration(
+                              labelText: 'Address',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            textInputAction: TextInputAction.done,
+                            focusNode: _addressFocusNode,
+                            validator: (value) {
+                              if (value.isEmpty) {
+                                return 'Please enter your Address!';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              userValues.address = value;
+                            },
+                          ),
                           Container(
                             padding: EdgeInsets.only(top: 40),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(
-                                'Next',
+                                'Save',
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _saveName,
+                              onPressed: _saveNameAddress,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'country_provider.dart';
-
 class Lodging extends ChangeNotifier {
   final String id;
   final String name;

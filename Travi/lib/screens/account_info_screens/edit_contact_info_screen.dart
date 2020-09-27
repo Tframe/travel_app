@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:provider/provider.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/user_provider.dart';
-import './signup_location_screen.dart';
 
-class SignUpNameScreen extends StatefulWidget {
-  static const routeName = '/signup-name-screen';
-
+class EditContactInfoScreen extends StatefulWidget {
+  static const routeName = '/edit-contact-info-screen';
   @override
-  _SignUpNameScreenState createState() => _SignUpNameScreenState();
+  _EditContactInfoScreenState createState() => _EditContactInfoScreenState();
 }
 
-class _SignUpNameScreenState extends State<SignUpNameScreen> {
+class _EditContactInfoScreenState extends State<EditContactInfoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  final _firstNameFocusNode = FocusNode();
-  final _lastNameFocusNode = FocusNode();
+  final _phoneFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
 
+  User user;
   var userValues = UserProvider(
     id: null,
     firstName: '',
@@ -26,33 +29,41 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
 
   @override
   void dispose() {
-    _firstNameFocusNode.dispose();
-    _lastNameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _phoneFocusNode.dispose();
     super.dispose();
   }
 
-  void _saveName() {
+  void _saveContact() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
-    Navigator.of(context)
-        .pushNamed(SignUpLocationScreen.routeName, arguments: userValues);
+
+    try {
+      await Provider.of<UserProvider>(context, listen: false)
+          .updateUserContact(userValues, user.uid);
+    } catch (error) {
+      print(error);
+      return;
+    }
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    user = arguments['user'];
+    final _loadedUser = arguments['loadedUser'];
+    setState(() {
+      userValues = _loadedUser;
+    });
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Name',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
+        title: Text('Edit Contact Information'),
       ),
       body: Stack(
         children: <Widget>[
@@ -66,15 +77,8 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.055,
-                  ),
-                  Text(
-                    'What\'s your name?',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
+                  Container(
+                    height: screenHeight * 0.15,
                   ),
                   Container(
                     width: screenWidth * 0.85,
@@ -87,8 +91,9 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                         children: <Widget>[
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.phone,
                             decoration: InputDecoration(
-                              labelText: 'First Name',
+                              labelText: 'Mobile #',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -96,25 +101,30 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                               ),
                             ),
                             textInputAction: TextInputAction.next,
-                            focusNode: _firstNameFocusNode,
+                            focusNode: _phoneFocusNode,
+                            keyboardType: TextInputType.phone,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_lastNameFocusNode);
+                                  .requestFocus(_emailFocusNode);
                             },
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Please enter your first name!';
+                                return 'Please enter a mobile #!';
+                              }
+                              if (value.length != 10) {
+                                return 'Invalid mobile #';
                               }
                               return null;
                             },
                             onSaved: (value) {
-                              userValues.firstName = value;
+                              userValues.phone = value;
                             },
                           ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.email,
                             decoration: InputDecoration(
-                              labelText: 'Last Name',
+                              labelText: 'Email',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -122,15 +132,19 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                               ),
                             ),
                             textInputAction: TextInputAction.done,
-                            focusNode: _lastNameFocusNode,
+                            keyboardType: TextInputType.emailAddress,
+                            focusNode: _emailFocusNode,
                             validator: (value) {
                               if (value.isEmpty) {
                                 return 'Please enter your Last name!';
                               }
+                              if (!value.contains('@')) {
+                                return 'Invalid email';
+                              }
                               return null;
                             },
                             onSaved: (value) {
-                              userValues.lastName = value;
+                              userValues.email = value;
                             },
                           ),
                           Container(
@@ -138,12 +152,12 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(
-                                'Next',
+                                'Save',
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _saveName,
+                              onPressed: _saveContact,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

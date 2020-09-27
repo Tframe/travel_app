@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
 import 'signup_screens/signup_intro_screen.dart';

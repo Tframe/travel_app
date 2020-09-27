@@ -7,6 +7,9 @@ import '../../providers/user_provider.dart';
 
 import './widgets/user_image_picker.dart';
 import './widgets/personal_info.dart';
+import './widgets/about_section.dart';
+import './widgets/contact_info.dart';
+import './edit_personal_info_screen.dart';
 
 class AccountProfileScreen extends StatefulWidget {
   static const routeName = '/account-profile-screen';
@@ -15,12 +18,17 @@ class AccountProfileScreen extends StatefulWidget {
 }
 
 class _AccountProfileScreenState extends State<AccountProfileScreen> {
+  // ignore: unused_field
   File _userImageFile;
   User user;
   UserProvider _loadedUser;
+
   //sets image picked
   void _pickedImage(File image) {
-    _userImageFile = image;
+    setState(() {
+      _userImageFile = image;
+      _setUser(user);
+    });
   }
 
   //Sets the current user based on UserId
@@ -40,6 +48,17 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
     user = FirebaseAuth.instance.currentUser;
     _setUser(user);
     super.initState();
+  }
+
+  void _editPersonalInfo() {
+    Navigator.of(context).pushNamed(
+      EditPersonalInfoScreen.routeName,
+      arguments: {'loadedUser': _loadedUser, 'user': user},
+    ).then((value) {
+      setState(() {
+        //To rebuild with new user information...
+      });
+    });
   }
 
   @override
@@ -64,8 +83,8 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
           if (snapshot.hasData) {
             return SingleChildScrollView(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Stack(
                     alignment: Alignment.topCenter,
@@ -75,10 +94,36 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                         width: double.infinity,
                         color: Colors.grey[400],
                       ),
-                      UserImagePicker(_pickedImage, user, _loadedUser),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: screenWidth * (0.5 - 0.17),
+                                bottom: screenHeight * 0.0125),
+                            child: UserImagePicker(
+                                _pickedImage, user, _loadedUser),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: screenHeight * 0.18),
+                            child: IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: _editPersonalInfo,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  PersonalInfo(_loadedUser),
+                  PersonalInfo(_loadedUser, user),
+                  Divider(
+                    thickness: 8,
+                  ),
+                  AboutSection(_loadedUser),
+                  Divider(
+                    thickness: 8,
+                  ),
+                  ContactInfo(_loadedUser, user),
                   Divider(
                     thickness: 8,
                   ),

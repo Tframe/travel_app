@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/trip_provider.dart';
-import '../../providers/country_provider.dart';
 import 'add_trip_countries_screen.dart';
 
 class AddTripTitleScreen extends StatefulWidget {
@@ -147,6 +146,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                           if (value.isEmpty) {
                             return 'Please enter a title!';
                           }
+                          return null;
                         },
                         onSaved: (value) {
                           tripValues.title = value;
@@ -183,6 +183,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                           if (value.isEmpty) {
                             return 'Please enter a description!';
                           }
+                          return null;
                         },
                         onSaved: (value) {
                           tripValues.description = value;

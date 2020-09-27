@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/trip_provider.dart';
-import '../providers/country_provider.dart';
 import '../screens/trip_details_screens/trip_detail_screen.dart';
-import './places_images.dart';
 
 class CurrentTripItem extends StatelessWidget {
   @override
@@ -59,7 +57,7 @@ class CurrentTripItem extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     Container(
-                      height: screenHeight * 0.25,
+                      height: screenHeight * 0.22,
                       width: double.infinity,
                       alignment: Alignment.center,
                       child: foundTrip.image == null
@@ -68,22 +66,20 @@ class CurrentTripItem extends StatelessWidget {
                                 topLeft: Radius.circular(8.0),
                                 topRight: Radius.circular(8.0),
                               ),
-                              child: Hero(
-                                tag: foundTrip.id,
-                                child:
-                                    Container(
-                                      child: IconButton(
-                                        icon: Icon(Icons.photo_camera),
-                                        //TODO
-                                        onPressed: () {},
-                                      ),
-                                      color: Colors.grey,
-                                      height: double.infinity,
-                                      width: double.infinity,
+                             
+                                child: 
+                                Container(
+                                    color: Colors.grey,
+                                    child: IconButton(
+                                      icon: Icon(Icons.photo_camera),
+                                      //TODO
+                                      onPressed: () {},
                                     ),
-                                    //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-                                    //PlacesImages(foundTrip.countries[0].id),
-                              ),
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                ),
+                                //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                                //PlacesImages(foundTrip.countries[0].id),
                             )
                           : (foundTrip.countries[0].id != ''
                               ? ClipRRect(

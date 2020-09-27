@@ -9,8 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserImagePicker extends StatefulWidget {
   final void Function(File pickedImage) imagePickFn;
-  User user;
-  UserProvider _loadeduser;
+  final User user;
+  final UserProvider _loadeduser;
 
   UserImagePicker(this.imagePickFn, this.user, this._loadeduser);
 
@@ -61,10 +61,12 @@ class _UserImagePickerState extends State<UserImagePicker> {
           child: CircleAvatar(
             radius: screenWidth * 0.16,
             backgroundColor: Colors.grey,
-            backgroundImage: widget._loadeduser.profilePicUrl != null
-                ? NetworkImage(widget._loadeduser.profilePicUrl)
-                //Make a No Image ImageProvider
-                : (_pickedImage != null ? FileImage(_pickedImage) : null),
+            backgroundImage: (_pickedImage != null
+                ? FileImage(_pickedImage)
+                : widget._loadeduser.profilePicUrl != null
+                    ? NetworkImage(widget._loadeduser.profilePicUrl)
+                    //Make a No Image ImageProvider
+                    : null),
           ),
         ),
       ),

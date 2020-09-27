@@ -7,8 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/country_provider.dart';
-import '../../widgets/places_images.dart';
 import '../../screens/edit_trip_screen.dart';
 
 //Destination Popup Menu Options
@@ -17,7 +15,6 @@ enum FilterDestinationOptions {
   CountriesOnly,
   CitiesOnly,
   CountriesCities,
-  MarkComplete,
 }
 
 //Group Popup Menu Options
@@ -61,7 +58,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   bool _citiesOnly = true;
 
   //Bool Values for Marking complete
-  bool _destinationsComplete = false;
   bool _transportationsComplete = false;
   bool _lodgingsComplete = false;
   bool _activitiesComplete = false;
@@ -155,7 +151,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       )
                     : CircleAvatar(
                         radius: 30,
-                        child: Image.network(
+                        backgroundImage: NetworkImage(
                           group[index].profilePicUrl,
                         ),
                       ),
@@ -251,6 +247,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ),
                 color: Colors.grey,
               ),
+              //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+              //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
             ),
           ),
           if (cardType == 'Country')
@@ -344,11 +342,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             _countriesOnly = false;
             _citiesOnly = true;
           });
-        } else if (_filterSelected == FilterDestinationOptions.MarkComplete) {
-          setState(() {
-            _destinationsComplete = !_destinationsComplete;
-            //TODO UPDATE DESTINATION COMPLETE IN FIRESTORE
-          });
         }
       },
       icon: Icon(
@@ -367,12 +360,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         PopupMenuItem(
           child: Text('Show Cities Only'),
           value: FilterDestinationOptions.CitiesOnly,
-        ),
-        PopupMenuItem(
-          child: _destinationsComplete
-              ? Text('Mark Incomplete')
-              : Text('Mark Complete'),
-          value: FilterDestinationOptions.MarkComplete,
         ),
       ],
     );
@@ -555,22 +542,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         topLeft: Radius.circular(8.0),
                         topRight: Radius.circular(8.0),
                       ),
-                      child: Hero(
-                        tag: loadedTrip.id,
-                        child: 
-                        Container(
-                          child: IconButton(
-                            icon: Icon(Icons.photo_camera),
-                            //TODO
-                            onPressed: () {},
-                          ),
-                          color: Colors.grey,
-                          height: double.infinity,
-                          width: double.infinity,
+                      child: Container(
+                        child: IconButton(
+                          icon: Icon(Icons.photo_camera),
+                          //TODO
+                          onPressed: () {},
                         ),
-                        //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-                        //PlacesImages(loadedTrip.countries[0].id),
+                        color: Colors.grey,
+                        height: double.infinity,
+                        width: double.infinity,
                       ),
+                      //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                      //PlacesImages(loadedTrip.countries[0].id),
                     )
                   : Stack(
                       alignment: Alignment.bottomRight,
