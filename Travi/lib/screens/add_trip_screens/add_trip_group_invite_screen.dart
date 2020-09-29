@@ -26,7 +26,8 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
   var _companionsIndex = 0;
 
   List<String> tempGroup = [];
-
+  //Map<int, String> grouptracker = {};
+  List<String> grouptracker = [];
   List<bool> _searchUserEmail = [];
 
   var tripValues = TripProvider(
@@ -58,7 +59,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         lastName: null,
         email: null,
         phone: null,
-        address: null,
+        location: null,
       ),
     ],
     isPrivate: true,
@@ -104,6 +105,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
               ],
             ),
           );
+          return;
         }
         for (int k = 0; k < tempCompanion.length; k++) {
           if (j != k) {
@@ -170,6 +172,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
 
   //adds a field for the country
   void _addGroupField() {
+    grouptracker.add('');
     int index = _companionsIndex;
     setState(() {
       _searchUserEmail.add(true);
@@ -349,6 +352,9 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                     ),
                                   ),
                                 ),
+                                initialValue: grouptracker[index] != ''
+                                    ? grouptracker[index]
+                                    : '',
                                 validator: (value) {
                                   if (value.isEmpty) {
                                     return 'Enter an email or mobile #';
@@ -368,6 +374,9 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                     : TextInputType.phone,
                                 onSaved: (value) {
                                   tempGroup.add(value);
+                                },
+                                onChanged: (value) {
+                                  grouptracker[index] = value;
                                 },
                               ),
                               trailing: Row(
@@ -406,6 +415,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                             ),
                             onDismissed: (direction) {
                               setState(() {
+                                grouptracker.removeAt(index);
                                 _numberCompanions = List.from(_numberCompanions)
                                   ..removeAt(index);
                                 _companionsIndex--;

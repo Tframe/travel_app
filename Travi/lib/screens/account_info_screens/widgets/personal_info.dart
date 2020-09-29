@@ -36,7 +36,7 @@ class PersonalInfo extends StatelessWidget {
 
         _paddingText('${_loadedUser.firstName} ${_loadedUser.lastName}',
             screenHeight, screenWidth, 20),
-        _paddingText('${_loadedUser.address}', screenHeight, screenWidth, 15),
+        _paddingText('${_loadedUser.location}', screenHeight, screenWidth, 15),
         _loadedUser.sites != null
             ? _paddingText('www.webite.com', screenHeight, screenWidth, 15)
             : new Container(),

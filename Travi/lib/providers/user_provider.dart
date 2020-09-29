@@ -8,7 +8,7 @@ class UserProvider extends ChangeNotifier {
   String password;
   String firstName;
   String lastName;
-  String address;
+  String location;
   String profilePicUrl;
   String about;
   List<String> sites;
@@ -21,7 +21,7 @@ class UserProvider extends ChangeNotifier {
     this.password,
     this.firstName,
     this.lastName,
-    this.address,
+    this.location,
     this.profilePicUrl,
     this.about,
     this.sites,
@@ -51,8 +51,10 @@ class UserProvider extends ChangeNotifier {
           'lastName': userInfo.lastName,
           'email': userInfo.email,
           'phone': userInfo.phone,
-          'address': userInfo.address,
-          'profilePicUrl': userInfo.profilePicUrl,
+
+          //CHANGE TO LOCATION INSTEAD OF location
+          'location': userInfo.location,
+          'profilePicUrl': '',
         })
         .then((value) => print('User added'))
         .catchError((error) => print('Failed to add user: $error'));
@@ -60,7 +62,6 @@ class UserProvider extends ChangeNotifier {
 
   //Get single user info by ID
   Future<UserProvider> findUserById(String userId) async {
-    print(userId);
     UserProvider loadedUser;
     try {
       await FirebaseFirestore.instance
@@ -69,13 +70,15 @@ class UserProvider extends ChangeNotifier {
           .get()
           .then((doc) => {
                 loadedUser = UserProvider(
-                    id: doc.reference.id,
-                    firstName: doc.data()['firstName'],
-                    lastName: doc.data()['lastName'],
-                    address: doc.data()['address'],
-                    email: doc.data()['email'],
-                    phone: doc.data()['phone'],
-                    profilePicUrl: doc.data()['profilePicUrl'])
+                  id: doc.reference.id,
+                  firstName: doc.data()['firstName'],
+                  lastName: doc.data()['lastName'],
+                  location: doc.data()['location'],
+                  email: doc.data()['email'],
+                  phone: doc.data()['phone'],
+                  profilePicUrl: doc.data()['profilePicUrl'],
+                  about: doc.data()['about'],
+                )
               });
     } catch (error) {
       throw error;
@@ -98,7 +101,7 @@ class UserProvider extends ChangeNotifier {
                     id: doc.reference.id,
                     firstName: doc.data()['firstName'],
                     lastName: doc.data()['lastName'],
-                    address: doc.data()['address'],
+                    location: doc.data()['location'],
                     email: doc.data()['email'],
                     phone: doc.data()['phone'],
                     profilePicUrl: doc.data()['profilePicUrl'],
@@ -115,14 +118,14 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  //Update user name and address
-  Future<void> updateUserNameAddress(
+  //Update user name and location
+  Future<void> updateUserNameLocation(
       UserProvider userValues, String userId) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'firstName': userValues.firstName,
         'lastName': userValues.lastName,
-        'address': userValues.address,
+        'location': userValues.location,
       }).then((value) => print('User updated'));
     } catch (error) {
       throw error;
@@ -132,10 +135,8 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-  //Update user name and address
-  Future<void> updateUserContact(
-      UserProvider userValues, String userId) async {
+  //Update user name and location
+  Future<void> updateUserContact(UserProvider userValues, String userId) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'phone': userValues.phone,
@@ -149,4 +150,17 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //Update user name and location
+  Future<void> updateAbout(UserProvider userValues, String userId) async {
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'about': userValues.about,
+      }).then((value) => print('User updated'));
+    } catch (error) {
+      throw error;
+    }
+    _users = [];
+    _users.add(userValues);
+    notifyListeners();
+  }
 }

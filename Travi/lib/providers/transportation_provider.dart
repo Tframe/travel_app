@@ -5,7 +5,7 @@ enum TransportationType {
   Train,
   Boat,
   CarRental,
-  CarPickup,
+  CarPickup,  //Like Uber or Lyft
 }
 
 class Transportation extends ChangeNotifier{

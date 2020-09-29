@@ -29,7 +29,7 @@ class _SignUpPasswordScreen extends State<SignUpPasswordScreen> {
     email: '',
     phone: '',
     password: '',
-    address: '',
+    location: '',
   );
 
   void _submitUserData(BuildContext ctx) async {

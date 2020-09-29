@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 
-import '../../providers/user_provider.dart';
-import './signup_password_screen.dart';
+import 'package:flutter/services.dart';
 
-class SignUpEmailScreen extends StatefulWidget {
-  static const routeName = '/signup-email-screen';
+import 'package:provider/provider.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../providers/user_provider.dart';
+
+class EditAboutScreen extends StatefulWidget {
+  static const routeName = '/edit-about-screen';
   @override
-  _SignUpEmailScreenState createState() => _SignUpEmailScreenState();
+  _EditAboutScreenState createState() => _EditAboutScreenState();
 }
 
-class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
+class _EditAboutScreenState extends State<EditAboutScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+  final _aboutFocusNode = FocusNode();
+
+  User user;
   var userValues = UserProvider(
     id: null,
     firstName: '',
@@ -18,31 +25,45 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
     email: '',
     phone: '',
     location: '',
+    about: '',
   );
 
-  void _saveEmail() {
+  @override
+  void dispose() {
+    _aboutFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _saveContact() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
     }
     _formKey.currentState.save();
-    Navigator.of(context)
-        .pushNamed(SignUpPasswordScreen.routeName, arguments: userValues);
+
+    try {
+      await Provider.of<UserProvider>(context, listen: false)
+          .updateAbout(userValues, user.uid);
+    } catch (error) {
+      print(error);
+      return;
+    }
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    userValues = ModalRoute.of(context).settings.arguments;
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    user = arguments['user'];
+    final _loadedUser = arguments['loadedUser'];
+    setState(() {
+      userValues = _loadedUser;
+    });
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Email Address',
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
+        title: Text('Edit About'),
       ),
       body: Stack(
         children: <Widget>[
@@ -56,21 +77,8 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SizedBox(
-                    height: screenHeight * 0.055,
-                  ),
-                  Text(
-                    'Add your email address',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.025,
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.025,
+                  Container(
+                    height: screenHeight * 0.15,
                   ),
                   Container(
                     width: screenWidth * 0.85,
@@ -83,23 +91,29 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                         children: <Widget>[
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
+                            initialValue: userValues.about,
                             decoration: InputDecoration(
-                              labelText: 'E-Mail',
+                              labelText: 'About',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
-                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.done,
+                            focusNode: _aboutFocusNode,
+                            maxLines: 5,
                             validator: (value) {
-                              if (value.isEmpty || !value.contains('@')) {
-                                return 'Please enter a valid email';
+                              if (value.isEmpty) {
+                                return 'Please enter some information about yourself.';
+                              }
+                              if (value.length > 200) {
+                                return 'Enter less than 200 characters';
                               }
                               return null;
                             },
                             onSaved: (value) {
-                              userValues.email = value.trim();
+                              userValues.about = value;
                             },
                           ),
                           Container(
@@ -107,12 +121,12 @@ class _SignUpEmailScreenState extends State<SignUpEmailScreen> {
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(
-                                'Next',
+                                'Save',
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _saveEmail,
+                              onPressed: _saveContact,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

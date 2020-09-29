@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupy/screens/trip_details_screens/edit_lodgings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
@@ -7,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../screens/edit_trip_screen.dart';
+import './edit_trip_screen.dart';
 
 //Destination Popup Menu Options
 enum FilterDestinationOptions {
@@ -62,12 +63,17 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   bool _lodgingsComplete = false;
   bool _activitiesComplete = false;
 
+  User user = FirebaseAuth.instance.currentUser;
+
   //get the trip details as arguments from trip list screen
   @override
   void didChangeDependencies() {
     if (!_loadedTrip) {
       tripId = ModalRoute.of(context).settings.arguments;
       _loadedTrip = true;
+      loadedTrip = Provider.of<TripsProvider>(
+        context,
+      ).findById(tripId);
     }
     super.didChangeDependencies();
   }
@@ -275,8 +281,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Container with horizontal scrollable cards
-  Widget cardScroller(String cardTitle, double screenHeight, double screenWidth,
-      double avatarMultiplier, Widget widget, BuildContext ctx) {
+  Widget cardScroller(
+      String cardTitle,
+      double screenHeight,
+      double screenWidth,
+      double avatarMultiplier,
+      Widget widget,
+      BuildContext ctx,
+      TripProvider loadedTrip) {
     return Container(
       width: double.infinity,
       child: Column(
@@ -300,13 +312,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 child: cardTitle == 'Destinations'
                     ? _destinationMenuButton(cardTitle)
                     : (cardTitle == 'Group'
-                        ? _groupMenuButton()
+                        ? _groupMenuButton(loadedTrip)
                         : (cardTitle == 'Lodging'
-                            ? _lodgingMenuButton()
+                            ? _lodgingMenuButton(loadedTrip)
                             : (cardTitle == 'Transportation'
-                                ? _transportationMenuButton()
+                                ? _transportationMenuButton(loadedTrip)
                                 : (cardTitle == 'Activities'
-                                    ? _activitiesMenuButton()
+                                    ? _activitiesMenuButton(loadedTrip)
                                     : null)))),
               ),
             ],
@@ -366,7 +378,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _groupMenuButton() {
+  Widget _groupMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterGroupOptions selectedOption) {
         if (selectedOption == FilterGroupOptions.EditGroup) {
@@ -386,11 +398,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _lodgingMenuButton() {
+  Widget _lodgingMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterLodgingOptions _selectedOption) {
         if (_selectedOption == FilterLodgingOptions.EditLodging) {
           //Navigator to add or remove lodgings
+          Navigator.of(context).pushNamed(
+            EditLodgingsScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
         } else if (_selectedOption == FilterLodgingOptions.MarkComplete) {
           setState(() {
             _lodgingsComplete = !_lodgingsComplete;
@@ -417,7 +433,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _transportationMenuButton() {
+  Widget _transportationMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterTransportationOptions _selectedOption) {
         if (_selectedOption == FilterTransportationOptions.EditTransporation) {
@@ -449,7 +465,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _activitiesMenuButton() {
+  Widget _activitiesMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterActivityOptions selectedOption) {
         if (selectedOption == FilterActivityOptions.EditActivity) {
@@ -481,7 +497,6 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
 
   //Method to update completedItem on Firestore
   Future<void> updateTask(String taskCompleted, bool mark) async {
-    User user = FirebaseAuth.instance.currentUser;
     try {
       await Provider.of<TripsProvider>(context, listen: false)
           .updateTripCompleted(tripId, taskCompleted, mark, user);
@@ -515,15 +530,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         iconTheme: new IconThemeData(
           color: Theme.of(context).secondaryHeaderColor,
         ),
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: Theme.of(context).secondaryHeaderColor,
-              ),
-              //TODO...... CREATE EDIT FUNCTION
-              onPressed: () {})
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //       icon: Icon(
+        //         Icons.edit,
+        //         color: Theme.of(context).secondaryHeaderColor,
+        //       ),
+        //       //TODO...... CREATE EDIT FUNCTION
+        //       onPressed: () {})
+        // ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -626,8 +641,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               width: screenWidth * 0.9,
               child: FlatButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(EditTripScreen.routeName,
-                      arguments: loadedTrip.id);
+                  Navigator.of(context).pushNamed(
+                    EditTripScreen.routeName,
+                    arguments: {'trip': loadedTrip, 'user': user},
+                  );
                 },
                 child: Text(
                   'Edit Trip',
@@ -657,6 +674,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               .65,
               groupAvatar(loadedTrip.group),
               context,
+              loadedTrip,
             ),
             Divider(
               thickness: 10,
@@ -723,6 +741,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               1,
               cardWidget(screenHeight, screenWidth, 'Destinations', loadedTrip),
               context,
+              loadedTrip,
             ),
             Divider(
               thickness: 10,
@@ -734,6 +753,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               1,
               cardWidget(screenHeight, screenWidth, 'Lodging', loadedTrip),
               context,
+              loadedTrip,
             ),
             Divider(
               thickness: 10,
@@ -746,6 +766,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               cardWidget(
                   screenHeight, screenWidth, 'Transportation', loadedTrip),
               context,
+              loadedTrip,
             ),
             Divider(
               thickness: 10,
@@ -757,6 +778,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               1,
               cardWidget(screenHeight, screenWidth, 'Activities', loadedTrip),
               context,
+              loadedTrip,
             ),
             Padding(
               padding: EdgeInsets.only(bottom: 12),

@@ -38,10 +38,9 @@ class TripsProvider extends ChangeNotifier {
         'creator': userId,
         'startDate': tripValues.startDate,
         'endDate': tripValues.endDate,
-        'destinationsComplete': tripValues.destinationsComplete,
-        'transportationsComplete': tripValues.transportationsComplete,
-        'lodgingsComplete': tripValues.lodgingsComplete,
-        'activitiesComplete': tripValues.activitiesComplete,
+        'transportationsComplete': false,
+        'lodgingsComplete': false,
+        'activitiesComplete': false,
         'countries': tripValues.countries != null
             ? tripValues.countries
                 .map((countries) => {
@@ -279,9 +278,13 @@ class TripsProvider extends ChangeNotifier {
                           id: null,
                           name: lodgingsData['name'],
                           address: lodgingsData['address'],
+                          country: lodgingsData['country'],
+                          city: lodgingsData['city'],
                           reservationID: lodgingsData['reservationID'],
-                          checkInDateTime: lodgingsData['checkInDateTime'],
-                          checkOutDateTime: lodgingsData['checkOutDateTime'],
+                          checkInDate: lodgingsData['checkInDate'],
+                          checkInTime: lodgingsData['checkInTime'],
+                          checkOutDate: lodgingsData['checkOutDate'],
+                          checkOutTime: lodgingsData['checkOutTime'],
                         ));
                       })
                     : [],
@@ -338,14 +341,43 @@ class TripsProvider extends ChangeNotifier {
   }
 
   //Update user specified trip in Firebase Firestore
-  Future<void> updateTripCompleted(
-      String tripId, String taskCompleted, bool mark, User userId) async {
-    final tripIndex = _trips.indexWhere((trip) => trip.id == tripId);
+  Future<void> updateTrip(TripProvider updatedTrip, User userId) async {
+    final tripIndex = _trips.indexWhere((trip) => trip.id == updatedTrip.id);
     if (tripIndex >= 0) {
       try {
         await FirebaseFirestore.instance
             .collection('users')
             .doc('${userId.uid}')
+            .collection('trips')
+            .doc('${updatedTrip.id}')
+            .update({
+              'title': updatedTrip.title,
+              'description': updatedTrip.description,
+              'startDate': updatedTrip.startDate,
+              'endDate': updatedTrip.endDate,
+            }).then(
+          (value) {
+            print('Trip updated');
+          },
+        );
+      } catch (error) {
+        throw error;
+      }
+    }
+    
+    notifyListeners();
+  }
+
+
+  //Update user specified trip in Firebase Firestore
+  Future<void> updateTripCompleted(
+      String tripId, String taskCompleted, bool mark, User user) async {
+    final tripIndex = _trips.indexWhere((trip) => trip.id == tripId);
+    if (tripIndex >= 0) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc('${user.uid}')
             .collection('trips')
             .doc('$tripId')
             .update({'$taskCompleted': mark}).then(
@@ -366,4 +398,29 @@ class TripsProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+
+  //Add lodging to a trip
+  Future<void> addLodgingToTrip(String tripId, String taskCompleted, bool mark, User user) async {
+    final tripIndex = _trips.indexWhere((trip) => trip.id == tripId);
+    if (tripIndex >= 0) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc('${user.uid}')
+            .collection('trips')
+            .doc('$tripId')
+            .update({'$taskCompleted': mark}).then(
+          (value) {
+            print('Trip updated');
+          },
+        );
+      } catch (error) {
+        throw error;
+      }
+    }
+    notifyListeners();
+  }
+
+
 }

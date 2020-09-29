@@ -18,7 +18,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
+    location: '',
   );
 
   void _saveLocation() {
@@ -95,7 +95,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'Address',
+                              labelText: 'Location',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -104,12 +104,12 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                             ),
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Please enter the address!';
+                                return 'Please enter a location!';
                               }
                               return null;
                             },
                             onSaved: (value) {
-                              userValues.address = value;
+                              userValues.location = value;
                             },
                           ),
                           Container(

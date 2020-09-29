@@ -119,7 +119,7 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                   Divider(
                     thickness: 8,
                   ),
-                  AboutSection(_loadedUser),
+                  AboutSection(_loadedUser, user),
                   Divider(
                     thickness: 8,
                   ),

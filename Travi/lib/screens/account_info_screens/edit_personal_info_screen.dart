@@ -16,7 +16,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _firstNameFocusNode = FocusNode();
   final _lastNameFocusNode = FocusNode();
-  final _addressFocusNode = FocusNode();
+  final _locationFocusNode = FocusNode();
   User user;
   var userValues = UserProvider(
     id: null,
@@ -24,7 +24,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
+    location: '',
   );
 
   // ignore: unused_field
@@ -40,7 +40,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
   void dispose() {
     _firstNameFocusNode.dispose();
     _lastNameFocusNode.dispose();
-    _addressFocusNode.dispose();
+    _locationFocusNode.dispose();
     super.dispose();
   }
 
@@ -53,7 +53,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
 
     try {
       await Provider.of<UserProvider>(context, listen: false)
-          .updateUserNameAddress(userValues, user.uid);
+          .updateUserNameLocation(userValues, user.uid);
     } catch (error) {
       print(error);
       return;
@@ -139,7 +139,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                             focusNode: _lastNameFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
+                                  .requestFocus(_locationFocusNode);
                             },
                             validator: (value) {
                               if (value.isEmpty) {
@@ -153,9 +153,9 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                           ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
-                            initialValue: userValues.address,
+                            initialValue: userValues.location,
                             decoration: InputDecoration(
-                              labelText: 'Address',
+                              labelText: 'Location',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -163,15 +163,15 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                               ),
                             ),
                             textInputAction: TextInputAction.done,
-                            focusNode: _addressFocusNode,
+                            focusNode: _locationFocusNode,
                             validator: (value) {
                               if (value.isEmpty) {
-                                return 'Please enter your Address!';
+                                return 'Please enter your location!';
                               }
                               return null;
                             },
                             onSaved: (value) {
-                              userValues.address = value;
+                              userValues.location = value;
                             },
                           ),
                           Container(

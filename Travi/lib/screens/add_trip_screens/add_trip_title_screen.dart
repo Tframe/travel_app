@@ -206,10 +206,13 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(
-                              'Start Date:',
-                              style: TextStyle(
-                                color: Colors.grey[600],
+                            Container(
+                              width: screenWidth * 0.25,
+                              child: Text(
+                                'Start Date:',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ),
                             Container(
@@ -221,8 +224,8 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.only(right: 20),
-                              width: 100,
+                              padding: EdgeInsets.only(right: 30),
+                              width: screenWidth * 0.40,
                               child: tripValues.startDate == null
                                   ? Text('')
                                   : Text(
@@ -241,10 +244,13 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            Text(
-                              'End Date:',
-                              style: TextStyle(
-                                color: Colors.grey[600],
+                            Container(
+                              width: screenWidth * 0.25,
+                              child: Text(
+                                'End Date:',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ),
                             Container(
@@ -257,8 +263,8 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.only(right: 20),
-                              width: 100,
+                              padding: EdgeInsets.only(right: 30),
+                              width: screenWidth * 0.40,
                               child: tripValues.endDate == null
                                   ? Text('')
                                   : Text(

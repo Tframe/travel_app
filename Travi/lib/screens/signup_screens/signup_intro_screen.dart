@@ -44,7 +44,7 @@ class SignUpIntroScreen extends StatelessWidget {
                     height: screenHeight * 0.035,
                   ),
                   Text(
-                    'Join GROUPY',
+                    'Join Travi',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

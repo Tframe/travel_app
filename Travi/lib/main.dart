@@ -10,7 +10,7 @@ import './screens/discover_screen.dart';
 import './screens/current_trips_screen.dart';
 import './screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
-import './screens/edit_trip_screen.dart';
+import './screens/trip_details_screens/edit_trip_screen.dart';
 import './screens/login_signup_screen.dart';
 import './screens/trip_details_screens/trip_detail_screen.dart';
 import './screens/login_screen.dart';
@@ -30,6 +30,9 @@ import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
 import './screens/account_info_screens/account_profile_screen.dart';
 import './screens/account_info_screens/edit_personal_info_screen.dart';
 import './screens/account_info_screens/edit_contact_info_screen.dart';
+import './screens/account_info_screens/edit_about_screen.dart';
+import './screens/trip_details_screens/edit_lodgings_screen.dart';
+import './screens/trip_details_screens/add_lodging_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
@@ -170,6 +173,9 @@ class MyApp extends StatelessWidget {
           AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
           EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
           EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
+          EditAboutScreen.routeName: (ctx) => EditAboutScreen(),
+          EditLodgingsScreen.routeName: (ctx) => EditLodgingsScreen(),
+          AddLodgingScreen.routeName: (ctx) => AddLodgingScreen(),
         },
       ),
     );
