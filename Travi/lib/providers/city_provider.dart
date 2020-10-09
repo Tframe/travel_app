@@ -10,6 +10,8 @@ class City extends ChangeNotifier {
   double longitude;
   List<Address> places;
   List<Uint8List> googleImages;
+  String cityImageUrl;
+
   City({
     @required this.id,
     @required this.city,
@@ -17,5 +19,6 @@ class City extends ChangeNotifier {
     @required this.longitude,
     this.places,
     this.googleImages,
+    this.cityImageUrl,
   });
 }

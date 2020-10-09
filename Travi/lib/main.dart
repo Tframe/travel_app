@@ -32,7 +32,18 @@ import './screens/account_info_screens/edit_personal_info_screen.dart';
 import './screens/account_info_screens/edit_contact_info_screen.dart';
 import './screens/account_info_screens/edit_about_screen.dart';
 import './screens/trip_details_screens/edit_lodgings_screen.dart';
-import './screens/trip_details_screens/add_lodging_screen.dart';
+import './screens/trip_details_screens/add_or_edit_lodging_screen.dart';
+import './screens/trip_details_screens/edit_transportations_screen.dart';
+import './screens/trip_details_screens/edit_activities_screen.dart';
+import './screens/trip_details_screens/edit_group_screen.dart';
+import './screens/trip_details_screens/add_companion_screen.dart';
+import './screens/trip_details_screens/add_or_edit_transportation_screen.dart';
+import './screens/trip_details_screens/edit_flights_screen.dart';
+import './screens/trip_details_screens/add_or_edit_flight_screen.dart';
+import './screens/trip_details_screens/add_or_edit_activity_screen.dart';
+import './screens/trip_details_screens/edit_restaurants_screen.dart';
+import './screens/trip_details_screens/add_or_edit_restaurant_screen.dart';
+import './screens/timeline_screens/timeline_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
@@ -174,8 +185,22 @@ class MyApp extends StatelessWidget {
           EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
           EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
           EditAboutScreen.routeName: (ctx) => EditAboutScreen(),
+          EditGroupScreen.routeName: (ctx) => EditGroupScreen(),
+          AddCompanionScreen.routeName: (ctx) => AddCompanionScreen(),
           EditLodgingsScreen.routeName: (ctx) => EditLodgingsScreen(),
-          AddLodgingScreen.routeName: (ctx) => AddLodgingScreen(),
+          AddOrEditLodgingScreen.routeName: (ctx) => AddOrEditLodgingScreen(),
+          EditTransportationsScreen.routeName: (ctx) =>
+              EditTransportationsScreen(),
+          AddOrEditTransportationScreen.routeName: (ctx) =>
+              AddOrEditTransportationScreen(),
+          EditFlightsScreen.routeName: (ctx) => EditFlightsScreen(),
+          AddOrEditFlightScreen.routeName: (ctx) => AddOrEditFlightScreen(),
+          EditActivitiesScreen.routeName: (ctx) => EditActivitiesScreen(),
+          AddOrEditActivityScreen.routeName: (ctx) => AddOrEditActivityScreen(),
+          EditRestaurantsScreen.routeName: (ctx) => EditRestaurantsScreen(),
+          AddOrEditRestaurantScreen.routeName: (ctx) =>
+              AddOrEditRestaurantScreen(),
+          TimelineScreen.routeName: (ctx) => TimelineScreen(),
         },
       ),
     );

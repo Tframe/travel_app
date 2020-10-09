@@ -1,37 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import './add_or_edit_lodging_screen.dart';
+import './add_or_edit_activity_screen.dart';
 
-class EditLodgingsScreen extends StatefulWidget {
-  static const routeName = '/edit-lodgings-screen';
+class EditActivitiesScreen extends StatefulWidget {
+  static const routeName = '/edit-activities-screen';
   @override
-  _EditLodgingsScreenState createState() => _EditLodgingsScreenState();
+  _EditActivitiesScreenState createState() => _EditActivitiesScreenState();
 }
 
-class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
+class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
   TripProvider loadedTrip;
 
-  //Add new loading
-  //if editIndex == -1, then adding lodging,
-  //if editIndex > -1, then editing lodging.
-  void _addOrEditLodging(int editIndex) async {
+  void addOrEditActivity(int editIndex) async {
     Navigator.of(context).pushNamed(
-      AddOrEditLodgingScreen.routeName,
+      AddOrEditActivityScreen.routeName,
       arguments: {
         'loadedTrip': loadedTrip,
         'editIndex': editIndex,
       },
     ).then((value) {
       setState(() {
-        print('popped and updated');
+        print('updated and popped');
       });
     });
   }
+
+  //Removes swiped activity
+  void removeActivity(int index) async {}
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +41,15 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
     loadedTrip = arguments['loadedTrip'];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Lodgings'),
+        title: Text('Edit Activities'),
       ),
-      body: loadedTrip.lodgings == null || loadedTrip.lodgings.length == 0
+      body: loadedTrip.activities == null || loadedTrip.activities.length == 0
           ? Center(
-              child: Text('No Lodgings Added'),
+              child: Text('No Activities Added'),
             )
           : SingleChildScrollView(
               child: Container(
-                width: screenWidth,
+                width: screenWidth * 0.9,
                 child: Column(
                   children: [
                     Container(
@@ -59,12 +59,12 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.lodgings == null ? 0 : loadedTrip.lodgings.length,
+                        itemCount: loadedTrip.activities == null ? 0 : loadedTrip.activities.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.lodgings),
+                              key: ValueKey(loadedTrip.activities),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -72,30 +72,19 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                     Icons.hotel,
                                   ),
                                 ),
-                                title: Text(loadedTrip.lodgings[index].name),
+                                title: Text(loadedTrip.activities[index].title),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      loadedTrip.lodgings[index].address != null
-                                          ? '${loadedTrip.lodgings[index].address}'
-                                          : '',
-                                    ),
+                                        '${loadedTrip.activities[index].title}'),
                                     Text(
-                                      loadedTrip.lodgings[index]
-                                                      .checkInDateTime !=
-                                                  null &&
-                                              loadedTrip.lodgings[index]
-                                                      .checkOutDateTime !=
-                                                  null
-                                          ? '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)} - ${DateFormat.yMd().format(loadedTrip.lodgings[index].checkOutDateTime)}'
-                                          : '',
+                                      '${DateFormat.yMd().format(loadedTrip.activities[index].startingDateTime)} - ${DateFormat.yMd().format(loadedTrip.activities[index].endingDateTime)}',
                                     ),
                                   ],
                                 ),
-                                
-                                //TODO Navigate to the lodging profile page
-                                onTap: () => _addOrEditLodging(index),
+                                //TODO Navigate to the activity profile page
+                                onTap: () => addOrEditActivity(index),
                               ),
                               background: Container(
                                 color: Colors.red,
@@ -116,7 +105,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.lodgings[index].name}?',
+                                      'Are you sure you want to delete ${loadedTrip.activities[index].title}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
@@ -125,7 +114,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                           setState(() {
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
-                                                .removeLodging(loadedTrip,
+                                                .removeActivity(loadedTrip,
                                                     user.uid, index);
                                           });
                                           Navigator.of(context).pop();
@@ -152,7 +141,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEditLodging(-1),
+        onPressed: () => addOrEditActivity(-1),
         child: Icon(
           Icons.add,
         ),

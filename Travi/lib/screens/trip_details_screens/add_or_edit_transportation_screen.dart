@@ -1,73 +1,115 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../providers/trip_provider.dart';
-import '../../providers/lodging_provider.dart';
+import '../../providers/transportation_provider.dart';
+import '../../providers/trips_provider.dart';
+import '../../providers/user_provider.dart';
 
-class AddLodgingScreen extends StatefulWidget {
-  static const routeName = '/add-lodging-screen';
+class AddOrEditTransportationScreen extends StatefulWidget {
+  static const routeName = '/add-transportation-screen';
+
   @override
-  _AddLodgingScreenState createState() => _AddLodgingScreenState();
+  _AddOrEditTransportationScreenState createState() =>
+      _AddOrEditTransportationScreenState();
 }
 
-class _AddLodgingScreenState extends State<AddLodgingScreen> {
+class _AddOrEditTransportationScreenState
+    extends State<AddOrEditTransportationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  final _nameFocusNode = FocusNode();
-  final _countryFocusNode = FocusNode();
-  final _cityFocusNode = FocusNode();
-  final _addressFocusNode = FocusNode();
-  final _reservationIdFocusNode = FocusNode();
-
-  final _lastDate = DateTime.now().add(Duration(days: 365));
+  final _companyFocusNode = FocusNode();
+  final _reservationFocusNode = FocusNode();
+  final _startingAddressFocusNode = FocusNode();
+  final _endingAddressFocusNode = FocusNode();
+  final _transportationTypeFocusNode = FocusNode();
 
   TripProvider loadedTrip;
+  bool edit = false;
+  int editIndex = -1;
 
-  Lodging tempLodging = Lodging(
+  List<DropdownMenuItem<int>> transportationType = [];
+  int _selectedTransportationType = 0;
+  Transportation newTransportation = Transportation(
     id: null,
-    name: null,
-    country: null,
-    city: null,
-    address: null,
-    checkInDate: null,
-    checkInTime: null,
-    checkOutDate: null,
-    checkOutTime: null,
+    company: null,
     reservationID: null,
+    startingAddress: null,
+    startingDateTime: null,
+    endingAddress: null,
+    endingDateTime: null,
+    transportationType: null,
   );
+
+  // ignore: avoid_init_to_null
+  TimeOfDay _startTime = null;
+  // ignore: avoid_init_to_null
+  TimeOfDay _endTime = null;
+
+  @override
+  void initState() {
+    transportationType = [];
+    transportationType.add(
+      new DropdownMenuItem(
+        child: new Text(
+          'Choose a transportation type',
+        ),
+        value: 0,
+      ),
+    );
+    transportationType.add(
+      new DropdownMenuItem(
+        child: new Text(
+          'Train',
+        ),
+        value: 1,
+      ),
+    );
+    transportationType.add(
+      new DropdownMenuItem(
+        child: new Text(
+          'Boat',
+        ),
+        value: 2,
+      ),
+    );
+    transportationType.add(
+      new DropdownMenuItem(
+        child: new Text(
+          'Car Pickup',
+        ),
+        value: 3,
+      ),
+    );
+    transportationType.add(
+      new DropdownMenuItem(
+        child: new Text(
+          'Car Rental',
+        ),
+        value: 4,
+      ),
+    );
+
+    super.initState();
+  }
 
   @override
   void dispose() {
-    _nameFocusNode.dispose();
-    _countryFocusNode.dispose();
-    _cityFocusNode.dispose();
-    _addressFocusNode.dispose();
-    _reservationIdFocusNode.dispose();
+    _companyFocusNode.dispose();
+    _reservationFocusNode.dispose();
+    _startingAddressFocusNode.dispose();
+    _endingAddressFocusNode.dispose();
+    _transportationTypeFocusNode.dispose();
     super.dispose();
   }
 
-  void _saveContact() async {
-    if (!_formKey.currentState.validate()) {
-      // Invalid!
-      return;
-    }
-    _formKey.currentState.save();
-
-    try {
-      // await Provider.of<UserProvider>(context, listen: false)
-      //     .updateAbout(userValues, user.uid);
-    } catch (error) {
-      print(error);
-      return;
-    }
-    Navigator.of(context).pop();
-  }
-
+  //Displays the datepicker for the start date
   Future<void> _showStartDatePicker() async {
     await showDatePicker(
       context: context,
       helpText: 'Start Date',
-      initialDate: loadedTrip.startDate,
-      firstDate: DateTime.now(),
+      initialDate: loadedTrip.startDate.isBefore(DateTime.now()) ? DateTime.now() : loadedTrip.startDate,
+      firstDate: loadedTrip.startDate.isBefore(DateTime.now()) ? DateTime.now() : loadedTrip.startDate,
       lastDate: loadedTrip.endDate.subtract(
         Duration(
           days: 1,
@@ -78,13 +120,14 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
         return;
       } else {
         setState(() {
-          tempLodging.checkInDate = selectedDate;
+          newTransportation.startingDateTime = selectedDate;
         });
-        _showEndDatePicker();
+        _showCheckinTimePicker();
       }
     });
   }
 
+  //Displays the datepicker for the end date
   Future<void> _showEndDatePicker() async {
     if (loadedTrip.startDate == null) {
       await _showStartDatePicker();
@@ -92,20 +135,22 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
     showDatePicker(
       context: context,
       helpText: 'End Date',
-      initialDate: loadedTrip.endDate,
-      firstDate: DateTime.now(),
+      initialDate: newTransportation.startingDateTime,
+      firstDate: newTransportation.startingDateTime,
       lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
       if (selectedDate == null) {
         return;
       } else {
         setState(() {
-          tempLodging.checkOutDate = selectedDate;
+          newTransportation.endingDateTime = selectedDate;
         });
+        _showCheckoutTimePicker();
       }
     });
   }
 
+  //Displays the time picker for the checkin time
   Future<void> _showCheckinTimePicker() async {
     showTimePicker(
       context: context,
@@ -116,26 +161,99 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
         return;
       } else {
         setState(() {
-          tempLodging.checkInTime = selectedTime;
+          _startTime = selectedTime;
         });
+        setDateTime(true, newTransportation.startingDateTime, _startTime);
       }
     });
   }
 
+  //Displays the time picker for the checkout time
   Future<void> _showCheckoutTimePicker() async {
     showTimePicker(
       context: context,
       helpText: 'Checkout Time',
-      initialTime: TimeOfDay(hour: 00, minute: 00),
+      initialTime: _startTime,
     ).then((selectedTime) {
       if (selectedTime == null) {
         return;
       } else {
         setState(() {
-          tempLodging.checkOutTime = selectedTime;
+          _endTime = selectedTime;
         });
+        setDateTime(false, newTransportation.endingDateTime, _endTime);
       }
     });
+  }
+
+  //Adds selected Time to date
+  void setDateTime(bool endDate, DateTime date, TimeOfDay time) {
+    DateTime newDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    if (endDate == true) {
+      setState(() {
+        newTransportation.startingDateTime = newDateTime;
+      });
+    } else if (endDate == false) {
+      setState(() {
+        newTransportation.endingDateTime = newDateTime;
+      });
+    }
+  }
+
+  //Saves transporation
+  void _addOrEditTransportation() async {
+    if (!_formKey.currentState.validate()) {
+      return;
+    } else {
+      _formKey.currentState.save();
+      setTransportationType();
+      try {
+        String userId = await Provider.of<UserProvider>(context, listen: false)
+            .getCurrentUserId();
+        await Provider.of<TripsProvider>(context, listen: false)
+            .addOrEditTransportation(
+                loadedTrip, userId, newTransportation, edit ? editIndex : -1);
+      } catch (error) {
+        print(error);
+        return;
+      }
+    }
+    Navigator.of(context).pop();
+  }
+
+  //Takes value from drop down and sets it to enum
+  void setTransportationType() {
+    String tempType = '';
+   if (_selectedTransportationType == 1) {
+      tempType = 'train';
+    } else if (_selectedTransportationType == 2) {
+      tempType = 'boat';
+    } else if (_selectedTransportationType == 3) {
+      tempType = 'carPickup';
+    } else if (_selectedTransportationType == 4) {
+      tempType = 'carRental';
+    }
+    setState(() {
+      newTransportation.transportationType = tempType;
+    });
+  }
+
+  void setEditType(){
+    if(newTransportation.transportationType == 'boat'){
+      _selectedTransportationType = 2;
+    } else if(newTransportation.transportationType == 'train'){
+      _selectedTransportationType = 3;
+    } else if(newTransportation.transportationType == 'carPickup'){
+      _selectedTransportationType = 4;
+    } else if(newTransportation.transportationType == 'carRental'){
+      _selectedTransportationType = 5;
+    }
   }
 
   @override
@@ -144,8 +262,22 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
+    editIndex = arguments['editIndex'];
+    if (editIndex > -1) {
+      setState(() {
+        edit = true;
+        newTransportation = loadedTrip.transportations[editIndex];
+        setEditType();
+      });
+    }
     return Scaffold(
-      appBar: AppBar(title: Text('Add Lodging')),
+      appBar: AppBar(
+        title: edit
+            ? const Text('Edit Transportation')
+            : const Text(
+                'Add Transportation',
+              ),
+      ),
       body: Stack(
         children: <Widget>[
           Container(
@@ -163,7 +295,7 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: Text(
-                        'Enter the lodging details',
+                        'Enter the transportation details',
                         style: TextStyle(
                           fontSize: 17,
                         ),
@@ -179,36 +311,57 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                          DropdownButtonFormField(
                             decoration: InputDecoration(
-                              labelText: 'Name',
+                              labelText: 'Transportation Type',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
+                            items: transportationType,
+                            value: _selectedTransportationType,
+                            validator: (value) {
+                              if (value == 0) {
+                                return 'Please choose a transportation type!';
+                              }
+                              return null;
+                            },
+                            onChanged: (selectedValue) {
+                              FocusScope.of(context)
+                                  .requestFocus(_companyFocusNode);
+                              setState(() {
+                                _selectedTransportationType = selectedValue;
+                              });
+                            },
+                            focusNode: _transportationTypeFocusNode,
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Company',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newTransportation.company,
                             textInputAction: TextInputAction.next,
-                            focusNode: _nameFocusNode,
-                            // validator: (value) {
-                            //   if (value.isEmpty) {
-                            //     return 'Please enter the lodging name.';
-                            //   }
-                            //   return null;
-                            // },
+                            focusNode: _companyFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_countryFocusNode);
+                                  .requestFocus(_startingAddressFocusNode);
                             },
                             onSaved: (value) {
-                              tempLodging.name = value;
+                              newTransportation.company = value;
                             },
                           ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'Country',
+                              labelText: 'Starting Location Address',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -216,71 +369,35 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                               ),
                             ),
                             textInputAction: TextInputAction.next,
-                            focusNode: _countryFocusNode,
-                            // validator: (value) {
-                            //   if (value.isEmpty) {
-                            //     return 'Please enter the country.';
-                            //   }
-                            //   return null;
-                            // },
+                            focusNode: _startingAddressFocusNode,
+                            initialValue: newTransportation.startingAddress,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_cityFocusNode);
+                                  .requestFocus(_endingAddressFocusNode);
                             },
                             onSaved: (value) {
-                              tempLodging.country = value;
+                              newTransportation.startingAddress = value;
                             },
                           ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'City',
+                              labelText: 'Ending Location Address',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
+                            initialValue: edit ? newTransportation.endingAddress : '',
                             textInputAction: TextInputAction.next,
-                            focusNode: _cityFocusNode,
-                            // validator: (value) {
-                            //   if (value.isEmpty) {
-                            //     return 'Please enter a city.';
-                            //   }
-                            //   return null;
-                            // },
+                            focusNode: _endingAddressFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
+                                  .requestFocus(_reservationFocusNode);
                             },
                             onSaved: (value) {
-                              tempLodging.city = value;
-                            },
-                          ),
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'Address',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            focusNode: _addressFocusNode,
-                            // validator: (value) {
-                            //   if (value.isEmpty) {
-                            //     return 'Please enter an address.';
-                            //   }
-                            //   return null;
-                            // },
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context)
-                                  .requestFocus(_reservationIdFocusNode);
-                            },
-                            onSaved: (value) {
-                              tempLodging.address = value;
+                              newTransportation.endingAddress = value;
                             },
                           ),
                           TextFormField(
@@ -293,16 +410,11 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
-                            textInputAction: TextInputAction.next,
-                            focusNode: _reservationIdFocusNode,
-                            // validator: (value) {
-                            //   if (value.isEmpty) {
-                            //     return 'Please enter some information about yourself.';
-                            //   }
-                            //   return null;
-                            // },
+                            textInputAction: TextInputAction.done,
+                            focusNode: _reservationFocusNode,
+                            initialValue: edit ? newTransportation.reservationID : '',
                             onSaved: (value) {
-                              tempLodging.reservationID = value;
+                              newTransportation.reservationID = value;
                             },
                           ),
                           Container(
@@ -312,7 +424,7 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                                 Container(
                                   width: screenWidth * 0.25,
                                   child: Text(
-                                    'Checkin Date:',
+                                    'Starting Date and Time:',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                     ),
@@ -327,54 +439,17 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.only(right: 30),
                                   width: screenWidth * 0.4,
-                                  child: tempLodging.checkInDate == null
-                                      ? Text('')
-                                      : Text(
-                                          '${DateFormat.yMd().format(tempLodging.checkInDate)}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                          ),
-                                          textAlign: TextAlign.right,
-                                        ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Container(
-                                  width: screenWidth * 0.25,
-                                  child: Text(
-                                    'Checkin Time:',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  alignment: Alignment.center,
-                                  child: IconButton(
-                                    icon: Icon(Icons.access_time),
-                                    color: Colors.green,
-                                    onPressed: _showCheckinTimePicker,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(right: 30),
-                                  width: screenWidth * 0.4,
-                                  child: tempLodging.checkInTime == null
-                                      ? Text('')
-                                      : Text(
-                                          '${tempLodging.checkInTime.format(context)}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                          ),
-                                          textAlign: TextAlign.right,
-                                        ),
+                                  child:
+                                      newTransportation.startingDateTime == null
+                                          ? Text('')
+                                          : Text(
+                                              '${DateFormat.yMd().add_jm().format(newTransportation.startingDateTime)}',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                              ),
+                                              textAlign: TextAlign.right,
+                                            ),
                                 ),
                               ],
                             ),
@@ -387,7 +462,7 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                                 Container(
                                   width: screenWidth * 0.25,
                                   child: Text(
-                                    'Checkout Date:',
+                                    'Ending Date and Time:',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                     ),
@@ -403,55 +478,17 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.only(right: 30),
                                   width: screenWidth * 0.4,
-                                  child: tempLodging.checkOutDate == null
-                                      ? Text('')
-                                      : Text(
-                                          '${DateFormat.yMd().format(tempLodging.checkOutDate)}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                          ),
-                                          textAlign: TextAlign.right,
-                                        ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Container(
-                                  width: screenWidth * 0.25,
-                                  child: Text(
-                                    'Checkout Time:',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(left: 5),
-                                  child: IconButton(
-                                    icon: Icon(Icons.access_time),
-                                    color: Colors.green,
-                                    onPressed: _showCheckoutTimePicker,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(right: 30),
-                                  width: screenWidth * 0.4,
-                                  child: tempLodging.checkOutTime == null
-                                      ? Text('')
-                                      : Text(
-                                          '${tempLodging.checkOutTime.format(context)}',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                          ),
-                                          textAlign: TextAlign.right,
-                                        ),
+                                  child:
+                                      newTransportation.endingDateTime == null
+                                          ? Text('')
+                                          : Text(
+                                              '${DateFormat.yMd().add_jm().format(newTransportation.endingDateTime)}',
+                                              style: TextStyle(
+                                                color: Colors.grey[600],
+                                              ),
+                                              textAlign: TextAlign.right,
+                                            ),
                                 ),
                               ],
                             ),
@@ -461,12 +498,12 @@ class _AddLodgingScreenState extends State<AddLodgingScreen> {
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(
-                                'Save',
+                                'Submit',
                                 style: TextStyle(
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: _saveContact,
+                              onPressed: () => _addOrEditTransportation(),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

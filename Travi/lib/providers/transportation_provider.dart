@@ -1,23 +1,23 @@
 import 'package:flutter/foundation.dart';
 
 enum TransportationType {
-  Flight,
   Train,
   Boat,
   CarRental,
-  CarPickup,  //Like Uber or Lyft
+  CarPickup, //Like Uber or Lyft
 }
 
-class Transportation extends ChangeNotifier{
-  final String id;
-  final String company;
-  final String reservationID;
+class Transportation extends ChangeNotifier {
+  String id;
+  String company;
+  String reservationID;
   String startingAddress;
   DateTime startingDateTime;
   String endingAddress;
   DateTime endingDateTime;
-  TransportationType transportationType;
-  
+  String transportationType;
+  String transportationImageUrl;
+
   Transportation({
     @required this.id,
     @required this.company,
@@ -27,6 +27,6 @@ class Transportation extends ChangeNotifier{
     @required this.endingAddress,
     @required this.endingDateTime,
     @required this.transportationType,
+    this.transportationImageUrl,
   });
-
 }

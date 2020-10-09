@@ -36,7 +36,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
     startDate: null,
     endDate: null,
     countries: [],
-    image: '',
+    tripImageUrl: '',
     description: '',
     group: [],
     lodgings: [],
@@ -92,7 +92,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
     });
     try {
       await Provider.of<TripsProvider>(context, listen: false)
-          .updateTrip(_editedTrip, user);
+          .updateTripDetails(_editedTrip, user);
     } catch (error) {
       throw error;
     }

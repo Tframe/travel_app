@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProvider extends ChangeNotifier {
   String id;
@@ -29,10 +30,41 @@ class UserProvider extends ChangeNotifier {
   });
 
   List<UserProvider> _users = [];
+  String _currentUserId = '';
+  User _currentUser;
 
   //getter function to return list of trips
   List<UserProvider> get users {
     return [..._users];
+  }
+
+  //Set's a provider variable Firebase User for currently logged
+  //in user.
+  Future<void> setCurrentUser() async {
+    _currentUser = FirebaseAuth.instance.currentUser;
+  }
+
+  //Returned the Firebase User data
+  Future<User> getCurrentUser() async {
+    if (_currentUser != null) {
+      return _currentUser;
+    } else {
+      return null;
+    }
+  }
+
+  //Sets the current Firebase User ID
+  Future<void> setCurrentUserId() async {
+    _currentUserId = _currentUser.uid;
+  }
+
+  //Returned the current Firebase User ID
+  Future<String> getCurrentUserId() async {
+    if (_currentUserId != null || _currentUserId != '') {
+      return _currentUserId;
+    } else {
+      return '';
+    }
   }
 
   //used to set companions once users are loaded from firebase

@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 class Activity extends ChangeNotifier {
-  final String id;
-  final String title;
-  final String reservationID;
-  final String address;
-  final DateTime startingDateTime;
-  final DateTime endingDateTime;
+  String id;
+  String title;
+  String reservationID;
+  String address;
+  DateTime startingDateTime;
+  DateTime endingDateTime;
+  String activityImageUrl;
 
   Activity({
     @required this.id,
@@ -14,6 +15,7 @@ class Activity extends ChangeNotifier {
     @required this.reservationID,
     @required this.address,
     @required this.startingDateTime,
-    this.endingDateTime,
+    @required this.endingDateTime,
+    this.activityImageUrl,
   });
 }

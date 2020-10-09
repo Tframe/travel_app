@@ -5,23 +5,23 @@ import 'package:intl/intl.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import './add_or_edit_lodging_screen.dart';
+import './add_or_edit_restaurant_screen.dart';
 
-class EditLodgingsScreen extends StatefulWidget {
-  static const routeName = '/edit-lodgings-screen';
+class EditRestaurantsScreen extends StatefulWidget {
+  static const routeName = '/edit-restaurants-screen';
   @override
-  _EditLodgingsScreenState createState() => _EditLodgingsScreenState();
+  _EditRestaurantsScreenState createState() => _EditRestaurantsScreenState();
 }
 
-class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
+class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
   TripProvider loadedTrip;
 
   //Add new loading
   //if editIndex == -1, then adding lodging,
   //if editIndex > -1, then editing lodging.
-  void _addOrEditLodging(int editIndex) async {
+  void _addOrEditRestaurant(int editIndex) async {
     Navigator.of(context).pushNamed(
-      AddOrEditLodgingScreen.routeName,
+      AddOrEditRestaurantScreen.routeName,
       arguments: {
         'loadedTrip': loadedTrip,
         'editIndex': editIndex,
@@ -41,11 +41,11 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
     loadedTrip = arguments['loadedTrip'];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Lodgings'),
+        title: Text('Edit Restaurants'),
       ),
-      body: loadedTrip.lodgings == null || loadedTrip.lodgings.length == 0
+      body: loadedTrip.restaurants == null || loadedTrip.restaurants.length == 0
           ? Center(
-              child: Text('No Lodgings Added'),
+              child: Text('No Restaurants Added'),
             )
           : SingleChildScrollView(
               child: Container(
@@ -59,43 +59,39 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.lodgings == null ? 0 : loadedTrip.lodgings.length,
+                        itemCount: loadedTrip.restaurants == null ? 0 : loadedTrip.restaurants.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.lodgings),
+                              key: ValueKey(loadedTrip.restaurants),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
                                   child: Icon(
-                                    Icons.hotel,
+                                    Icons.restaurant,
                                   ),
                                 ),
-                                title: Text(loadedTrip.lodgings[index].name),
+                                title: Text(loadedTrip.restaurants[index].name),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      loadedTrip.lodgings[index].address != null
-                                          ? '${loadedTrip.lodgings[index].address}'
+                                      loadedTrip.restaurants[index].address != null
+                                          ? '${loadedTrip.restaurants[index].address}'
                                           : '',
                                     ),
                                     Text(
-                                      loadedTrip.lodgings[index]
-                                                      .checkInDateTime !=
-                                                  null &&
-                                              loadedTrip.lodgings[index]
-                                                      .checkOutDateTime !=
-                                                  null
-                                          ? '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)} - ${DateFormat.yMd().format(loadedTrip.lodgings[index].checkOutDateTime)}'
+                                      loadedTrip.restaurants[index]
+                                                      .startingDateTime !=
+                                                  null 
+                                          ? '${DateFormat.yMd().format(loadedTrip.restaurants[index].startingDateTime)}'
                                           : '',
                                     ),
                                   ],
                                 ),
-                                
                                 //TODO Navigate to the lodging profile page
-                                onTap: () => _addOrEditLodging(index),
+                                onTap: () => _addOrEditRestaurant(index),
                               ),
                               background: Container(
                                 color: Colors.red,
@@ -116,7 +112,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.lodgings[index].name}?',
+                                      'Are you sure you want to delete ${loadedTrip.restaurants[index].name}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
@@ -125,7 +121,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                           setState(() {
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
-                                                .removeLodging(loadedTrip,
+                                                .removeRestaurant(loadedTrip,
                                                     user.uid, index);
                                           });
                                           Navigator.of(context).pop();
@@ -152,7 +148,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEditLodging(-1),
+        onPressed: () => _addOrEditRestaurant(-1),
         child: Icon(
           Icons.add,
         ),

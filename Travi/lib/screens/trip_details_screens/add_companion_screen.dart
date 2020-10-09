@@ -1,25 +1,22 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
-import '../../providers/trips_provider.dart';
-import '../../providers/country_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/city_provider.dart';
-import '../../screens/tab_bar_screen.dart';
+import '../../providers/trips_provider.dart';
 
-class AddTripGroupInviteScreen extends StatefulWidget {
-  static const routeName = '/group-invite-screen';
+class AddCompanionScreen extends StatefulWidget {
+  static const routeName = '/add-companion-screen';
 
   @override
-  _AddTripGroupInviteScreenState createState() =>
-      _AddTripGroupInviteScreenState();
+  _AddCompanionScreenState createState() => _AddCompanionScreenState();
 }
 
-class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
+class _AddCompanionScreenState extends State<AddCompanionScreen> {
+  TripProvider loadedTrip;
+
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _listViewController = ScrollController();
   var _numberCompanions = List<Widget>();
@@ -30,46 +27,11 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
   List<String> grouptracker = [];
   List<bool> _searchUserEmail = [];
 
-  var tripValues = TripProvider(
-    id: null,
-    title: null,
-    startDate: null,
-    endDate: null,
-    countries: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-        cities: [
-          City(
-            id: null,
-            city: null,
-            longitude: null,
-            latitude: null,
-            places: [],
-          ),
-        ],
-      ),
-    ],
-    group: [
-      UserProvider(
-        id: null,
-        firstName: null,
-        lastName: null,
-        email: null,
-        phone: null,
-        location: null,
-      ),
-    ],
-    isPrivate: true,
-    tripImageUrl: null,
-    description: null,
-  );
-
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
-    User user = FirebaseAuth.instance.currentUser;
+
+    User user = await Provider.of<UserProvider>(context, listen: false).getCurrentUser();
+
     final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
@@ -115,6 +77,30 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             }
           }
         }
+        for (int l = 0; l < loadedTrip.group.length; l++) {
+          if (tempCompanion[j].id == loadedTrip.group[l].id) {
+            await showDialog<Null>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text(
+                  'Companion already invited',
+                ),
+                content: Text(
+                  'You have already invited ${loadedTrip.group[l].firstName} ${loadedTrip.group[l].lastName[0]}.!',
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: const Text('Okay'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+        }
       }
     } catch (error) {
       await showDialog<Null>(
@@ -140,32 +126,14 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
       );
     }
 
-    tripValues.group = tempCompanion;
+    tempCompanion.addAll(loadedTrip.group);
 
-    //Adds data to firestore
-    try {
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addTrip(tripValues, user.uid);
-      Navigator.of(context).pushNamed(TabBarScreen.routeName);
-    } catch (error) {
-      await showDialog<Null>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('An error occured'),
-          content: Text('Something went wrong'),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Okay'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    }
+    await Provider.of<TripsProvider>(context, listen: false)
+        .updateCompanions(loadedTrip, user.uid, tempCompanion);
 
-    Navigator.of(context).pushNamed(TabBarScreen.routeName);
+    //Update current trip
+
+    Navigator.of(context).pop();
 
     tempGroup = [];
   }
@@ -258,18 +226,12 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     );
   }
 
-  //Pop back a page and clear out provider
-  void _backPage() async {
-    // final removed = await Provider.of<UserProvider>(context, listen: false)
-    //     .removeAllUsers();
-    Navigator.of(context).pop();
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    tripValues = ModalRoute.of(context).settings.arguments;
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    loadedTrip = arguments['loadedTrip'];
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -278,19 +240,12 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             color: Colors.black,
           ),
         ),
-        leading: new IconButton(
-          icon: new Icon(Icons.arrow_back),
-          onPressed: _backPage,
-        ),
       ),
       body: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            // margin: EdgeInsets.symmetric(
-            //   horizontal: screenWidth * 0.05,
-            // ),
             width: screenWidth,
             decoration: BoxDecoration(
                 // color: Theme.of(context).accentColor,
@@ -455,7 +410,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                     width: screenWidth * 0.85,
                     child: FlatButton(
                       child: Text(
-                        'Create Trip',
+                        'Submit',
                         style: TextStyle(
                           color: Theme.of(context).accentColor,
                         ),

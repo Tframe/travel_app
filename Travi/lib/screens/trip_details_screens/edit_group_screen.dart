@@ -1,31 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
-import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import './add_or_edit_lodging_screen.dart';
+import '../../providers/trip_provider.dart';
+import './add_companion_screen.dart';
 
-class EditLodgingsScreen extends StatefulWidget {
-  static const routeName = '/edit-lodgings-screen';
+class EditGroupScreen extends StatefulWidget {
+  static const routeName = '/edit-group-screen';
   @override
-  _EditLodgingsScreenState createState() => _EditLodgingsScreenState();
+  _EditGroupScreenState createState() => _EditGroupScreenState();
 }
 
-class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
+class _EditGroupScreenState extends State<EditGroupScreen> {
   TripProvider loadedTrip;
 
-  //Add new loading
-  //if editIndex == -1, then adding lodging,
-  //if editIndex > -1, then editing lodging.
-  void _addOrEditLodging(int editIndex) async {
+  void addCompanion() async {
     Navigator.of(context).pushNamed(
-      AddOrEditLodgingScreen.routeName,
-      arguments: {
-        'loadedTrip': loadedTrip,
-        'editIndex': editIndex,
-      },
+      AddCompanionScreen.routeName,
+      arguments: {'loadedTrip': loadedTrip},
     ).then((value) {
       setState(() {
         print('popped and updated');
@@ -41,11 +34,11 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
     loadedTrip = arguments['loadedTrip'];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Lodgings'),
+        title: Text('Edit Group'),
       ),
-      body: loadedTrip.lodgings == null || loadedTrip.lodgings.length == 0
+      body: loadedTrip.group.length == 0
           ? Center(
-              child: Text('No Lodgings Added'),
+              child: Text('No Companions Added'),
             )
           : SingleChildScrollView(
               child: Container(
@@ -54,48 +47,38 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
+                      width: screenWidth * 0.8,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.lodgings == null ? 0 : loadedTrip.lodgings.length,
+                        itemCount: loadedTrip.group.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.lodgings),
+                              key: ValueKey(loadedTrip.group),
                               child: ListTile(
-                                leading: Padding(
-                                  padding: const EdgeInsets.only(right: 28.0),
-                                  child: Icon(
-                                    Icons.hotel,
-                                  ),
-                                ),
-                                title: Text(loadedTrip.lodgings[index].name),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      loadedTrip.lodgings[index].address != null
-                                          ? '${loadedTrip.lodgings[index].address}'
-                                          : '',
-                                    ),
-                                    Text(
-                                      loadedTrip.lodgings[index]
-                                                      .checkInDateTime !=
-                                                  null &&
-                                              loadedTrip.lodgings[index]
-                                                      .checkOutDateTime !=
-                                                  null
-                                          ? '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)} - ${DateFormat.yMd().format(loadedTrip.lodgings[index].checkOutDateTime)}'
-                                          : '',
-                                    ),
-                                  ],
+                                leading: loadedTrip
+                                        .group[index].profilePicUrl.isEmpty
+                                    ? CircleAvatar(
+                                        radius: 30,
+                                        child: Icon(
+                                          Icons.person,
+                                        ),
+                                      )
+                                    : CircleAvatar(
+                                        radius: 30,
+                                        backgroundImage: NetworkImage(
+                                          loadedTrip.group[index].profilePicUrl,
+                                        ),
+                                      ),
+                                title: Text(
+                                  '${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName[0]}.',
                                 ),
                                 
-                                //TODO Navigate to the lodging profile page
-                                onTap: () => _addOrEditLodging(index),
+                                //TODO Navigate to the user profile page
+                                onTap: () {},
                               ),
                               background: Container(
                                 color: Colors.red,
@@ -116,7 +99,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.lodgings[index].name}?',
+                                      'Are you sure you want to remove ${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName[0]}.?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
@@ -125,7 +108,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                           setState(() {
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
-                                                .removeLodging(loadedTrip,
+                                                .removeCompanion(loadedTrip,
                                                     user.uid, index);
                                           });
                                           Navigator.of(context).pop();
@@ -152,7 +135,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addOrEditLodging(-1),
+        onPressed: addCompanion,
         child: Icon(
           Icons.add,
         ),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../screens/add_trip_screens/add_trip_intro_screen.dart';
-import 'package:groupy/screens/current_trips_screen.dart';
-import 'package:groupy/screens/discover_screen.dart';
-import 'package:groupy/screens/past_trips_screen.dart';
-import 'package:groupy/widgets/app_drawer.dart';
+import '../screens/current_trips_screen.dart';
+import '../screens/discover_screen.dart';
+import '../screens/past_trips_screen.dart';
+import '../widgets/app_drawer.dart';
+import '../providers/user_provider.dart';
 
 class TabBarScreen extends StatefulWidget {
   static const routeName = '/tab-bar-screen';
@@ -15,6 +18,17 @@ class TabBarScreen extends StatefulWidget {
 class _TabBarScreenState extends State<TabBarScreen> {
   List<Map<String, Object>> _pages;
   int _selectedPageIndex = 1;
+
+  void setUserData() async {
+    try {
+      await Provider.of<UserProvider>(context, listen: false).setCurrentUser();
+      await Provider.of<UserProvider>(context, listen: false)
+          .setCurrentUserId();
+    } catch (error) {
+      print(error);
+      return;
+    }
+  }
 
   @override
   void initState() {
@@ -32,7 +46,7 @@ class _TabBarScreenState extends State<TabBarScreen> {
         'title': 'Past Trips',
       }
     ];
-
+    setUserData();
     super.initState();
   }
 
@@ -54,12 +68,12 @@ class _TabBarScreenState extends State<TabBarScreen> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(
-              Icons.add,
-              color: Theme.of(context).secondaryHeaderColor,
-            ),
-            onPressed: () => Navigator.of(context).pushNamed(AddTripIntroScreen.routeName)
-          ),
+              icon: Icon(
+                Icons.add,
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+              onPressed: () => Navigator.of(context)
+                  .pushNamed(AddTripIntroScreen.routeName)),
         ],
       );
     } else {
