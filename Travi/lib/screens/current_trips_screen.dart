@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/current_trip_card_list.dart';
 import '../providers/trips_provider.dart';
+import '../providers/user_provider.dart';
+import '../screens/add_trip_screens/add_trip_intro_screen.dart';
 
 class CurrentTripsScreen extends StatefulWidget {
   static const routeName = '/current-trips';
@@ -16,16 +18,27 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
   var _isInit = true;
   var _isLoading = false;
 
-//DO I WANT TO SET PROVIDER HERE???
-
   @override
   void didChangeDependencies() {
+    UserProvider loggedInUser =
+        Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
     User user = FirebaseAuth.instance.currentUser;
     if (_isInit) {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<TripsProvider>(context, listen: false).fetchAndSetTrips(user).then((_) {
+      Provider.of<TripsProvider>(context, listen: false)
+          .fetchAndSetTrips(user)
+          .then((value) {
+        for (int i = 0; i < loggedInUser.tripInvites.length; i++) {
+          if (loggedInUser.tripInvites[i].status == 'Accepted') {
+            Provider.of<TripsProvider>(context, listen: false)
+                .fetchAndSetInvitedTrip(
+              loggedInUser.tripInvites[i].organizerUserId,
+              loggedInUser.tripInvites[i].tripId,
+            );
+          }
+        }
         setState(() {
           _isLoading = false;
         });
@@ -43,6 +56,16 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
               child: CircularProgressIndicator(),
             )
           : CurrentTripCardList(),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(
+          Icons.add,
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
+        onPressed: () {
+          Navigator.of(context).pushNamed(AddTripIntroScreen.routeName);
+        },
+      ),
     );
   }
 }

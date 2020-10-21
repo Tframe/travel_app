@@ -18,6 +18,8 @@ class AddOrEditActivityScreen extends StatefulWidget {
 class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _titleFocusNode = FocusNode();
+  final _phoneNumberFocusNode = FocusNode();
+  final _websiteFocusNode = FocusNode();
   final _addressFocusNode = FocusNode();
   final _reservationIdFocusNode = FocusNode();
 
@@ -28,6 +30,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
   Activity newActivity = Activity(
     id: null,
     title: null,
+    phoneNumber: null,
+    website: null,
     reservationID: null,
     address: null,
     startingDateTime: null,
@@ -42,6 +46,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
   @override
   void dispose() {
     _titleFocusNode.dispose();
+    _phoneNumberFocusNode.dispose();
+    _websiteFocusNode.dispose();
     _addressFocusNode.dispose();
     _reservationIdFocusNode.dispose();
     super.dispose();
@@ -106,13 +112,7 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
     showDatePicker(
       context: context,
       helpText: 'Checkout Date',
-      initialDate: edit
-          ? (newActivity.endingDateTime.isBefore(DateTime.now())
-              ? DateTime.now()
-              : newActivity.endingDateTime)
-          : (loadedTrip.startDate.isBefore(DateTime.now())
-              ? DateTime.now()
-              : loadedTrip.startDate),
+      initialDate: edit ? newActivity.endingDateTime : newActivity.startingDateTime,
       firstDate: newActivity.startingDateTime,
       lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
@@ -255,10 +255,52 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             focusNode: _titleFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
+                                  .requestFocus(_phoneNumberFocusNode);
                             },
                             onSaved: (value) {
                               newActivity.title = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Phone # (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newActivity.phoneNumber,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _phoneNumberFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_websiteFocusNode);
+                            },
+                            onSaved: (value) {
+                              newActivity.phoneNumber = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Website (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newActivity.website,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _websiteFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_addressFocusNode);
+                            },
+                            onSaved: (value) {
+                              newActivity.website = value;
                             },
                           ),
                           TextFormField(

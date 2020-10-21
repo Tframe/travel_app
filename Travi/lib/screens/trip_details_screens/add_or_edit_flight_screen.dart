@@ -16,6 +16,8 @@ class AddOrEditFlightScreen extends StatefulWidget {
 class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _airlineFocusNode = FocusNode();
+  final _airlinePhoneNumberFocusNode = FocusNode();
+  final _airlineWebsiteFocusNode = FocusNode();
   final _flightNumberFocusNode = FocusNode();
   final _departureAirportFocusNode = FocusNode();
   final _departureTerminalFocusNode = FocusNode();
@@ -33,6 +35,8 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   Flight newFlight = Flight(
     airline: null,
     flightNumber: null,
+    airlinePhoneNumber: null,
+    airlineWebsite: null,
     departureAirport: null,
     departureDateTime: null,
     departureTerminal: null,
@@ -52,6 +56,8 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   void dispose() {
     _airlineFocusNode.dispose();
     _flightNumberFocusNode.dispose();
+    _airlinePhoneNumberFocusNode.dispose();
+    _airlineWebsiteFocusNode.dispose();
     _departureAirportFocusNode.dispose();
     _departureTerminalFocusNode.dispose();
     _departureGateFocusNode.dispose();
@@ -67,9 +73,15 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
     await showDatePicker(
       context: context,
       helpText: 'Departure Date',
-      initialDate: loadedTrip.startDate,
-      firstDate: loadedTrip.startDate,
-      lastDate: loadedTrip.endDate,
+      initialDate: edit
+          ? newFlight.departureDateTime.isBefore(DateTime.now())
+              ? DateTime.now()
+              : newFlight.departureDateTime
+          : loadedTrip.startDate.isBefore(DateTime.now())
+              ? DateTime.now()
+              : loadedTrip.startDate,
+      firstDate: DateTime.now(),
+      lastDate: loadedTrip.endDate
     ).then((selectedDate) {
       if (selectedDate == null) {
         return;
@@ -251,10 +263,10 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             focusNode: _airlineFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_flightNumberFocusNode);
+                                  .requestFocus(_airlinePhoneNumberFocusNode);
                             },
                             validator: (value) {
-                              if(value.isEmpty){
+                              if (value.isEmpty) {
                                 return 'Enter an airline';
                               }
                               return null;
@@ -266,7 +278,49 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'Flight Number',
+                              labelText: 'Airline Phone # (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newFlight.airlinePhoneNumber,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _airlinePhoneNumberFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_airlineWebsiteFocusNode);
+                            },
+                            onSaved: (value) {
+                              newFlight.airlinePhoneNumber = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Airline Website (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newFlight.airlineWebsite,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _airlineWebsiteFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_flightNumberFocusNode);
+                            },
+                            onSaved: (value) {
+                              newFlight.airlineWebsite = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Flight #',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -281,10 +335,10 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                                   .requestFocus(_confirmationNumberFocusNode);
                             },
                             validator: (value) {
-                              if(value.isEmpty){
-                                return 'Enter a flight number';
-                              } else if(value.length != 4){
-                                return 'Flight numbers must be 4 digits long';
+                              if (value.isEmpty) {
+                                return 'Enter a flight #';
+                              } else if (value.length != 4) {
+                                return 'Flight # must be 4 digits long';
                               }
                               return null;
                             },
@@ -295,7 +349,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
-                              labelText: 'Confirmation Number (Optional)',
+                              labelText: 'Confirmation # (Optional)',
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
@@ -343,7 +397,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                                   .requestFocus(_departureTerminalFocusNode);
                             },
                             validator: (value) {
-                              if(value.isEmpty){
+                              if (value.isEmpty) {
                                 return 'Enter a departure airport';
                               }
                               return null;
@@ -461,7 +515,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                                   .requestFocus(_arrivalTerminalFocusNode);
                             },
                             validator: (value) {
-                              if(value.isEmpty){
+                              if (value.isEmpty) {
                                 return 'Enter an arrival airport';
                               }
                               return null;

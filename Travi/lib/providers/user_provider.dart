@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import './invitation_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   String id;
@@ -14,6 +15,8 @@ class UserProvider extends ChangeNotifier {
   String about;
   List<String> sites;
   List<String> followers;
+  String invitationStatus;
+  List<Invites> tripInvites;
 
   UserProvider({
     this.id,
@@ -27,13 +30,16 @@ class UserProvider extends ChangeNotifier {
     this.about,
     this.sites,
     this.followers,
+    this.invitationStatus,
+    this.tripInvites,
   });
 
   List<UserProvider> _users = [];
   String _currentUserId = '';
   User _currentUser;
+  UserProvider loggedInUser;
 
-  //getter function to return list of trips
+  //getter function to return list of users
   List<UserProvider> get users {
     return [..._users];
   }
@@ -72,6 +78,55 @@ class UserProvider extends ChangeNotifier {
     _users = loadedUser;
   }
 
+  //sets current logged in user
+  Future<void> setLoggedInUser(String userId) async {
+    List<Invites> tripInvites = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get()
+          .then(
+            (doc) => {
+              loggedInUser = UserProvider(
+                  id: doc.reference.id,
+                  firstName: doc.data()['firstName'],
+                  lastName: doc.data()['lastName'],
+                  location: doc.data()['location'],
+                  email: doc.data()['email'],
+                  phone: doc.data()['phone'],
+                  profilePicUrl: doc.data()['profilePicUrl'],
+                  about: doc.data()['about'],
+                  invitationStatus: 'Accepted',
+                  tripInvites: doc.data()['tripInvites'] != null
+                      ? doc
+                          .data()['tripInvites']
+                          .asMap()
+                          .forEach((tripInviteIndex, tripInvite) {
+                          tripInvites.add(Invites(
+                            invitationId: tripInvite['id'],
+                            organizerUserId: tripInvite['organizerUserId'],
+                            organizerFirstName:
+                                tripInvite['organizerFirstName'],
+                            organizerLastName: tripInvite['organizerLastName'],
+                            status: tripInvite['status'],
+                            tripId: tripInvite['tripId'],
+                            tripTitle: tripInvite['tripTitle'],
+                          ));
+                        })
+                      : [])
+            },
+          );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //get currently logged in user
+  UserProvider get currentLoggedInUser {
+    return loggedInUser;
+  }
+
   //Add user info to Firestore
   Future<void> addUser(UserProvider userInfo, String userId) async {
     await FirebaseFirestore.instance
@@ -83,7 +138,6 @@ class UserProvider extends ChangeNotifier {
           'lastName': userInfo.lastName,
           'email': userInfo.email,
           'phone': userInfo.phone,
-
           //CHANGE TO LOCATION INSTEAD OF location
           'location': userInfo.location,
           'profilePicUrl': '',
@@ -137,6 +191,7 @@ class UserProvider extends ChangeNotifier {
                     email: doc.data()['email'],
                     phone: doc.data()['phone'],
                     profilePicUrl: doc.data()['profilePicUrl'],
+                    invitationStatus: 'pending',
                   ));
                 })
               })
@@ -194,5 +249,138 @@ class UserProvider extends ChangeNotifier {
     _users = [];
     _users.add(userValues);
     notifyListeners();
+  }
+
+  //Get trip invitation lists to see if anything is pending
+  Future<void> getInvites(String userId) async {
+    List<Invites> _newInvites = [];
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('invited-trips')
+          .get()
+          .then((invitedTrips) {
+        invitedTrips.docs.asMap().forEach((index, data) {
+          _newInvites.add(
+            Invites(
+                invitationId: invitedTrips.docs[index].id,
+                organizerUserId:
+                    invitedTrips.docs[index].data()['organizerUserId'],
+                organizerFirstName:
+                    invitedTrips.docs[index].data()['organizerFirstName'],
+                organizerLastName:
+                    invitedTrips.docs[index].data()['organizerLastName'],
+                status: invitedTrips.docs[index].data()['status'],
+                tripId: invitedTrips.docs[index].data()['tripId'],
+                tripTitle: invitedTrips.docs[index].data()['tripTitle'],
+                unread: invitedTrips.docs[index].data()['unread']),
+          );
+        });
+
+        loggedInUser.tripInvites = _newInvites;
+      });
+    } catch (error) {
+      loggedInUser.tripInvites = _newInvites;
+      throw (error);
+    }
+  }
+
+  //Update trip-invitations trip status
+  Future<void> updateTripInvitationStatus(
+    String userId,
+    String invitationId,
+    String tripId,
+    String newStatus,
+  ) async {
+    final tripInviteIndex = loggedInUser.tripInvites
+        .indexWhere((tripInvites) => tripInvites.tripId == tripId);
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('invited-trips')
+          .doc('$invitationId')
+          .update({
+        'status': newStatus,
+        'unread': false,
+      }).then((value) {
+        print('Invitation Status Updated');
+      });
+    } catch (error) {
+      throw (error);
+    }
+    loggedInUser.tripInvites[tripInviteIndex].status = newStatus;
+    updateOrganizerInvitationStatus(
+      loggedInUser.tripInvites[tripInviteIndex].organizerUserId,
+      tripId,
+      newStatus,
+      userId,
+    );
+    notifyListeners();
+  }
+
+  //Update organizer's trip with new invitation status
+  Future<void> updateOrganizerInvitationStatus(
+    String organizerId,
+    String tripId,
+    String newStatus,
+    String userId,
+  ) async {
+    List<UserProvider> _tempGroup = [];
+
+    //Get list of group in organizer's trip
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(organizerId)
+          .collection('trips')
+          .doc(tripId)
+          .get()
+          .then((DocumentSnapshot doc) {
+        doc.data()['group'].asMap().forEach((groupIndex, groupData) {
+          _tempGroup.add(UserProvider(
+            id: groupData['id'],
+            firstName: groupData['firstName'],
+            lastName: groupData['lastName'],
+            email: groupData['email'],
+            phone: groupData['phone'],
+            profilePicUrl: groupData['profilePicUrl'],
+            invitationStatus: groupData['invitationStatus'],
+          ));
+        });
+      });
+    } catch (onError) {
+      throw (onError);
+    }
+    //update status on organizer's trip
+    final _groupIndex = _tempGroup.indexWhere((group) => group.id == userId);
+    _tempGroup[_groupIndex].invitationStatus = newStatus;
+
+    //update in firestore
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .update({
+        'group': _tempGroup
+            .map((group) => {
+                  'id': group.id,
+                  'firstName': group.firstName,
+                  'lastName': group.lastName,
+                  'email': group.email,
+                  'phone': group.phone,
+                  'profilePicUrl': group.profilePicUrl,
+                  'invitationStatus': group.invitationStatus,
+                })
+            .toList()
+      }).then((value) {
+        print('Invitation Status Updated on Organizer Trip');
+      });
+    } catch (error) {
+      throw (error);
+    }
   }
 }

@@ -22,6 +22,9 @@ class AppDrawer extends StatelessWidget {
             iconTheme: new IconThemeData(
               color: Colors.white,
             ),
+            actions: [
+              Container(),
+            ],
           ),
           ListTile(
             leading: Icon(

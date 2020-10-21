@@ -31,7 +31,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
   Future<void> _addCompanions() async {
 
     User user = await Provider.of<UserProvider>(context, listen: false).getCurrentUser();
-
+    UserProvider currentLoggedInUser = Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
     final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
@@ -129,7 +129,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
     tempCompanion.addAll(loadedTrip.group);
 
     await Provider.of<TripsProvider>(context, listen: false)
-        .updateCompanions(loadedTrip, user.uid, tempCompanion);
+        .updateCompanions(loadedTrip, user.uid, currentLoggedInUser.firstName, currentLoggedInUser.lastName,tempCompanion);
 
     //Update current trip
 

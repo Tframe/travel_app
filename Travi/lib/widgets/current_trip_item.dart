@@ -60,7 +60,7 @@ class CurrentTripItem extends StatelessWidget {
                       height: screenHeight * 0.22,
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: foundTrip.tripImageUrl == null
+                      child: foundTrip.tripImageUrl == null || foundTrip.tripImageUrl == ''
                           ? ClipRRect(
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(8.0),

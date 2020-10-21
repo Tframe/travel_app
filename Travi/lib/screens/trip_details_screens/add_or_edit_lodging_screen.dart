@@ -16,7 +16,8 @@ class AddOrEditLodgingScreen extends StatefulWidget {
 class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _nameFocusNode = FocusNode();
-
+  final _phoneNumberFocusNode = FocusNode();
+  final _websiteFocusNode = FocusNode();
   final _addressFocusNode = FocusNode();
   final _reservationIdFocusNode = FocusNode();
 
@@ -28,6 +29,8 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     id: null,
     name: null,
     address: null,
+    phoneNumber: null,
+    website: null,
     checkInDateTime: null,
     checkOutDateTime: null,
     reservationID: null,
@@ -41,6 +44,8 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
   @override
   void dispose() {
     _nameFocusNode.dispose();
+    _phoneNumberFocusNode.dispose();
+    _websiteFocusNode.dispose();
     _addressFocusNode.dispose();
     _reservationIdFocusNode.dispose();
     super.dispose();
@@ -73,13 +78,15 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     await showDatePicker(
       context: context,
       helpText: 'Checkin Date',
-      initialDate: edit ? tempLodging.checkInDateTime : loadedTrip.startDate,
-      firstDate: DateTime.now(),
-      lastDate: loadedTrip.endDate.subtract(
-        Duration(
-          days: 1,
-        ),
-      ),
+      initialDate: edit
+          ? tempLodging.checkInDateTime.isBefore(DateTime.now())
+              ? DateTime.now()
+              : tempLodging.checkInDateTime
+          : loadedTrip.startDate.isBefore(DateTime.now())
+              ? DateTime.now()
+              : loadedTrip.startDate,
+      firstDate: loadedTrip.startDate,
+      lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
       if (selectedDate == null) {
         return;
@@ -101,7 +108,7 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
       context: context,
       helpText: 'Checkout Date',
       initialDate: edit ? tempLodging.checkOutDateTime : tempLodging.checkInDateTime,
-      firstDate: DateTime.now(),
+      firstDate: tempLodging.checkInDateTime,
       lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
       if (selectedDate == null) {
@@ -244,6 +251,48 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             },
                             onSaved: (value) {
                               tempLodging.name = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Phone # (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: tempLodging.phoneNumber,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _phoneNumberFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_websiteFocusNode);
+                            },
+                            onSaved: (value) {
+                              tempLodging.phoneNumber = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Website (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: tempLodging.website,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _websiteFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_addressFocusNode);
+                            },
+                            onSaved: (value) {
+                              tempLodging.website = value;
                             },
                           ),
                           TextFormField(

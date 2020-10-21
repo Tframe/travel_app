@@ -76,7 +76,17 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                 title: Text(
                                   '${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName[0]}.',
                                 ),
-                                
+                                //Display trip acception status
+                                trailing: loadedTrip.group[index].invitationStatus ==
+                                        'accepted'
+                                    ? Text('Accepted')
+                                    : loadedTrip.group[index].invitationStatus ==
+                                            'pending'
+                                        ? Text('Pending...')
+                                        : loadedTrip.group[index].invitationStatus ==
+                                                'declined'
+                                            ? Text('Declined')
+                                            : Text(''),
                                 //TODO Navigate to the user profile page
                                 onTap: () {},
                               ),

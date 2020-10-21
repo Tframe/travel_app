@@ -16,6 +16,8 @@ class AddOrEditRestaurantScreen extends StatefulWidget {
 class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _nameFocusNode = FocusNode();
+  final _phoneNumberFocusNode = FocusNode();
+  final _websiteFocusNode = FocusNode();
   final _addressFocusNode = FocusNode();
   final _reservationIdFocusNode = FocusNode();
 
@@ -37,6 +39,8 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
   @override
   void dispose() {
     _nameFocusNode.dispose();
+    _phoneNumberFocusNode.dispose();
+    _websiteFocusNode.dispose();
     _addressFocusNode.dispose();
     _reservationIdFocusNode.dispose();
     super.dispose();
@@ -189,10 +193,52 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             focusNode: _nameFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
+                                  .requestFocus(_phoneNumberFocusNode);
                             },
                             onSaved: (value) {
                               newRestaurant.name = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Phone # (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newRestaurant.phoneNumber,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _phoneNumberFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_websiteFocusNode);
+                            },
+                            onSaved: (value) {
+                              newRestaurant.phoneNumber = value;
+                            },
+                          ),
+                          TextFormField(
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Website (Optional)',
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor),
+                              ),
+                            ),
+                            initialValue: newRestaurant.website,
+                            textInputAction: TextInputAction.next,
+                            focusNode: _websiteFocusNode,
+                            onFieldSubmitted: (_) {
+                              FocusScope.of(context)
+                                  .requestFocus(_addressFocusNode);
+                            },
+                            onSaved: (value) {
+                              newRestaurant.website = value;
                             },
                           ),
                           TextFormField(

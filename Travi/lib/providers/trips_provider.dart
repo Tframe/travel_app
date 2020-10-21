@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:groupy/providers/restaurant_provider.dart';
-import '../providers/address_provider.dart';
 
 import './trip_provider.dart';
 import './user_provider.dart';
@@ -58,16 +57,6 @@ class TripsProvider extends ChangeNotifier {
                                     'latitude': cities.latitude,
                                     'longitude': cities.longitude,
                                     'cityImageUrl': cities.cityImageUrl,
-                                    'places': cities.places != null
-                                        ? cities.places
-                                            .map((places) => {
-                                                  'title': '',
-                                                  'address': '',
-                                                  'latitude': 0.00,
-                                                  'longitude': 0.00,
-                                                })
-                                            .toList()
-                                        : [],
                                   })
                               .toList()
                           : [],
@@ -89,7 +78,7 @@ class TripsProvider extends ChangeNotifier {
                       'profilePicUrl': group.profilePicUrl == null
                           ? null
                           : group.profilePicUrl,
-                      'requestAccepted': false,
+                      'invitationStatus': group.invitationStatus,
                     })
                 .toList()
             : [],
@@ -98,10 +87,14 @@ class TripsProvider extends ChangeNotifier {
                 .map((activity) => {
                       'id': '',
                       'title': '',
+                      'phoneNumber': '',
+                      'website': '',
                       'reservationID': '',
                       'startingDateTime': null,
                       'endingDateTime': null,
                       'address': '',
+                      'latitude': null,
+                      'longitude': null,
                       'activityImageUrl': '',
                     })
                 .toList()
@@ -111,9 +104,13 @@ class TripsProvider extends ChangeNotifier {
                 .map((lodging) => {
                       'id': '',
                       'name': '',
+                      'phoneNumber': '',
+                      'website': '',
                       'checkInDateTime': null,
                       'checkOutDateTime': null,
                       'address': '',
+                      'latitude': null,
+                      'longitude': null,
                       'reservationID': '',
                       'lodgingImageUrl': '',
                     })
@@ -124,9 +121,15 @@ class TripsProvider extends ChangeNotifier {
                 .map((transportation) => {
                       'id': '',
                       'company': '',
+                      'phoneNumber': '',
+                      'website': '',
                       'reservationID': '',
                       'startingAddress': '',
+                      'startingLatitude': null,
+                      'startingLongitude': null,
                       'endingAddress': '',
+                      'endingLatitude': null,
+                      'endingLongitude': null,
                       'startingDateTime': null,
                       'endingDateTime': null,
                       'transportationImageUrl': '',
@@ -138,13 +141,19 @@ class TripsProvider extends ChangeNotifier {
                 .map((flight) => {
                       'id': '',
                       'airline': '',
+                      'airlinePhoneNumber': '',
+                      'airlineWebsite': '',
                       'flightNumber': '',
                       'confirmationNumber': '',
                       'departureAirport': '',
+                      'departureAirportLatitude': null,
+                      'departureAirportLongitude': null,
                       'departureDateTime': null,
                       'departureTerminal': '',
                       'departureGate': '',
                       'arrivalAirport': '',
+                      'arrivalAirportLatitude': null,
+                      'arrivalAirportLongitude': null,
                       'arrivalDateTime': null,
                       'arrivalTerminal': '',
                       'arrivalGate': '',
@@ -156,15 +165,33 @@ class TripsProvider extends ChangeNotifier {
                 .map((restaurant) => {
                       'id': '',
                       'name': '',
+                      'phoneNumber': '',
+                      'website': '',
                       'reservationID': '',
                       'address': '',
+                      'latitude': null,
+                      'longitude': null,
                       'startingDateTime': null,
                     })
                 .toList()
             : [],
         'isPrivate': true,
-      }).then((value) {
-        print('Trip added');
+      }).then((docRef) async {
+        tripValues.id = docRef.id;
+        try {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc('$userId')
+              .collection('trips')
+              .doc('${docRef.id}')
+              .update({
+            'id': docRef.id,
+          }).then(
+            (value) => print('Trip added'),
+          );
+        } catch (error) {
+          throw error;
+        }
       }).catchError((onError) {
         print('Failed to add Trip');
         throw onError;
@@ -186,8 +213,19 @@ class TripsProvider extends ChangeNotifier {
         isPrivate: true,
         tripImageUrl: null,
       );
-
       _trips.add(newTrip);
+
+      //Add trip and user id's to new companion's list of trip invitations
+      for (int i = 1; i < newTrip.group.length; i++) {
+        addTripToCompanion(
+          newTrip.group[i].id,
+          userId,
+          newTrip.group[0].firstName,
+          newTrip.group[0].lastName,
+          newTrip.id,
+          newTrip.title,
+        );
+      }
 
       notifyListeners();
     } catch (error) {
@@ -207,7 +245,6 @@ class TripsProvider extends ChangeNotifier {
     List<UserProvider> loadedUsers = [];
     List<Country> loadedCountries = [];
     List<City> loadedCities = [];
-    List<Address> loadedAddresses = [];
     List<Activity> loadedActivities = [];
     List<Lodging> loadedLodgings = [];
     List<Transportation> loadedTransportations = [];
@@ -222,7 +259,6 @@ class TripsProvider extends ChangeNotifier {
           .collection('trips')
           .get()
           .then(
-        //.forEach(
         (trip) {
           trip.docs.asMap().forEach(
             (index, data) {
@@ -251,6 +287,7 @@ class TripsProvider extends ChangeNotifier {
                           email: groupData['email'],
                           phone: groupData['phone'],
                           profilePicUrl: groupData['profilePicUrl'],
+                          invitationStatus: groupData['invitationStatus'],
                         ));
                       })
                     : [],
@@ -275,23 +312,7 @@ class TripsProvider extends ChangeNotifier {
                                     latitude: cityData['latitude'],
                                     longitude: cityData['longitude'],
                                     cityImageUrl: cityData['cityImageUrl'],
-                                    places: cityData['places'] != null
-                                        ? cityData['places']
-                                            .asMap()
-                                            .forEach((placeIndex, placeData) {
-                                            loadedAddresses.add(Address(
-                                              id: null,
-                                              title: placeData['title'],
-                                              address: placeData['address'],
-                                              latitude: placeData['latitude'],
-                                              longitude: placeData['longitude'],
-                                            ));
-                                          })
-                                        : [],
                                   ));
-                                  loadedCities[cityIndex].places =
-                                      loadedAddresses;
-                                  loadedAddresses = [];
                                 })
                               : [],
                         ));
@@ -307,8 +328,12 @@ class TripsProvider extends ChangeNotifier {
                         loadedActivities.add(Activity(
                           id: null,
                           title: activitiesData['title'],
+                          phoneNumber: activitiesData['phoneNumber'],
+                          website: activitiesData['website'],
                           reservationID: activitiesData['reservationID'],
                           address: activitiesData['address'],
+                          latitude: activitiesData['latitude'],
+                          longitude: activitiesData['longitude'],
                           startingDateTime:
                               activitiesData['startingDateTime'].toDate(),
                           endingDateTime:
@@ -325,7 +350,11 @@ class TripsProvider extends ChangeNotifier {
                         loadedLodgings.add(Lodging(
                           id: null,
                           name: lodgingsData['name'],
+                          phoneNumber: lodgingsData['phoneNumber'],
+                          website: lodgingsData['website'],
                           address: lodgingsData['address'],
+                          latitude: lodgingsData['latitude'],
+                          longitude: lodgingsData['longitude'],
                           reservationID: lodgingsData['reservationID'],
                           checkInDateTime:
                               lodgingsData['checkInDateTime'].toDate(),
@@ -344,12 +373,21 @@ class TripsProvider extends ChangeNotifier {
                         loadedTransportations.add(Transportation(
                           id: transportationsData['id'],
                           company: transportationsData['company'],
+                          phoneNumber: transportationsData['phoneNumber'],
+                          website: transportationsData['website'],
                           reservationID: transportationsData['reservationID'],
                           startingAddress:
                               transportationsData['startingAddress'],
+                          startingLatitude:
+                              transportationsData['startingLatitude'],
+                          startingLongitude:
+                              transportationsData['startingLongitude'],
                           startingDateTime:
                               transportationsData['startingDateTime'].toDate(),
                           endingAddress: transportationsData['endingAddress'],
+                          endingLatitude: transportationsData['endingLatitude'],
+                          endingLongitude:
+                              transportationsData['endingLongitude'],
                           endingDateTime:
                               transportationsData['endingDateTime'].toDate(),
                           transportationType:
@@ -365,14 +403,24 @@ class TripsProvider extends ChangeNotifier {
                         loadedFlights.add(Flight(
                           id: flightData['id'],
                           airline: flightData['airline'],
+                          airlinePhoneNumber: flightData['airlinePhoneNumber'],
+                          airlineWebsite: flightData['airlineWebsite'],
                           flightNumber: flightData['flightNumber'],
                           confirmationNumber: flightData['confirmationNumber'],
                           departureAirport: flightData['departureAirport'],
+                          departureAirportLatitude:
+                              flightData['departureAirportLatitude'],
+                          departureAirportLongitude:
+                              flightData['departureAirportLongitude'],
                           departureDateTime:
                               flightData['departureDateTime'].toDate(),
                           departureTerminal: flightData['departureTerminal'],
                           departureGate: flightData['departureGate'],
                           arrivalAirport: flightData['arrivalAirport'],
+                          arrivalAirportLatitude:
+                              flightData['arrivalAirportLatitude'],
+                          arrivalAirportLongitude:
+                              flightData['arrivalAirportLongitude'],
                           arrivalDateTime:
                               flightData['arrivalDateTime'].toDate(),
                           arrivalTerminal: flightData['arrivalTerminal'],
@@ -388,10 +436,14 @@ class TripsProvider extends ChangeNotifier {
                         loadedRestaurants.add(Restaurant(
                           id: restaurantsData['id'],
                           name: restaurantsData['name'],
+                          phoneNumber: restaurantsData['phoneNumber'],
+                          website: restaurantsData['website'],
                           reservationID: restaurantsData['reservationID'],
                           startingDateTime:
                               restaurantsData['startingDateTime'].toDate(),
                           address: restaurantsData['address'],
+                          latitude: restaurantsData['latitude'],
+                          longitude: restaurantsData['longitude'],
                         ));
                       })
                     : [],
@@ -421,8 +473,235 @@ class TripsProvider extends ChangeNotifier {
         print('Failed to find Trip');
         throw onError;
       });
-
       await setTripsList(loadedTrips);
+
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //Fetch and add invited trips to trips list
+  Future<void> fetchAndSetInvitedTrip(String userId, String tripId) async {
+    final List<TripProvider> loadedTrips = [..._trips];
+    TripProvider tempTrip;
+    List<UserProvider> loadedUsers = [];
+    List<Country> loadedCountries = [];
+    List<City> loadedCities = [];
+    List<Activity> loadedActivities = [];
+    List<Lodging> loadedLodgings = [];
+    List<Transportation> loadedTransportations = [];
+    List<Flight> loadedFlights = [];
+    List<Restaurant> loadedRestaurants = [];
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('trips')
+          .doc('$tripId')
+          .get()
+          .then(
+        (DocumentSnapshot doc) {
+          tempTrip = TripProvider(
+            id: doc.id,
+            title: doc.data()['title'],
+            startDate: doc.data()['startDate'].toDate(),
+            endDate: doc.data()['endDate'].toDate(),
+            description: doc.data()['description'],
+            tripImageUrl: doc.data()['tripImageUrl'],
+            transportationsComplete: doc.data()['transportationsComplete'],
+            lodgingsComplete: doc.data()['lodgingsComplete'],
+            activitiesComplete: doc.data()['activitiesComplete'],
+            group: doc.data()['group'] != null
+                ? doc.data()['group'].asMap().forEach((groupIndex, groupData) {
+                    loadedUsers.add(UserProvider(
+                      id: groupData['id'],
+                      firstName: groupData['firstName'],
+                      lastName: groupData['lastName'],
+                      email: groupData['email'],
+                      phone: groupData['phone'],
+                      profilePicUrl: groupData['profilePicUrl'],
+                      invitationStatus: groupData['invitationStatus'],
+                    ));
+                  })
+                : [],
+            countries: doc.data()['countries'] != null
+                ? doc
+                    .data()['countries']
+                    .asMap()
+                    .forEach((countryIndex, countryData) {
+                    loadedCountries.add(Country(
+                      id: countryData['id'],
+                      country: countryData['country'],
+                      latitude: countryData['latitude'],
+                      longitude: countryData['longitude'],
+                      countryImageUrl: countryData['countryImageUrl'],
+                      cities: countryData['cities'] != null
+                          ? countryData['cities']
+                              .asMap()
+                              .forEach((cityIndex, cityData) {
+                              loadedCities.add(City(
+                                id: cityData['id'],
+                                city: cityData['city'],
+                                latitude: cityData['latitude'],
+                                longitude: cityData['longitude'],
+                                cityImageUrl: cityData['cityImageUrl'],
+                              ));
+                            })
+                          : [],
+                    ));
+                    loadedCountries[countryIndex].cities = loadedCities;
+                    loadedCities = [];
+                  })
+                : [],
+            activities: doc.data()['activities'] != null
+                ? doc
+                    .data()['activities']
+                    .asMap()
+                    .forEach((activitiesIndex, activitiesData) {
+                    loadedActivities.add(Activity(
+                      id: null,
+                      title: activitiesData['title'],
+                      phoneNumber: activitiesData['phoneNumber'],
+                      website: activitiesData['website'],
+                      reservationID: activitiesData['reservationID'],
+                      address: activitiesData['address'],
+                      latitude: activitiesData['latitude'],
+                      longitude: activitiesData['longitude'],
+                      startingDateTime:
+                          activitiesData['startingDateTime'].toDate(),
+                      endingDateTime: activitiesData['endingDateTime'].toDate(),
+                      activityImageUrl: activitiesData['activityImageUrl'],
+                    ));
+                  })
+                : [],
+            lodgings: doc.data()['lodgings'] != null
+                ? doc
+                    .data()['lodgings']
+                    .asMap()
+                    .forEach((lodgingsIndex, lodgingsData) {
+                    loadedLodgings.add(Lodging(
+                      id: null,
+                      name: lodgingsData['name'],
+                      phoneNumber: lodgingsData['phoneNumber'],
+                      website: lodgingsData['website'],
+                      address: lodgingsData['address'],
+                      latitude: lodgingsData['latitude'],
+                      longitude: lodgingsData['longitude'],
+                      reservationID: lodgingsData['reservationID'],
+                      checkInDateTime: lodgingsData['checkInDateTime'].toDate(),
+                      checkOutDateTime:
+                          lodgingsData['checkOutDateTime'].toDate(),
+                      lodgingImageUrl: lodgingsData['lodgingImageUrl'],
+                    ));
+                  })
+                : [],
+            transportations: doc.data()['transportations'] != null
+                ? doc
+                    .data()['transportations']
+                    .asMap()
+                    .forEach((transportationsIndex, transportationsData) {
+                    loadedTransportations.add(Transportation(
+                      id: transportationsData['id'],
+                      company: transportationsData['company'],
+                      phoneNumber: transportationsData['phoneNumber'],
+                      website: transportationsData['website'],
+                      reservationID: transportationsData['reservationID'],
+                      startingAddress: transportationsData['startingAddress'],
+                      startingLatitude: transportationsData['startingLatitude'],
+                      startingLongitude:
+                          transportationsData['startingLongitude'],
+                      startingDateTime:
+                          transportationsData['startingDateTime'].toDate(),
+                      endingAddress: transportationsData['endingAddress'],
+                      endingLatitude: transportationsData['endingLatitude'],
+                      endingLongitude: transportationsData['endingLongitude'],
+                      endingDateTime:
+                          transportationsData['endingDateTime'].toDate(),
+                      transportationType:
+                          transportationsData['transportationType'],
+                    ));
+                  })
+                : [],
+            flights: doc.data()['flights'] != null
+                ? doc
+                    .data()['flights']
+                    .asMap()
+                    .forEach((flightsIndex, flightData) {
+                    loadedFlights.add(Flight(
+                      id: flightData['id'],
+                      airline: flightData['airline'],
+                      airlinePhoneNumber: flightData['airlinePhoneNumber'],
+                      airlineWebsite: flightData['airlineWebsite'],
+                      flightNumber: flightData['flightNumber'],
+                      confirmationNumber: flightData['confirmationNumber'],
+                      departureAirport: flightData['departureAirport'],
+                      departureAirportLatitude:
+                          flightData['departureAirportLatitude'],
+                      departureAirportLongitude:
+                          flightData['departureAirportLongitude'],
+                      departureDateTime:
+                          flightData['departureDateTime'].toDate(),
+                      departureTerminal: flightData['departureTerminal'],
+                      departureGate: flightData['departureGate'],
+                      arrivalAirport: flightData['arrivalAirport'],
+                      arrivalAirportLatitude:
+                          flightData['arrivalAirportLatitude'],
+                      arrivalAirportLongitude:
+                          flightData['arrivalAirportLongitude'],
+                      arrivalDateTime: flightData['arrivalDateTime'].toDate(),
+                      arrivalTerminal: flightData['arrivalTerminal'],
+                      arrivalGate: flightData['arrivalGate'],
+                    ));
+                  })
+                : [],
+            restaurants: doc.data()['restaurants'] != null
+                ? doc
+                    .data()['restaurants']
+                    .asMap()
+                    .forEach((restaurantIndex, restaurantsData) {
+                    loadedRestaurants.add(Restaurant(
+                      id: restaurantsData['id'],
+                      name: restaurantsData['name'],
+                      phoneNumber: restaurantsData['phoneNumber'],
+                      website: restaurantsData['website'],
+                      reservationID: restaurantsData['reservationID'],
+                      startingDateTime:
+                          restaurantsData['startingDateTime'].toDate(),
+                      address: restaurantsData['address'],
+                      latitude: restaurantsData['latitude'],
+                      longitude: restaurantsData['longitude'],
+                    ));
+                  })
+                : [],
+            isPrivate: doc.data()['isPrivate'],
+          );
+          loadedTrips.add(tempTrip);
+          loadedTrips[loadedTrips.length - 1].group = loadedUsers;
+          loadedTrips[loadedTrips.length - 1].countries = loadedCountries;
+          loadedTrips[loadedTrips.length - 1].activities = loadedActivities;
+          loadedTrips[loadedTrips.length - 1].lodgings = loadedLodgings;
+          loadedTrips[loadedTrips.length - 1].transportations =
+              loadedTransportations;
+          loadedTrips[loadedTrips.length - 1].flights = loadedFlights;
+          loadedTrips[loadedTrips.length - 1].restaurants = loadedRestaurants;
+          loadedUsers = [];
+          loadedCountries = [];
+          loadedActivities = [];
+          loadedLodgings = [];
+          loadedTransportations = [];
+          loadedFlights = [];
+          loadedRestaurants = [];
+        },
+      ).then((value) {
+        print('Trip found');
+      }).catchError((onError) {
+        print('Failed to find Trip');
+        throw onError;
+      });
+      await setTripsList(loadedTrips);
+
       notifyListeners();
     } catch (error) {
       throw error;
@@ -519,6 +798,10 @@ class TripsProvider extends ChangeNotifier {
               .map((lodging) => {
                     'name': lodging.name,
                     'address': lodging.address,
+                    'latitude': lodging.latitude,
+                    'longitude': lodging.longitude,
+                    'phoneNumber': lodging.phoneNumber,
+                    'website': lodging.website,
                     'checkInDateTime': lodging.checkInDateTime,
                     'checkOutDateTime': lodging.checkOutDateTime,
                     'reservationID': lodging.reservationID,
@@ -559,7 +842,11 @@ class TripsProvider extends ChangeNotifier {
               .lodgings
               .map((lodging) => {
                     'name': lodging.name,
+                    'phoneNumber': lodging.phoneNumber,
+                    'website': lodging.website,
                     'address': lodging.address,
+                    'latitude': lodging.latitude,
+                    'longitude': lodging.longitude,
                     'checkInDateTime': lodging.checkInDateTime,
                     'checkOutDateTime': lodging.checkOutDateTime,
                     'reservationID': lodging.reservationID,
@@ -611,7 +898,11 @@ class TripsProvider extends ChangeNotifier {
           'restaurants': tempRestaurant
               .map((restaurant) => {
                     'name': restaurant.name,
+                    'phoneNumber': restaurant.phoneNumber,
+                    'website': restaurant.website,
                     'address': restaurant.address,
+                    'latitude': restaurant.latitude,
+                    'longitude': restaurant.longitude,
                     'startingDateTime': restaurant.startingDateTime,
                     'reservationID': restaurant.reservationID,
                   })
@@ -650,7 +941,11 @@ class TripsProvider extends ChangeNotifier {
               .restaurants
               .map((restaurant) => {
                     'name': restaurant.name,
+                    'phoneNumber': restaurant.phoneNumber,
+                    'website': restaurant.website,
                     'address': restaurant.address,
+                    'latitude': restaurant.latitude,
+                    'longitude': restaurant.longitude,
                     'startingDateTime': restaurant.startingDateTime,
                     'reservationID': restaurant.reservationID,
                   })
@@ -671,6 +966,8 @@ class TripsProvider extends ChangeNotifier {
   Future<void> updateCompanions(
     TripProvider currentTrip,
     String userId,
+    String organizerFirstName,
+    String organizerLastName,
     List<UserProvider> newCompanionList,
   ) async {
     final tripIndex = _trips.indexWhere((trip) => trip.id == currentTrip.id);
@@ -693,6 +990,7 @@ class TripsProvider extends ChangeNotifier {
                     'email': companion.email,
                     'phone': companion.phone,
                     'profilePicUrl': companion.profilePicUrl,
+                    'invitationStatus': companion.invitationStatus,
                   })
               .toList()
         }).then(
@@ -706,6 +1004,18 @@ class TripsProvider extends ChangeNotifier {
     }
     _trips[tripIndex].group = newCompanionList;
     notifyListeners();
+
+    //Add trip and user id's to new companion's list of trip invitations
+    for (int i = 0; i < newCompanionList.length; i++) {
+      addTripToCompanion(
+        newCompanionList[i].id,
+        userId,
+        organizerFirstName,
+        organizerLastName,
+        currentTrip.id,
+        currentTrip.title,
+      );
+    }
   }
 
   //Removes chosen companion
@@ -750,6 +1060,55 @@ class TripsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //Adds tripid to list of trips user is invited to
+  Future<void> addTripToCompanion(
+    String userId,
+    String organizerUserId,
+    String organizerFirstName,
+    String organizerLastName,
+    String tripId,
+    String tripTitle,
+  ) async {
+    //Check to see if user already invited. If so, don't send new invite.
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('invited-trips')
+          .get()
+          .then((invitedTrips) {
+        invitedTrips.docs.asMap().forEach((index, data) {
+          if (invitedTrips.docs[index].data()['tripId'] == tripId) {
+            print('User is already invited to trip');
+            return;
+          }
+        });
+      });
+    } catch (error) {
+      throw (error);
+    }
+    //Add trip information to list of trip invitations.
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('invited-trips')
+          .add({
+        'organizerUserId': organizerUserId,
+        'organizerFirstName': organizerFirstName,
+        'organizerLastName': organizerLastName,
+        'tripId': tripId,
+        'tripTitle': tripTitle,
+        'status': 'pending',
+        'unread': true,
+      }).then((value) {
+        print('Trip added');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //Updates current Trip list of Transportations, sorts by startDateTime
   Future<void> addOrEditTransportation(
     TripProvider currentTrip,
@@ -783,10 +1142,16 @@ class TripsProvider extends ChangeNotifier {
               .map((transportation) => {
                     'transportationType': transportation.transportationType,
                     'company': transportation.company,
+                    'phoneNumber': transportation.phoneNumber,
+                    'website': transportation.website,
                     'startingDateTime': transportation.startingDateTime,
                     'endingDateTime': transportation.endingDateTime,
                     'startingAddress': transportation.startingAddress,
+                    'startingLatitude': transportation.startingLatitude,
+                    'startingLongitude': transportation.startingLongitude,
                     'endingAddress': transportation.endingAddress,
+                    'endingLatitude': transportation.endingLatitude,
+                    'endingLongitude': transportation.endingLongitude,
                     'reservationID': transportation.reservationID,
                     'transportationImageUrl':
                         transportation.transportationImageUrl,
@@ -826,10 +1191,16 @@ class TripsProvider extends ChangeNotifier {
               .map((transportation) => {
                     'transportationType': transportation.transportationType,
                     'company': transportation.company,
+                    'phoneNumber': transportation.phoneNumber,
+                    'website': transportation.website,
                     'startingDateTime': transportation.startingDateTime,
                     'endingDateTime': transportation.endingDateTime,
                     'startingAddress': transportation.startingAddress,
+                    'startingLatitude': transportation.startingLatitude,
+                    'startingLongitude': transportation.startingLongitude,
                     'endingAddress': transportation.endingAddress,
+                    'endingLatitude': transportation.endingLatitude,
+                    'endingLongitude': transportation.endingLongitude,
                     'reservationID': transportation.reservationID,
                     'transportationImageUrl':
                         transportation.transportationImageUrl,
@@ -880,13 +1251,20 @@ class TripsProvider extends ChangeNotifier {
               .map((flight) => {
                     'id': flight.id,
                     'airline': flight.airline,
+                    'airlinePhoneNumber': flight.airlinePhoneNumber,
+                    'airlineWebsite': flight.airlineWebsite,
                     'flightNumber': flight.flightNumber,
                     'confirmationNumber': flight.confirmationNumber,
                     'departureAirport': flight.departureAirport,
+                    'departureLatitude': flight.departureAirportLatitude,
+                    'departureAirportLongitude':
+                        flight.departureAirportLongitude,
                     'departureDateTime': flight.departureDateTime,
                     'departureTerminal': flight.departureTerminal,
                     'departureGate': flight.departureGate,
                     'arrivalAirport': flight.arrivalAirport,
+                    'arrivalAirportLatitude': flight.arrivalAirportLatitude,
+                    'arrivalAirportLongitude': flight.arrivalAirportLongitude,
                     'arrivalDateTime': flight.arrivalDateTime,
                     'arrivalTerminal': flight.arrivalTerminal,
                     'arrivalGate': flight.arrivalGate,
@@ -926,13 +1304,20 @@ class TripsProvider extends ChangeNotifier {
               .map((flight) => {
                     'id': flight.id,
                     'airline': flight.airline,
+                    'airlinePhoneNumber': flight.airlinePhoneNumber,
+                    'airlineWebsite': flight.airlineWebsite,
                     'flightNumber': flight.flightNumber,
                     'confirmationNumber': flight.confirmationNumber,
                     'departureAirport': flight.departureAirport,
+                    'departureLatitude': flight.departureAirportLatitude,
+                    'departureAirportLongitude':
+                        flight.departureAirportLongitude,
                     'departureDateTime': flight.departureDateTime,
                     'departureTerminal': flight.departureTerminal,
                     'departureGate': flight.departureGate,
                     'arrivalAirport': flight.arrivalAirport,
+                    'arrivalAirportLatitude': flight.arrivalAirportLatitude,
+                    'arrivalAirportLongitude': flight.arrivalAirportLongitude,
                     'arrivalDateTime': flight.arrivalDateTime,
                     'arrivalTerminal': flight.arrivalTerminal,
                     'arrivalGate': flight.arrivalGate,
@@ -984,7 +1369,11 @@ class TripsProvider extends ChangeNotifier {
               .activities
               .map((activity) => {
                     'title': activity.title,
+                    'phoneNumber': activity.phoneNumber,
+                    'website': activity.website,
                     'address': activity.address,
+                    'latitude': activity.latitude,
+                    'longitude': activity.longitude,
                     'startingDateTime': activity.startingDateTime,
                     'endingDateTime': activity.endingDateTime,
                     'reservationID': activity.reservationID,
@@ -1024,7 +1413,11 @@ class TripsProvider extends ChangeNotifier {
               .activities
               .map((activity) => {
                     'title': activity.title,
+                    'phoneNumber': activity.phoneNumber,
+                    'website': activity.website,
                     'address': activity.address,
+                    'latitude': activity.latitude,
+                    'longitude': activity.longitude,
                     'startingDateTime': activity.startingDateTime,
                     'endingDateTime': activity.endingDateTime,
                     'reservationID': activity.reservationID,

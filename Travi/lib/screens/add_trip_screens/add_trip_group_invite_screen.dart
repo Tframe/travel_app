@@ -47,7 +47,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             city: null,
             longitude: null,
             latitude: null,
-            places: [],
           ),
         ],
       ),
@@ -60,6 +59,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         email: null,
         phone: null,
         location: null,
+        invitationStatus: null,
       ),
     ],
     isPrivate: true,
@@ -77,14 +77,17 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     }
     _formKey.currentState.save();
     try {
+      tempCompanion
+          .add(Provider.of<UserProvider>(context, listen: false).loggedInUser);
       for (int i = 0; i < tempGroup.length; i++) {
         //Verify email or phone # is in firestore
         await Provider.of<UserProvider>(context, listen: false)
             .findUserByContactInfo(tempGroup[i], _searchUserEmail[i]);
+
         tempCompanion
             .add(Provider.of<UserProvider>(context, listen: false).users[0]);
       }
-      for (int j = 0; j < tempCompanion.length; j++) {
+      for (int j = 1; j < tempCompanion.length; j++) {
         if (tempCompanion[j].id == user.uid) {
           await showDialog<Null>(
             context: context,

@@ -70,7 +70,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
     }
     if (loadedTrip.lodgings.isNotEmpty) {
       if (loadedTrip.lodgings.length > lodgingTrackerIndex) {
-
         if (earliestDate.isAfter(
             loadedTrip.lodgings[lodgingTrackerIndex].checkInDateTime)) {
           earliestDate =
@@ -151,20 +150,16 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   void setEndChildText(String eventTracker) {
     if (eventTracker == 'Flight') {
-      endChildText =
-          loadedTrip.flights[flightTrackerIndex - 1].airline;
+      endChildText = loadedTrip.flights[flightTrackerIndex - 1].airline;
     } else if (eventTracker == 'Transportation') {
-      endChildText = loadedTrip
-          .transportations[transportationTrackerIndex - 1].company;
+      endChildText =
+          loadedTrip.transportations[transportationTrackerIndex - 1].company;
     } else if (eventTracker == 'Lodging') {
-      endChildText =
-          loadedTrip.lodgings[lodgingTrackerIndex - 1].name;
+      endChildText = loadedTrip.lodgings[lodgingTrackerIndex - 1].name;
     } else if (eventTracker == 'Activity') {
-      endChildText =
-          loadedTrip.activities[activitiesTrackerIndex - 1].title;
+      endChildText = loadedTrip.activities[activitiesTrackerIndex - 1].title;
     } else if (eventTracker == 'Restaurant') {
-      endChildText =
-          loadedTrip.restaurants[restaruantsTrackerIndex - 1].name;
+      endChildText = loadedTrip.restaurants[restaruantsTrackerIndex - 1].name;
     }
   }
 
@@ -175,111 +170,126 @@ class _TimelineScreenState extends State<TimelineScreen> {
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
     getTotals();
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Timeline',
-          ),
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              SizedBox(
-                height: screenHeight * 0.015,
-              ),
-              Container(
-                padding: const EdgeInsets.only(
-                  left: 28,
-                ),
-                alignment: Alignment.centerLeft,
-                height: screenHeight * 0.075,
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${loadedTrip.title}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '${DateFormat.yMMMd().format(loadedTrip.startDate)} - ${DateFormat.yMMMd().format(loadedTrip.endDate)}',
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
-                      textAlign: TextAlign.left,
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _totalEvents,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    String event = getEarliestEvent();
-                    setStartChildDate(event);
-                    setEndChildText(event);
-                    return TimelineTile(
-                      alignment: TimelineAlign.manual,
-                      isFirst: index == 0 ? true : false,
-                      isLast: index == _totalEvents - 1 ? true : false,
-                      lineXY: 0.35,
-                      indicatorStyle: IndicatorStyle(
-                        width: 37,
-                        iconStyle: IconStyle(
-                            iconData: event == 'Flight'
-                                ? Icons.airplanemode_active
-                                : event == 'Lodging'
-                                    ? Icons.hotel
-                                    : event == 'Transportation'
-                                        ? Icons.train
-                                        : event == 'Restaurant'
-                                            ? Icons.restaurant
-                                            : event == 'Activity'
-                                                ? Icons.local_activity
-                                                : Icons.place),
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      beforeLineStyle: LineStyle(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      afterLineStyle: LineStyle(
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      startChild: Container(
-                        alignment: Alignment.center,
-                        child: tempChildDate.day == startChildDate.day &&
-                                tempChildDate.month == startChildDate.month &&
-                                tempChildDate.year == startChildDate.year &&
-                                (tempChildDate.hour != startChildDate.hour ||
-                                    tempChildDate.minute !=
-                                        startChildDate.minute)
-                            ? Text('${DateFormat.jm().format(startChildDate)}')
-                            : Text(
-                                '${DateFormat.MMMEd().format(startChildDate)}'),
-                      ),
-                      endChild: Container(
-                        constraints: const BoxConstraints(
-                          minHeight: 75,
-                        ),
-                        child: Text(endChildText),
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.05,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Timeline',
         ),
       ),
+      body: Center(
+        child: Column(
+          children: [
+            SizedBox(
+              height: screenHeight * 0.015,
+            ),
+            Container(
+              padding: const EdgeInsets.only(
+                left: 28,
+              ),
+              alignment: Alignment.centerLeft,
+              height: screenHeight * 0.075,
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${loadedTrip.title}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${DateFormat.yMMMd().format(loadedTrip.startDate)} - ${DateFormat.yMMMd().format(loadedTrip.endDate)}',
+                    style: TextStyle(
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ],
+              ),
+            ),
+            _totalEvents <= 0
+                ? Container(
+                    width: screenWidth * 0.65,
+                    padding: const EdgeInsets.only(top: 150.0),
+                    child: Text(
+                      'There are no events to display. Go add some events!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: _totalEvents,
+                      itemBuilder: (BuildContext ctx, int index) {
+                        String event = getEarliestEvent();
+                        setStartChildDate(event);
+                        setEndChildText(event);
+                        return TimelineTile(
+                          alignment: TimelineAlign.manual,
+                          isFirst: index == 0 ? true : false,
+                          isLast: index == _totalEvents - 1 ? true : false,
+                          lineXY: 0.35,
+                          indicatorStyle: IndicatorStyle(
+                            width: 37,
+                            iconStyle: IconStyle(
+                                iconData: event == 'Flight'
+                                    ? Icons.airplanemode_active
+                                    : event == 'Lodging'
+                                        ? Icons.hotel
+                                        : event == 'Transportation'
+                                            ? Icons.train
+                                            : event == 'Restaurant'
+                                                ? Icons.restaurant
+                                                : event == 'Activity'
+                                                    ? Icons.local_activity
+                                                    : Icons.place),
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          beforeLineStyle: LineStyle(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          afterLineStyle: LineStyle(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          startChild: Container(
+                            alignment: Alignment.center,
+                            child: tempChildDate.day == startChildDate.day &&
+                                    tempChildDate.month ==
+                                        startChildDate.month &&
+                                    tempChildDate.year ==
+                                        startChildDate.year &&
+                                    (tempChildDate.hour !=
+                                            startChildDate.hour ||
+                                        tempChildDate.minute !=
+                                            startChildDate.minute)
+                                ? Text(
+                                    '${DateFormat.jm().format(startChildDate)}')
+                                : Text(
+                                    '${DateFormat.MMMEd().format(startChildDate)}'),
+                          ),
+                          endChild: Container(
+                            constraints: const BoxConstraints(
+                              minHeight: 75,
+                            ),
+                            child: Text(endChildText),
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.05,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+          ],
+        ),
+      ),
+      
     );
   }
 }
