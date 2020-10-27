@@ -44,7 +44,6 @@ class _EditTripScreenState extends State<EditTripScreen> {
     transportations: [],
   );
 
-  var _isInit = true;
 
   var _isLoading = false;
 

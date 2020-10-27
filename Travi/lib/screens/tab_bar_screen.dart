@@ -7,6 +7,7 @@ import '../screens/past_trips_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/notification_end_drawer.dart';
 import '../providers/user_provider.dart';
+import '../providers/notification_provider.dart';
 
 class TabBarScreen extends StatefulWidget {
   static const routeName = '/tab-bar-screen';
@@ -21,32 +22,7 @@ class _TabBarScreenState extends State<TabBarScreen> {
   int _selectedPageIndex = 1;
   String currentUserId;
   UserProvider currentLoggedInUser;
-
-  Future<void> setUserData() async {
-    try {
-      await Provider.of<UserProvider>(context, listen: false).setCurrentUser();
-      await Provider.of<UserProvider>(context, listen: false)
-          .setCurrentUserId();
-      currentUserId = await Provider.of<UserProvider>(context, listen: false)
-          .getCurrentUserId();
-      await Provider.of<UserProvider>(context, listen: false)
-          .setLoggedInUser(currentUserId);
-      getListOfInvitations();
-    } catch (error) {
-      print(error);
-      return;
-    }
-  }
-
-  //Gets list of pending invitations for current loggedin user.
-  Future<void> getListOfInvitations() async {
-    await Provider.of<UserProvider>(context, listen: false)
-        .getInvites(currentUserId);
-    setState(() {
-      currentLoggedInUser =
-          Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
-    });
-  }
+  List<NotificationProvider> notifications;
 
   @override
   void initState() {
@@ -74,6 +50,46 @@ class _TabBarScreenState extends State<TabBarScreen> {
     });
   }
 
+  Future<void> setUserData() async {
+    try {
+      await Provider.of<UserProvider>(context, listen: false).setCurrentUser();
+      await Provider.of<UserProvider>(context, listen: false)
+          .setCurrentUserId();
+      currentUserId = await Provider.of<UserProvider>(context, listen: false)
+          .getCurrentUserId();
+      await Provider.of<UserProvider>(context, listen: false)
+          .setLoggedInUser(currentUserId);
+
+      await getListOfInvitations();
+      await getNotifications();
+    } catch (error) {
+      print(error);
+      return;
+    }
+  }
+
+  //Gets list of pending invitations for current loggedin user.
+  Future<void> getListOfInvitations() async {
+    await Provider.of<UserProvider>(context, listen: false)
+        .getInvites(currentUserId);
+    setState(() {
+      currentLoggedInUser =
+          Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
+    });
+  }
+
+  //after loading user, get all notifications for user.
+  Future<void> getNotifications() async {
+    await Provider.of<NotificationProvider>(context, listen: false)
+        .getNotifications(currentUserId);
+    notifications =
+        Provider.of<NotificationProvider>(context, listen: false).notifications;
+    setState(() {
+      notifications.sort(
+          (a, b) => b.notificationDateTime.compareTo(a.notificationDateTime));
+    });
+  }
+
   Widget _builderAppBar(BuildContext ctx) {
     return AppBar(
       title: Text(_pages[_selectedPageIndex]['title'],
@@ -90,34 +106,58 @@ class _TabBarScreenState extends State<TabBarScreen> {
           children: [
             IconButton(
               icon: Icon(
-                Icons.announcement,
+                Icons.notifications,
                 size: 30,
               ),
               onPressed: () {
                 _scaffoldKey.currentState.openEndDrawer();
+                if (_scaffoldKey.currentState.isEndDrawerOpen) {
+                  setState(() {
+                    Provider.of<NotificationProvider>(context, listen: false)
+                        .clearNotificationsList();
+                    // //After viewing, update all unread notifications to be read.
+                    for (int i = 0; i < notifications.length; i++) {
+                      if (notifications[i].unread) {
+                        Provider.of<NotificationProvider>(context,
+                                listen: false)
+                            .updatedNotificationUnread(
+                          currentLoggedInUser.id,
+                          notifications[i].id,
+                          false,
+                        );
+                      }
+                    }
+                  });
+                }
               },
             ),
-            currentLoggedInUser != null
-                ? currentLoggedInUser.tripInvites != null
-                    ? currentLoggedInUser.tripInvites.length > 0
-                        ? Container(
-                            height: 25,
-                            width: 25,
-                            child: Card(
-                              elevation: 5,
-                              color: Colors.red,
-                              child: Text(
-                                '${currentLoggedInUser.tripInvites.length}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+            notifications != null
+                ? notifications
+                            .where(
+                                (notification) => notification.unread == true)
+                            .length >
+                        0
+                    ? Container(
+                        height: 25,
+                        width: 25,
+                        child: Card(
+                          elevation: 5,
+                          color: Colors.red,
+                          child: Text(
+                            '${notifications.where((notification) => notification.unread).length}',
+                            style: TextStyle(
+                              color: Colors.white,
                             ),
-                          )
-                        : Container()
-                    : Container()
-                : Container(),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        width: 1,
+                      )
+                : Container(
+                    width: 1,
+                  ),
           ],
         ),
       ],
@@ -126,18 +166,16 @@ class _TabBarScreenState extends State<TabBarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-    int value = 0;
     return Scaffold(
       key: _scaffoldKey,
       appBar: _builderAppBar(context),
       drawer: AppDrawer(),
       body: _pages[_selectedPageIndex]['page'],
       endDrawer: Container(
-        width: screenWidth * 0.9,
-        child: NotificationEndDrawer(currentLoggedInUser),
-      ),
+          width: screenWidth * 0.9,
+          child: NotificationEndDrawer(currentLoggedInUser)),
+      endDrawerEnableOpenDragGesture: false,
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Theme.of(context).primaryColor,
         unselectedItemColor: Theme.of(context).accentColor,

@@ -9,6 +9,7 @@ import './flight_provider.dart';
 
 class TripProvider extends ChangeNotifier {
   String id;
+  String organizerId;
   String title;
   DateTime startDate;
   DateTime endDate;
@@ -29,6 +30,7 @@ class TripProvider extends ChangeNotifier {
 
   TripProvider({
     @required this.id,
+    this.organizerId,
     @required this.title,
     @required this.startDate,
     @required this.endDate,

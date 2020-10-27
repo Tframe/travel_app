@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:groupy/providers/user_provider.dart';
 
 class Flight extends ChangeNotifier {
   String id;
+  String organizerId;
+  List<UserProvider> participants;
   String airline;
   String airlinePhoneNumber;
   String airlineWebsite;
@@ -19,9 +22,12 @@ class Flight extends ChangeNotifier {
   DateTime arrivalDateTime;
   String arrivalTerminal;
   String arrivalGate;
+  bool chosen;
 
   Flight({
     this.id,
+    this.organizerId,
+    this.participants,
     this.airline,
     this.airlinePhoneNumber,
     this.airlineWebsite,
@@ -39,5 +45,6 @@ class Flight extends ChangeNotifier {
     this.arrivalDateTime,
     this.arrivalTerminal,
     this.arrivalGate,
+    this.chosen,
   });
 }

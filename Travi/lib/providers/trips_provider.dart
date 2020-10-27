@@ -37,7 +37,7 @@ class TripsProvider extends ChangeNotifier {
           .collection('trips')
           .add({
         'title': tripValues.title,
-        'creator': userId,
+        'organizerId': userId,
         'startDate': tripValues.startDate,
         'endDate': tripValues.endDate,
         'transportationsComplete': false,
@@ -246,10 +246,15 @@ class TripsProvider extends ChangeNotifier {
     List<Country> loadedCountries = [];
     List<City> loadedCities = [];
     List<Activity> loadedActivities = [];
+    List<UserProvider> loadedActivityParticipants = [];
     List<Lodging> loadedLodgings = [];
+    List<UserProvider> loadedLodgingParticipants = [];
     List<Transportation> loadedTransportations = [];
+    List<UserProvider> loadedTransportationParticipants = [];
     List<Flight> loadedFlights = [];
+    List<UserProvider> loadedFlightParticipants = [];
     List<Restaurant> loadedRestaurants = [];
+    List<UserProvider> loadedRestaurantParticipants = [];
 
     _trips = [];
     try {
@@ -265,6 +270,7 @@ class TripsProvider extends ChangeNotifier {
               tempTrip = null;
               tempTrip = TripProvider(
                 id: trip.docs[index].id,
+                organizerId: trip.docs[index].data()['organizerId'],
                 title: trip.docs[index].data()['title'],
                 startDate: trip.docs[index].data()['startDate'].toDate(),
                 endDate: trip.docs[index].data()['endDate'].toDate(),
@@ -339,7 +345,21 @@ class TripsProvider extends ChangeNotifier {
                           endingDateTime:
                               activitiesData['endingDateTime'].toDate(),
                           activityImageUrl: activitiesData['activityImageUrl'],
+                          participants: activitiesData['participants'] != null
+                              ? activitiesData['participants']
+                                  .asMap()
+                                  .forEach((participantIndex, participantData) {
+                                  loadedActivityParticipants.add(UserProvider(
+                                    id: participantData['id'],
+                                    firstName: participantData['firstName'],
+                                    lastName: participantData['lastName'],
+                                  ));
+                                })
+                              : [],
                         ));
+                        loadedActivities[activitiesIndex].participants =
+                            loadedActivityParticipants;
+                        loadedActivityParticipants = [];
                       })
                     : [],
                 lodgings: trip.docs[index].data()['lodgings'] != null
@@ -361,7 +381,21 @@ class TripsProvider extends ChangeNotifier {
                           checkOutDateTime:
                               lodgingsData['checkOutDateTime'].toDate(),
                           lodgingImageUrl: lodgingsData['lodgingImageUrl'],
+                          participants: lodgingsData['participants'] != null
+                              ? lodgingsData['participants']
+                                  .asMap()
+                                  .forEach((participantIndex, participantData) {
+                                  loadedLodgingParticipants.add(UserProvider(
+                                    id: participantData['id'],
+                                    firstName: participantData['firstName'],
+                                    lastName: participantData['lastName'],
+                                  ));
+                                })
+                              : [],
                         ));
+                        loadedLodgings[lodgingsIndex].participants =
+                            loadedLodgingParticipants;
+                        loadedLodgingParticipants = [];
                       })
                     : [],
                 transportations: trip.docs[index].data()['transportations'] !=
@@ -392,7 +426,23 @@ class TripsProvider extends ChangeNotifier {
                               transportationsData['endingDateTime'].toDate(),
                           transportationType:
                               transportationsData['transportationType'],
+                          participants: transportationsData['participants'] !=
+                                  null
+                              ? transportationsData['participants']
+                                  .asMap()
+                                  .forEach((participantIndex, participantData) {
+                                  loadedTransportationParticipants
+                                      .add(UserProvider(
+                                    id: participantData['id'],
+                                    firstName: participantData['firstName'],
+                                    lastName: participantData['lastName'],
+                                  ));
+                                })
+                              : [],
                         ));
+                        loadedTransportations[transportationsIndex]
+                            .participants = loadedTransportationParticipants;
+                        loadedTransportationParticipants = [];
                       })
                     : [],
                 flights: trip.docs[index].data()['flights'] != null
@@ -425,7 +475,21 @@ class TripsProvider extends ChangeNotifier {
                               flightData['arrivalDateTime'].toDate(),
                           arrivalTerminal: flightData['arrivalTerminal'],
                           arrivalGate: flightData['arrivalGate'],
+                          participants: flightData['participants'] != null
+                              ? flightData['participants']
+                                  .asMap()
+                                  .forEach((participantIndex, participantData) {
+                                  loadedFlightParticipants.add(UserProvider(
+                                    id: participantData['id'],
+                                    firstName: participantData['firstName'],
+                                    lastName: participantData['lastName'],
+                                  ));
+                                })
+                              : [],
                         ));
+                        loadedFlights[flightsIndex].participants =
+                            loadedFlightParticipants;
+                        loadedFlightParticipants = [];
                       })
                     : [],
                 restaurants: trip.docs[index].data()['restaurants'] != null
@@ -444,7 +508,21 @@ class TripsProvider extends ChangeNotifier {
                           address: restaurantsData['address'],
                           latitude: restaurantsData['latitude'],
                           longitude: restaurantsData['longitude'],
+                          participants: restaurantsData['participants'] != null
+                              ? restaurantsData['participants']
+                                  .asMap()
+                                  .forEach((participantIndex, participantData) {
+                                  loadedRestaurantParticipants.add(UserProvider(
+                                    id: participantData['id'],
+                                    firstName: participantData['firstName'],
+                                    lastName: participantData['lastName'],
+                                  ));
+                                })
+                              : [],
                         ));
+                        loadedRestaurants[restaurantIndex].participants =
+                            loadedRestaurantParticipants;
+                        loadedRestaurantParticipants = [];
                       })
                     : [],
                 isPrivate: trip.docs[index].data()['isPrivate'],
@@ -489,10 +567,15 @@ class TripsProvider extends ChangeNotifier {
     List<Country> loadedCountries = [];
     List<City> loadedCities = [];
     List<Activity> loadedActivities = [];
+    List<UserProvider> loadedActivityParticipants = [];
     List<Lodging> loadedLodgings = [];
+    List<UserProvider> loadedLodgingParticipants = [];
     List<Transportation> loadedTransportations = [];
+    List<UserProvider> loadedTransportationParticipants = [];
     List<Flight> loadedFlights = [];
+    List<UserProvider> loadedFlightParticipants = [];
     List<Restaurant> loadedRestaurants = [];
+    List<UserProvider> loadedRestaurantParticipants = [];
 
     try {
       await FirebaseFirestore.instance
@@ -505,6 +588,7 @@ class TripsProvider extends ChangeNotifier {
         (DocumentSnapshot doc) {
           tempTrip = TripProvider(
             id: doc.id,
+            organizerId: doc.data()['organizerId'],
             title: doc.data()['title'],
             startDate: doc.data()['startDate'].toDate(),
             endDate: doc.data()['endDate'].toDate(),
@@ -573,7 +657,22 @@ class TripsProvider extends ChangeNotifier {
                           activitiesData['startingDateTime'].toDate(),
                       endingDateTime: activitiesData['endingDateTime'].toDate(),
                       activityImageUrl: activitiesData['activityImageUrl'],
+                      participants: activitiesData['participants'] != null
+                          ? activitiesData['participants']
+                              .asMap()
+                              .forEach((participantIndex, participantData) {
+                              loadedActivityParticipants.add(UserProvider(
+                                id: participantData['id'],
+                                firstName: participantData['firstName'],
+                                lastName: participantData['lastName'],
+                                profilePicUrl: participantData['profilePicUrl'],
+                              ));
+                            })
+                          : [],
                     ));
+                    loadedActivities[activitiesIndex].participants =
+                        loadedActivityParticipants;
+                    loadedActivityParticipants = [];
                   })
                 : [],
             lodgings: doc.data()['lodgings'] != null
@@ -594,7 +693,22 @@ class TripsProvider extends ChangeNotifier {
                       checkOutDateTime:
                           lodgingsData['checkOutDateTime'].toDate(),
                       lodgingImageUrl: lodgingsData['lodgingImageUrl'],
+                      participants: lodgingsData['participants'] != null
+                          ? lodgingsData['participants']
+                              .asMap()
+                              .forEach((participantIndex, participantData) {
+                              loadedLodgingParticipants.add(UserProvider(
+                                id: participantData['id'],
+                                firstName: participantData['firstName'],
+                                lastName: participantData['lastName'],
+                                profilePicUrl: participantData['profilePicUrl'],
+                              ));
+                            })
+                          : [],
                     ));
+                    loadedLodgings[lodgingsIndex].participants =
+                        loadedLodgingParticipants;
+                    loadedLodgingParticipants = [];
                   })
                 : [],
             transportations: doc.data()['transportations'] != null
@@ -621,7 +735,22 @@ class TripsProvider extends ChangeNotifier {
                           transportationsData['endingDateTime'].toDate(),
                       transportationType:
                           transportationsData['transportationType'],
+                      participants: transportationsData['participants'] != null
+                          ? transportationsData['participants']
+                              .asMap()
+                              .forEach((participantIndex, participantData) {
+                              loadedTransportationParticipants.add(UserProvider(
+                                id: participantData['id'],
+                                firstName: participantData['firstName'],
+                                lastName: participantData['lastName'],
+                                profilePicUrl: participantData['profilePicUrl'],
+                              ));
+                            })
+                          : [],
                     ));
+                    loadedTransportations[transportationsIndex].participants =
+                        loadedTransportationParticipants;
+                    loadedTransportationParticipants = [];
                   })
                 : [],
             flights: doc.data()['flights'] != null
@@ -653,7 +782,22 @@ class TripsProvider extends ChangeNotifier {
                       arrivalDateTime: flightData['arrivalDateTime'].toDate(),
                       arrivalTerminal: flightData['arrivalTerminal'],
                       arrivalGate: flightData['arrivalGate'],
+                      participants: flightData['participants'] != null
+                          ? flightData['participants']
+                              .asMap()
+                              .forEach((participantIndex, participantData) {
+                              loadedFlightParticipants.add(UserProvider(
+                                id: participantData['id'],
+                                firstName: participantData['firstName'],
+                                lastName: participantData['lastName'],
+                                profilePicUrl: participantData['profilePicUrl'],
+                              ));
+                            })
+                          : [],
                     ));
+                    loadedFlights[flightsIndex].participants =
+                        loadedFlightParticipants;
+                    loadedFlightParticipants = [];
                   })
                 : [],
             restaurants: doc.data()['restaurants'] != null
@@ -672,7 +816,22 @@ class TripsProvider extends ChangeNotifier {
                       address: restaurantsData['address'],
                       latitude: restaurantsData['latitude'],
                       longitude: restaurantsData['longitude'],
+                      participants: restaurantsData['participants'] != null
+                          ? restaurantsData['participants']
+                              .asMap()
+                              .forEach((participantIndex, participantData) {
+                              loadedRestaurantParticipants.add(UserProvider(
+                                id: participantData['id'],
+                                firstName: participantData['firstName'],
+                                lastName: participantData['lastName'],
+                                profilePicUrl: participantData['profilePicUrl'],
+                              ));
+                            })
+                          : [],
                     ));
+                    loadedRestaurants[restaurantIndex].participants =
+                        loadedRestaurantParticipants;
+                    loadedRestaurantParticipants = [];
                   })
                 : [],
             isPrivate: doc.data()['isPrivate'],
@@ -796,6 +955,8 @@ class TripsProvider extends ChangeNotifier {
             .update({
           'lodgings': tempLodge
               .map((lodging) => {
+                    'chosen': lodging.chosen,
+                    'organizerId': lodging.organizerId,
                     'name': lodging.name,
                     'address': lodging.address,
                     'latitude': lodging.latitude,
@@ -806,6 +967,13 @@ class TripsProvider extends ChangeNotifier {
                     'checkOutDateTime': lodging.checkOutDateTime,
                     'reservationID': lodging.reservationID,
                     'lodgingImageUrl': lodging.lodgingImageUrl,
+                    'participants': lodging.participants
+                        .map((participant) => {
+                              'id': participant.id,
+                              'firstName': participant.firstName,
+                              'lastName': participant.lastName,
+                            })
+                        .toList()
                   })
               .toList()
         }).then(
@@ -817,6 +985,7 @@ class TripsProvider extends ChangeNotifier {
         throw error;
       }
     }
+
     _trips[tripIndex].lodgings = tempLodge;
     notifyListeners();
   }
@@ -897,6 +1066,8 @@ class TripsProvider extends ChangeNotifier {
             .update({
           'restaurants': tempRestaurant
               .map((restaurant) => {
+                    'chosen': restaurant.chosen,
+                    'organizerId': restaurant.organizerId,
                     'name': restaurant.name,
                     'phoneNumber': restaurant.phoneNumber,
                     'website': restaurant.website,
@@ -905,6 +1076,13 @@ class TripsProvider extends ChangeNotifier {
                     'longitude': restaurant.longitude,
                     'startingDateTime': restaurant.startingDateTime,
                     'reservationID': restaurant.reservationID,
+                    'participants': restaurant.participants
+                        .map((participant) => {
+                              'id': participant.id,
+                              'firstName': participant.firstName,
+                              'lastName': participant.lastName,
+                            })
+                        .toList()
                   })
               .toList()
         }).then(
@@ -1004,18 +1182,6 @@ class TripsProvider extends ChangeNotifier {
     }
     _trips[tripIndex].group = newCompanionList;
     notifyListeners();
-
-    //Add trip and user id's to new companion's list of trip invitations
-    for (int i = 0; i < newCompanionList.length; i++) {
-      addTripToCompanion(
-        newCompanionList[i].id,
-        userId,
-        organizerFirstName,
-        organizerLastName,
-        currentTrip.id,
-        currentTrip.title,
-      );
-    }
   }
 
   //Removes chosen companion
@@ -1060,16 +1226,12 @@ class TripsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //Adds tripid to list of trips user is invited to
-  Future<void> addTripToCompanion(
+  //Checks if user is already invited to trip. Returns true if is,
+  //false if not.
+  Future<bool> checkIfInvited(
     String userId,
-    String organizerUserId,
-    String organizerFirstName,
-    String organizerLastName,
     String tripId,
-    String tripTitle,
   ) async {
-    //Check to see if user already invited. If so, don't send new invite.
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -1080,13 +1242,25 @@ class TripsProvider extends ChangeNotifier {
         invitedTrips.docs.asMap().forEach((index, data) {
           if (invitedTrips.docs[index].data()['tripId'] == tripId) {
             print('User is already invited to trip');
-            return;
+            return true;
           }
         });
       });
     } catch (error) {
       throw (error);
     }
+    return false;
+  }
+
+  //Adds tripid to list of trips user is invited to
+  Future<void> addTripToCompanion(
+    String userId,
+    String organizerUserId,
+    String organizerFirstName,
+    String organizerLastName,
+    String tripId,
+    String tripTitle,
+  ) async {
     //Add trip information to list of trip invitations.
     try {
       await FirebaseFirestore.instance
@@ -1140,6 +1314,8 @@ class TripsProvider extends ChangeNotifier {
           'transportations': _trips[tripIndex]
               .transportations
               .map((transportation) => {
+                    'chosen': transportation.chosen,
+                    'organizerId': transportation.organizerId,
                     'transportationType': transportation.transportationType,
                     'company': transportation.company,
                     'phoneNumber': transportation.phoneNumber,
@@ -1155,6 +1331,13 @@ class TripsProvider extends ChangeNotifier {
                     'reservationID': transportation.reservationID,
                     'transportationImageUrl':
                         transportation.transportationImageUrl,
+                    'participants': transportation.participants
+                        .map((participants) => {
+                              'id': participants.id,
+                              'firstName': participants.firstName,
+                              'lastName': participants.lastName,
+                            })
+                        .toList()
                   })
               .toList()
         }).then(
@@ -1249,7 +1432,9 @@ class TripsProvider extends ChangeNotifier {
           'flights': _trips[tripIndex]
               .flights
               .map((flight) => {
+                    'chosen': flight.chosen,
                     'id': flight.id,
+                    'organizerId': flight.organizerId,
                     'airline': flight.airline,
                     'airlinePhoneNumber': flight.airlinePhoneNumber,
                     'airlineWebsite': flight.airlineWebsite,
@@ -1268,6 +1453,13 @@ class TripsProvider extends ChangeNotifier {
                     'arrivalDateTime': flight.arrivalDateTime,
                     'arrivalTerminal': flight.arrivalTerminal,
                     'arrivalGate': flight.arrivalGate,
+                    'participants': flight.participants
+                        .map((participant) => {
+                              'id': participant.id,
+                              'firstName': participant.firstName,
+                              'lastName': participant.lastName,
+                            })
+                        .toList()
                   })
               .toList()
         }).then(
@@ -1338,7 +1530,7 @@ class TripsProvider extends ChangeNotifier {
   //Updates current Trip list of Transportations
   Future<void> addOrEditActivity(
     TripProvider currentTrip,
-    String userId,
+    String tripOrganizerId,
     Activity newactivity,
     int editActivityIndex,
   ) async {
@@ -1361,14 +1553,16 @@ class TripsProvider extends ChangeNotifier {
       try {
         await FirebaseFirestore.instance
             .collection('users')
-            .doc('$userId')
+            .doc('$tripOrganizerId')
             .collection('trips')
             .doc('${currentTrip.id}')
             .update({
           'activities': _trips[tripIndex]
               .activities
               .map((activity) => {
+                    'chosen': activity.chosen,
                     'title': activity.title,
+                    'organizerId': activity.organizerId,
                     'phoneNumber': activity.phoneNumber,
                     'website': activity.website,
                     'address': activity.address,
@@ -1378,6 +1572,13 @@ class TripsProvider extends ChangeNotifier {
                     'endingDateTime': activity.endingDateTime,
                     'reservationID': activity.reservationID,
                     'activityImageUrl': activity.activityImageUrl,
+                    'participants': activity.participants
+                        .map((participants) => {
+                              'id': participants.id,
+                              'firstName': participants.firstName,
+                              'lastName': participants.lastName,
+                            })
+                        .toList()
                   })
               .toList()
         }).then(

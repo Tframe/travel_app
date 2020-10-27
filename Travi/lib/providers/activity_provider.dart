@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:groupy/providers/user_provider.dart';
 
 class Activity extends ChangeNotifier {
   String id;
+  String organizerId;
+  List<UserProvider> participants;
   String title;
   String phoneNumber;
   String website;
@@ -12,9 +15,12 @@ class Activity extends ChangeNotifier {
   DateTime startingDateTime;
   DateTime endingDateTime;
   String activityImageUrl;
+  bool chosen;
 
   Activity({
     this.id,
+    this.organizerId,
+    this.participants,
     this.title,
     this.phoneNumber,
     this.website,
@@ -25,5 +31,7 @@ class Activity extends ChangeNotifier {
     this.startingDateTime,
     this.endingDateTime,
     this.activityImageUrl,
+    this.chosen,
   });
+
 }

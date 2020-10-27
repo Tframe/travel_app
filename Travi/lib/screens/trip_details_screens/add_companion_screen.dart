@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/trips_provider.dart';
+import '../../providers/notification_provider.dart';
 
 class AddCompanionScreen extends StatefulWidget {
   static const routeName = '/add-companion-screen';
@@ -29,11 +30,13 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
 
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
-
-    User user = await Provider.of<UserProvider>(context, listen: false).getCurrentUser();
-    UserProvider currentLoggedInUser = Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
+    User user = await Provider.of<UserProvider>(context, listen: false)
+        .getCurrentUser();
+    UserProvider currentLoggedInUser =
+        Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
     final List<UserProvider> tempCompanion = [];
     final isValid = _formKey.currentState.validate();
+    bool _invited = false;
     if (!isValid) {
       return;
     }
@@ -125,13 +128,49 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
         ),
       );
     }
+    loadedTrip.group.addAll(tempCompanion);
 
-    tempCompanion.addAll(loadedTrip.group);
+    //add companions to trip
+    await Provider.of<TripsProvider>(context, listen: false).updateCompanions(
+        loadedTrip,
+        user.uid,
+        currentLoggedInUser.firstName,
+        currentLoggedInUser.lastName,
+        loadedTrip.group);
 
-    await Provider.of<TripsProvider>(context, listen: false)
-        .updateCompanions(loadedTrip, user.uid, currentLoggedInUser.firstName, currentLoggedInUser.lastName,tempCompanion);
+    for (int i = 0; i < tempCompanion.length; i++) {
+      //check if user not already invited, if not invited, then
+      //add notification and to trip invite list.
+      _invited = await Provider.of<TripsProvider>(context, listen: false)
+          .checkIfInvited(tempCompanion[i].id, loadedTrip.id);
+      if (!_invited) {
+        //add trip info to new companion
+        await Provider.of<TripsProvider>(context, listen: false)
+            .addTripToCompanion(
+          tempCompanion[i].id,
+          currentLoggedInUser.id,
+          currentLoggedInUser.firstName,
+          currentLoggedInUser.lastName,
+          loadedTrip.id,
+          loadedTrip.title,
+        );
 
-    //Update current trip
+        //create the add trip notification
+        NotificationProvider newNotification =
+            Provider.of<NotificationProvider>(context, listen: false)
+                .createTripInviteNotification(
+          currentLoggedInUser.id,
+          currentLoggedInUser.firstName,
+          currentLoggedInUser.lastName,
+          loadedTrip.id,
+          loadedTrip.title,
+        );
+
+        //add notification to each companion added
+        await Provider.of<NotificationProvider>(context, listen: false)
+            .addNotification(tempCompanion[i].id, newNotification);
+      }
+    }
 
     Navigator.of(context).pop();
 

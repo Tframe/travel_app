@@ -6,6 +6,8 @@ import '../../providers/trip_provider.dart';
 import '../../providers/transportation_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
+import './widgets/group_avatars.dart';
 
 class AddOrEditTransportationScreen extends StatefulWidget {
   static const routeName = '/add-transportation-screen';
@@ -17,6 +19,8 @@ class AddOrEditTransportationScreen extends StatefulWidget {
 
 class _AddOrEditTransportationScreenState
     extends State<AddOrEditTransportationScreen> {
+  double screenHeight;
+  double screenWidth;
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _companyFocusNode = FocusNode();
   final _reservationFocusNode = FocusNode();
@@ -27,11 +31,13 @@ class _AddOrEditTransportationScreenState
   TripProvider loadedTrip;
   bool edit = false;
   int editIndex = -1;
+  bool _suggestion = false;
 
   List<DropdownMenuItem<int>> transportationType = [];
   int _selectedTransportationType = 0;
   Transportation newTransportation = Transportation(
     id: null,
+    chosen: false,
     company: null,
     reservationID: null,
     startingAddress: null,
@@ -39,6 +45,8 @@ class _AddOrEditTransportationScreenState
     endingAddress: null,
     endingDateTime: null,
     transportationType: null,
+    organizerId: null,
+    participants: [],
   );
 
   // ignore: avoid_init_to_null
@@ -108,8 +116,12 @@ class _AddOrEditTransportationScreenState
     await showDatePicker(
       context: context,
       helpText: 'Start Date',
-      initialDate: loadedTrip.startDate.isBefore(DateTime.now()) ? DateTime.now() : loadedTrip.startDate,
-      firstDate: loadedTrip.startDate.isBefore(DateTime.now()) ? DateTime.now() : loadedTrip.startDate,
+      initialDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
+      firstDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
       lastDate: loadedTrip.endDate.subtract(
         Duration(
           days: 1,
@@ -216,9 +228,59 @@ class _AddOrEditTransportationScreenState
       try {
         String userId = await Provider.of<UserProvider>(context, listen: false)
             .getCurrentUserId();
+        UserProvider loggedInUser =
+            Provider.of<UserProvider>(context, listen: false).loggedInUser;
+
+        newTransportation.organizerId = userId;
+        newTransportation.participants =
+            Provider.of<UserProvider>(context, listen: false).getParticipants;
         await Provider.of<TripsProvider>(context, listen: false)
             .addOrEditTransportation(
-                loadedTrip, userId, newTransportation, edit ? editIndex : -1);
+          loadedTrip,
+          loadedTrip.organizerId,
+          newTransportation,
+          edit ? editIndex : -1,
+        );
+
+        //create notification to be sent to other companions
+      for (int i = 0; i < loadedTrip.group.length; i++) {
+        //if not the user that is logged in, send notification
+        if (loggedInUser.id != loadedTrip.group[i].id) {
+          NotificationProvider newNotification;
+          //create the add activity notification
+          if (!edit) {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createAddEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              'transportation',
+            );
+          } else {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createEditEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              newTransportation.company,
+              'transportation',
+            );
+          }
+
+          //add notification to each companion added
+          await Provider.of<NotificationProvider>(context, listen: false)
+              .addNotification(loadedTrip.group[i].id, newNotification);
+        }
+      }
+
+        Provider.of<UserProvider>(context, listen: false)
+            .resetParticipantsList();
       } catch (error) {
         print(error);
         return;
@@ -230,7 +292,7 @@ class _AddOrEditTransportationScreenState
   //Takes value from drop down and sets it to enum
   void setTransportationType() {
     String tempType = '';
-   if (_selectedTransportationType == 1) {
+    if (_selectedTransportationType == 1) {
       tempType = 'train';
     } else if (_selectedTransportationType == 2) {
       tempType = 'boat';
@@ -244,22 +306,55 @@ class _AddOrEditTransportationScreenState
     });
   }
 
-  void setEditType(){
-    if(newTransportation.transportationType == 'boat'){
+  void setEditType() {
+    if (newTransportation.transportationType == 'train') {
+      _selectedTransportationType = 1;
+    } else if (newTransportation.transportationType == 'boat') {
       _selectedTransportationType = 2;
-    } else if(newTransportation.transportationType == 'train'){
+    } else if (newTransportation.transportationType == 'carPickup') {
       _selectedTransportationType = 3;
-    } else if(newTransportation.transportationType == 'carPickup'){
+    } else if (newTransportation.transportationType == 'carRental') {
       _selectedTransportationType = 4;
-    } else if(newTransportation.transportationType == 'carRental'){
-      _selectedTransportationType = 5;
     }
+  }
+
+  //Container with horizontal scrollable cards
+  Widget cardScroller(
+    String cardTitle,
+    double avatarMultiplier,
+    Widget widget,
+    BuildContext ctx,
+  ) {
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 18,
+      ),
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Choose companions to add',
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 18,
+            ),
+            height: screenHeight * 0.225 * avatarMultiplier,
+            child: widget,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
     editIndex = arguments['editIndex'];
@@ -291,18 +386,6 @@ class _AddOrEditTransportationScreenState
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    height: screenHeight * 0.075,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: Text(
-                        'Enter the transportation details',
-                        style: TextStyle(
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
                     width: screenWidth * 0.85,
                     alignment: Alignment.center,
                     child: Form(
@@ -311,6 +394,31 @@ class _AddOrEditTransportationScreenState
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 18.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                  value: _suggestion,
+                                  onChanged: (bool newValue) {
+                                    setState(() {
+                                      _suggestion = newValue;
+                                    });
+                                  },
+                                  activeColor: Theme.of(context).primaryColor,
+                                ),
+                                Text(
+                                  'Suggestion',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           DropdownButtonFormField(
                             decoration: InputDecoration(
                               labelText: 'Transportation Type',
@@ -389,7 +497,8 @@ class _AddOrEditTransportationScreenState
                                         Theme.of(context).secondaryHeaderColor),
                               ),
                             ),
-                            initialValue: edit ? newTransportation.endingAddress : '',
+                            initialValue:
+                                edit ? newTransportation.endingAddress : '',
                             textInputAction: TextInputAction.next,
                             focusNode: _endingAddressFocusNode,
                             onFieldSubmitted: (_) {
@@ -412,7 +521,8 @@ class _AddOrEditTransportationScreenState
                             ),
                             textInputAction: TextInputAction.done,
                             focusNode: _reservationFocusNode,
-                            initialValue: edit ? newTransportation.reservationID : '',
+                            initialValue:
+                                edit ? newTransportation.reservationID : '',
                             onSaved: (value) {
                               newTransportation.reservationID = value;
                             },
@@ -493,8 +603,18 @@ class _AddOrEditTransportationScreenState
                               ],
                             ),
                           ),
+                          cardScroller(
+                            'Group',
+                            .65,
+                            GroupAvatars(loadedTrip, editIndex,
+                                loadedTrip.transportations),
+                            context,
+                          ),
                           Container(
-                            padding: const EdgeInsets.only(top: 40),
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              bottom: 18,
+                            ),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(

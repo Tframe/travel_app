@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:groupy/providers/user_provider.dart';
 
 enum TransportationType {
   Train,
@@ -9,6 +10,8 @@ enum TransportationType {
 
 class Transportation extends ChangeNotifier {
   String id;
+  String organizerId;
+  List<UserProvider> participants;
   String company;
   String phoneNumber;
   String website;
@@ -23,9 +26,12 @@ class Transportation extends ChangeNotifier {
   DateTime endingDateTime;
   String transportationType;
   String transportationImageUrl;
+  bool chosen;
 
   Transportation({
     this.id,
+    this.organizerId,
+    this.participants,
     this.company,
     this.phoneNumber,
     this.website,
@@ -40,5 +46,6 @@ class Transportation extends ChangeNotifier {
     this.endingDateTime,
     this.transportationType,
     this.transportationImageUrl,
+    this.chosen,
   });
 }

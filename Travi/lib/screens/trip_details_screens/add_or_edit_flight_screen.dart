@@ -6,6 +6,8 @@ import '../../providers/flight_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
+import './widgets/group_avatars.dart';
 
 class AddOrEditFlightScreen extends StatefulWidget {
   static const routeName = '/add-or-edit-flight-screen';
@@ -14,6 +16,8 @@ class AddOrEditFlightScreen extends StatefulWidget {
 }
 
 class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
+  double screenHeight;
+  double screenWidth;
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _airlineFocusNode = FocusNode();
   final _airlinePhoneNumberFocusNode = FocusNode();
@@ -26,6 +30,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   final _arrivalTerminalFocusNode = FocusNode();
   final _arrivalGateFocusNode = FocusNode();
   final _confirmationNumberFocusNode = FocusNode();
+  bool _suggestion = false;
 
   TripProvider loadedTrip;
   bool edit = false;
@@ -33,6 +38,8 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
 
   List<DropdownMenuItem<int>> transportationType = [];
   Flight newFlight = Flight(
+    chosen: false,
+    organizerId: null,
     airline: null,
     flightNumber: null,
     airlinePhoneNumber: null,
@@ -45,6 +52,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
     arrivalDateTime: null,
     arrivalTerminal: null,
     arrivalGate: null,
+    participants: [],
   );
 
   // ignore: avoid_init_to_null
@@ -71,18 +79,16 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   //Displays the datepicker for the departure date
   Future<void> _showStartDatePicker() async {
     await showDatePicker(
-      context: context,
-      helpText: 'Departure Date',
-      initialDate: edit
-          ? newFlight.departureDateTime.isBefore(DateTime.now())
-              ? DateTime.now()
-              : newFlight.departureDateTime
-          : loadedTrip.startDate.isBefore(DateTime.now())
-              ? DateTime.now()
-              : loadedTrip.startDate,
-      firstDate: DateTime.now(),
-      lastDate: loadedTrip.endDate
-    ).then((selectedDate) {
+            context: context,
+            helpText: 'Departure Date',
+            initialDate: loadedTrip.startDate.isBefore(DateTime.now())
+                ? DateTime.now()
+                : loadedTrip.startDate,
+            firstDate: loadedTrip.startDate.isBefore(DateTime.now())
+                ? DateTime.now()
+                : loadedTrip.startDate,
+            lastDate: loadedTrip.endDate)
+        .then((selectedDate) {
       if (selectedDate == null) {
         return;
       } else {
@@ -182,9 +188,60 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
       try {
         String userId = await Provider.of<UserProvider>(context, listen: false)
             .getCurrentUserId();
+        UserProvider loggedInUser =
+            Provider.of<UserProvider>(context, listen: false).loggedInUser;
+
+        newFlight.organizerId = userId;
+        newFlight.participants =
+            Provider.of<UserProvider>(context, listen: false).getParticipants;
+        newFlight.chosen = !_suggestion;
         await Provider.of<TripsProvider>(context, listen: false)
             .addOrEditFlight(
-                loadedTrip, userId, newFlight, edit ? editIndex : -1);
+          loadedTrip,
+          loadedTrip.organizerId,
+          newFlight,
+          edit ? editIndex : -1,
+        );
+
+        //create notification to be sent to other companions
+        for (int i = 0; i < loadedTrip.group.length; i++) {
+          //if not the user that is logged in, send notification
+          if (loggedInUser.id != loadedTrip.group[i].id) {
+            NotificationProvider newNotification;
+            //create the add activity notification
+            if (!edit) {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createAddEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                'flight',
+              );
+            } else {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createEditEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                newFlight.airline,
+                'flight',
+              );
+            }
+
+            //add notification to each companion added
+            await Provider.of<NotificationProvider>(context, listen: false)
+                .addNotification(loadedTrip.group[i].id, newNotification);
+          }
+        }
+
+        Provider.of<UserProvider>(context, listen: false)
+            .resetParticipantsList();
       } catch (error) {
         print(error);
         return;
@@ -193,10 +250,43 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
     Navigator.of(context).pop();
   }
 
+  //Container with horizontal scrollable cards
+  Widget cardScroller(
+    String cardTitle,
+    double avatarMultiplier,
+    Widget widget,
+    BuildContext ctx,
+  ) {
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 18,
+      ),
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Choose companions to add',
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 18,
+            ),
+            height: screenHeight * 0.225 * avatarMultiplier,
+            child: widget,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
     editIndex = arguments['editIndex'];
@@ -227,19 +317,6 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    height: screenHeight * 0.075,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: const Text(
-                        'Enter the flight details',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
                     width: screenWidth * 0.85,
                     alignment: Alignment.center,
                     child: Form(
@@ -248,6 +325,31 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 18.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                  value: _suggestion,
+                                  onChanged: (bool newValue) {
+                                    setState(() {
+                                      _suggestion = newValue;
+                                    });
+                                  },
+                                  activeColor: Theme.of(context).primaryColor,
+                                ),
+                                Text(
+                                  'Suggestion',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
@@ -603,8 +705,18 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                               ],
                             ),
                           ),
+                          cardScroller(
+                            'Group',
+                            .65,
+                            GroupAvatars(
+                                loadedTrip, editIndex, loadedTrip.flights),
+                            context,
+                          ),
                           Container(
-                            padding: const EdgeInsets.only(top: 20),
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              bottom: 18,
+                            ),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(

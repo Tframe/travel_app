@@ -20,8 +20,8 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
   var tripValues = TripProvider(
     id: null,
     title: null,
-    startDate: null,
-    endDate: null,
+    startDate: DateTime.now(),
+    endDate: DateTime.now(),
     countries: null,
     description: null,
   );
@@ -40,7 +40,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
             context: context,
             helpText: 'Start Date',
             initialDate: DateTime.now(),
-            firstDate: DateTime.now(),
+            firstDate: DateTime.now().subtract(Duration(days: 365 * 5)),
             lastDate: _lastDate)
         .then((selectedDate) {
       if (selectedDate == null) {
@@ -62,7 +62,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
             context: context,
             helpText: 'End Date',
             initialDate: tripValues.startDate,
-            firstDate: tripValues.startDate,
+            firstDate: DateTime.now().subtract(Duration(days: 365 * 5)),
             lastDate: _lastDate)
         .then((selectedDate) {
       if (selectedDate == null) {

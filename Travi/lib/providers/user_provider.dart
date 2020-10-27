@@ -382,5 +382,31 @@ class UserProvider extends ChangeNotifier {
     } catch (error) {
       throw (error);
     }
+    notifyListeners();
+  }
+
+  //set list of group members for events
+  List<UserProvider> _participants = [];
+
+  //add participant to list of participants
+  void addParticipant(UserProvider newUser) {
+    _participants.add(newUser);
+  }
+
+  //resets list of participants
+  void resetParticipantsList() {
+    _participants = [];
+  }
+
+  //return list of participants
+  List<UserProvider> get getParticipants {
+    return _participants;
+  }
+
+  //remove participant
+  void removeParticipant(String userId) {
+    final participantIndex =
+        _participants.indexWhere((participant) => participant.id == userId);
+    _participants.removeAt(participantIndex);
   }
 }

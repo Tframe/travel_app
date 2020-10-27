@@ -6,6 +6,8 @@ import '../../providers/trip_provider.dart';
 import '../../providers/lodging_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
+import './widgets/group_avatars.dart';
 
 class AddOrEditLodgingScreen extends StatefulWidget {
   static const routeName = '/add-lodging-screen';
@@ -14,6 +16,8 @@ class AddOrEditLodgingScreen extends StatefulWidget {
 }
 
 class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
+  double screenHeight;
+  double screenWidth;
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _nameFocusNode = FocusNode();
   final _phoneNumberFocusNode = FocusNode();
@@ -24,9 +28,12 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
   TripProvider loadedTrip;
   bool edit = false;
   int editIndex = -1;
+  bool _suggestion = false;
 
   Lodging tempLodging = Lodging(
+    chosen: false,
     id: null,
+    organizerId: null,
     name: null,
     address: null,
     phoneNumber: null,
@@ -34,6 +41,7 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     checkInDateTime: null,
     checkOutDateTime: null,
     reservationID: null,
+    participants: [],
   );
 
   // ignore: avoid_init_to_null
@@ -62,8 +70,56 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     try {
       String userId = await Provider.of<UserProvider>(context, listen: false)
           .getCurrentUserId();
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditLodging(loadedTrip, userId, tempLodging, edit ? editIndex : -1);
+      UserProvider loggedInUser = Provider.of<UserProvider>(context, listen: false).loggedInUser;
+      tempLodging.organizerId = userId;
+      tempLodging.participants =
+          Provider.of<UserProvider>(context, listen: false).getParticipants;
+      tempLodging.chosen = !_suggestion;
+      await Provider.of<TripsProvider>(context, listen: false).addOrEditLodging(
+        loadedTrip,
+        loadedTrip.organizerId,
+        tempLodging,
+        edit ? editIndex : -1,
+      );
+
+      //create notification to be sent to other companions
+      for (int i = 0; i < loadedTrip.group.length; i++) {
+        //if not the user that is logged in, send notification
+        if (loggedInUser.id != loadedTrip.group[i].id) {
+          NotificationProvider newNotification;
+          //create the add activity notification
+          if (!edit) {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createAddEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              'lodging',
+            );
+          } else {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createEditEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              tempLodging.name,
+              'lodging',
+            );
+          }
+
+          //add notification to each companion added
+          await Provider.of<NotificationProvider>(context, listen: false)
+              .addNotification(loadedTrip.group[i].id, newNotification);
+        }
+      }
+
+      Provider.of<UserProvider>(context, listen: false).resetParticipantsList();
     } catch (error) {
       print(error);
       return;
@@ -72,20 +128,17 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     Navigator.of(context).pop();
   }
 
-
   //Displays the datepicker for the checkin date
   Future<void> _showStartDatePicker() async {
     await showDatePicker(
       context: context,
       helpText: 'Checkin Date',
-      initialDate: edit
-          ? tempLodging.checkInDateTime.isBefore(DateTime.now())
-              ? DateTime.now()
-              : tempLodging.checkInDateTime
-          : loadedTrip.startDate.isBefore(DateTime.now())
-              ? DateTime.now()
-              : loadedTrip.startDate,
-      firstDate: loadedTrip.startDate,
+      initialDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
+      firstDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
       lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
       if (selectedDate == null) {
@@ -107,7 +160,8 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     showDatePicker(
       context: context,
       helpText: 'Checkout Date',
-      initialDate: edit ? tempLodging.checkOutDateTime : tempLodging.checkInDateTime,
+      initialDate:
+          edit ? tempLodging.checkOutDateTime : tempLodging.checkInDateTime,
       firstDate: tempLodging.checkInDateTime,
       lastDate: loadedTrip.endDate,
     ).then((selectedDate) {
@@ -178,10 +232,49 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     }
   }
 
+  //Container with horizontal scrollable cards
+  Widget cardScroller(
+    String cardTitle,
+    double avatarMultiplier,
+    Widget widget,
+    BuildContext ctx,
+  ) {
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 18,
+      ),
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Choose companions to add',
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 18,
+            ),
+            height: screenHeight * 0.225 * avatarMultiplier,
+            child: widget,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void updateChosenStatus() {
+    setState(() {
+      tempLodging.chosen = !tempLodging.chosen;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
     editIndex = arguments['editIndex'];
@@ -193,11 +286,13 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: edit ? const Text(
-          'Edit Lodging',
-        ) : const Text(
-          'Add Lodging',
-        ),
+        title: edit
+            ? const Text(
+                'Edit Lodging',
+              )
+            : const Text(
+                'Add Lodging',
+              ),
       ),
       body: Stack(
         children: <Widget>[
@@ -211,16 +306,29 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Container(
-                    height: screenHeight * 0.075,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: Text(
-                        'Enter the lodging details',
-                        style: TextStyle(
-                          fontSize: 17,
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 18.0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: _suggestion,
+                          onChanged: (bool newValue) {
+                            setState(() {
+                              _suggestion = newValue;
+                            });
+                          },
+                          activeColor: Theme.of(context).primaryColor,
                         ),
-                      ),
+                        Text(
+                          'Suggestion',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Container(
@@ -247,7 +355,7 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             focusNode: _nameFocusNode,
                             onFieldSubmitted: (_) {
                               FocusScope.of(context)
-                                  .requestFocus(_addressFocusNode);
+                                  .requestFocus(_phoneNumberFocusNode);
                             },
                             onSaved: (value) {
                               tempLodging.name = value;
@@ -407,8 +515,18 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                               ],
                             ),
                           ),
+                          cardScroller(
+                            'Group',
+                            .65,
+                            GroupAvatars(
+                                loadedTrip, editIndex, loadedTrip.lodgings),
+                            context,
+                          ),
                           Container(
-                            padding: const EdgeInsets.only(top: 40),
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              bottom: 18,
+                            ),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(

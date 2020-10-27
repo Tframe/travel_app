@@ -6,14 +6,19 @@ import '../../providers/trip_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
+import './widgets/group_avatars.dart';
 
 class AddOrEditRestaurantScreen extends StatefulWidget {
   static const routeName = '/add-or-edit-restaurant-screen';
   @override
-  _AddOrEditRestaurantScreenState createState() => _AddOrEditRestaurantScreenState();
+  _AddOrEditRestaurantScreenState createState() =>
+      _AddOrEditRestaurantScreenState();
 }
 
 class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
+  double screenHeight;
+  double screenWidth;
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _nameFocusNode = FocusNode();
   final _phoneNumberFocusNode = FocusNode();
@@ -24,13 +29,17 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
   TripProvider loadedTrip;
   bool edit = false;
   int editIndex = -1;
+  bool _suggestion = false;
 
   Restaurant newRestaurant = Restaurant(
     id: null,
+    chosen: false,
     name: null,
     address: null,
     startingDateTime: null,
     reservationID: null,
+    organizerId: null,
+    participants: [],
   );
 
   // ignore: avoid_init_to_null
@@ -57,8 +66,56 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     try {
       String userId = await Provider.of<UserProvider>(context, listen: false)
           .getCurrentUserId();
+      UserProvider loggedInUser = Provider.of<UserProvider>(context, listen: false).loggedInUser;
+      newRestaurant.organizerId = userId;
+      newRestaurant.participants =
+          Provider.of<UserProvider>(context, listen: false).getParticipants;
       await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditRestaurant(loadedTrip, userId, newRestaurant, edit ? editIndex : -1);
+          .addOrEditRestaurant(
+        loadedTrip,
+        loadedTrip.organizerId,
+        newRestaurant,
+        edit ? editIndex : -1,
+      );
+
+      //create notification to be sent to other companions
+      for (int i = 0; i < loadedTrip.group.length; i++) {
+        //if not the user that is logged in, send notification
+        if (loggedInUser.id != loadedTrip.group[i].id) {
+          NotificationProvider newNotification;
+          //create the add activity notification
+          if (!edit) {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createAddEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              'restaurant',
+            );
+          } else {
+            newNotification =
+                Provider.of<NotificationProvider>(context, listen: false)
+                    .createEditEventNotification(
+              loggedInUser.id,
+              loggedInUser.firstName,
+              loggedInUser.lastName,
+              loadedTrip.id,
+              loadedTrip.title,
+              newRestaurant.name,
+              'restaurant',
+            );
+          }
+
+          //add notification to each companion added
+          await Provider.of<NotificationProvider>(context, listen: false)
+              .addNotification(loadedTrip.group[i].id, newNotification);
+        }
+      }
+
+      Provider.of<UserProvider>(context, listen: false).resetParticipantsList();
     } catch (error) {
       print(error);
       return;
@@ -71,8 +128,12 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     await showDatePicker(
       context: context,
       helpText: 'Checkin Date',
-      initialDate: edit ? newRestaurant.startingDateTime : loadedTrip.startDate,
-      firstDate: DateTime.now(),
+      initialDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
+      firstDate: loadedTrip.startDate.isBefore(DateTime.now())
+          ? DateTime.now()
+          : loadedTrip.startDate,
       lastDate: loadedTrip.endDate.subtract(
         Duration(
           days: 1,
@@ -124,10 +185,43 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     }
   }
 
+  //Container with horizontal scrollable cards
+  Widget cardScroller(
+    String cardTitle,
+    double avatarMultiplier,
+    Widget widget,
+    BuildContext ctx,
+  ) {
+    return Container(
+      padding: const EdgeInsets.only(
+        top: 18,
+      ),
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Choose companions to add',
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(
+              top: 18,
+            ),
+            height: screenHeight * 0.225 * avatarMultiplier,
+            child: widget,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     loadedTrip = arguments['loadedTrip'];
     editIndex = arguments['editIndex'];
@@ -139,11 +233,13 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: edit ? const Text(
-          'Edit Restaurant',
-        ) : const Text(
-          'Add Restaurant',
-        ),
+        title: edit
+            ? const Text(
+                'Edit Restaurant',
+              )
+            : const Text(
+                'Add Restaurant',
+              ),
       ),
       body: Stack(
         children: <Widget>[
@@ -158,18 +254,6 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Container(
-                    height: screenHeight * 0.075,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 30.0),
-                      child: Text(
-                        'Enter the restaurant details',
-                        style: TextStyle(
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
                     width: screenWidth * 0.85,
                     alignment: Alignment.center,
                     child: Form(
@@ -178,6 +262,31 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 18.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Checkbox(
+                                  value: _suggestion,
+                                  onChanged: (bool newValue) {
+                                    setState(() {
+                                      _suggestion = newValue;
+                                    });
+                                  },
+                                  activeColor: Theme.of(context).primaryColor,
+                                ),
+                                Text(
+                                  'Suggestion',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           TextFormField(
                             cursorColor: Theme.of(context).primaryColor,
                             decoration: InputDecoration(
@@ -315,8 +424,18 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                               ],
                             ),
                           ),
+                          cardScroller(
+                            'Group',
+                            .65,
+                            GroupAvatars(
+                                loadedTrip, editIndex, loadedTrip.restaurants),
+                            context,
+                          ),
                           Container(
-                            padding: const EdgeInsets.only(top: 40),
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              bottom: 18,
+                            ),
                             width: screenWidth,
                             child: FlatButton(
                               child: Text(

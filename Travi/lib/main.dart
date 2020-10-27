@@ -49,6 +49,8 @@ import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
 import './providers/countries_provider.dart';
 import './providers/cities_provider.dart';
+import './providers/notification_provider.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +132,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (ctx) => Cities(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => NotificationProvider(),
         ),
       ],
       child: MaterialApp(

@@ -19,7 +19,7 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
   var _isLoading = false;
 
   @override
-  void didChangeDependencies() {
+  void initState() {
     UserProvider loggedInUser =
         Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
     User user = FirebaseAuth.instance.currentUser;
@@ -45,6 +45,11 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
       });
     }
     _isInit = false;
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
   }
 

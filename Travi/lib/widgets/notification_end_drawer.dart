@@ -1,6 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:groupy/providers/user_provider.dart';
+import '../providers/user_provider.dart';
+import '../providers/notification_provider.dart';
 
 class NotificationEndDrawer extends StatefulWidget {
   final UserProvider currentLoggedInUser;
@@ -11,6 +13,24 @@ class NotificationEndDrawer extends StatefulWidget {
 }
 
 class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
+  UserProvider _loggedInUser;
+  List<NotificationProvider> notifications = [];
+
+  //get list of notifications and add to notification list.
+  Future<void> getNotifications() async {
+    _loggedInUser =
+        Provider.of<UserProvider>(context, listen: false).loggedInUser;
+
+    await Provider.of<NotificationProvider>(context, listen: false)
+        .getNotifications(_loggedInUser.id);
+    setState(() {
+      notifications = Provider.of<NotificationProvider>(context, listen: false)
+          .notifications;
+      notifications.sort(
+          (a, b) => b.notificationDateTime.compareTo(a.notificationDateTime));
+    });
+  }
+
   Future<void> displayNotificationInvitationResponse(
     BuildContext context,
     int index,
@@ -51,13 +71,25 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
   }
 
   Future<void> invitationResponse(
-      BuildContext context, int index, String invitationStatusResponse) async {
+    BuildContext context,
+    int index,
+    String invitationStatusResponse,
+  ) async {
     await Provider.of<UserProvider>(context, listen: false)
         .updateTripInvitationStatus(
+      widget.currentLoggedInUser.id,
+      widget.currentLoggedInUser.tripInvites[index].invitationId,
+      widget.currentLoggedInUser.tripInvites[index].tripId,
+      invitationStatusResponse,
+    );
+    await Provider.of<NotificationProvider>(context, listen: false)
+        .updateNotificationStatus(widget.currentLoggedInUser.id,
+            notifications[index].id, invitationStatusResponse);
+    await Provider.of<NotificationProvider>(context, listen: false)
+        .updatedNotificationUnread(
           widget.currentLoggedInUser.id,
-          widget.currentLoggedInUser.tripInvites[index].invitationId,
-          widget.currentLoggedInUser.tripInvites[index].tripId,
-          invitationStatusResponse,
+          notifications[index].id,
+          false,
         )
         .then(
           (value) => setState(() {
@@ -97,6 +129,46 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
   }
 
   @override
+  void initState() {
+    getNotifications();
+    super.initState();
+  }
+
+  Widget getIcon(int index) {
+    if (notifications[index].notificationType == 'trip-invite') {
+      return Icon(
+        Icons.group,
+      );
+    }
+    if (notifications[index].notificationType == 'edit-flight' || notifications[index].notificationType == 'add-flight') {
+      return Icon(
+        Icons.flight,
+      );
+    }
+    if (notifications[index].notificationType == 'edit-lodging' || notifications[index].notificationType == 'add-lodging') {
+      return Icon(
+        Icons.hotel,
+      );
+    }
+    if (notifications[index].notificationType == 'edit-activity' || notifications[index].notificationType == 'add-activity') {
+      return Icon(
+        Icons.local_activity,
+      );
+    }
+    if (notifications[index].notificationType == 'edit-restaurant' || notifications[index].notificationType == 'add-restaurant') {
+      return Icon(
+        Icons.restaurant,
+      );
+    }
+    if (notifications[index].notificationType == 'edit-transportation' || notifications[index].notificationType == 'add-transportation') {
+      return Icon(
+        Icons.directions_car,
+      );
+    }
+    return Container();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
@@ -123,68 +195,64 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             ),
             SingleChildScrollView(
               child: Container(
-                height: screenHeight * 0.1,
+                height: screenHeight * 0.89,
                 child: ListView.builder(
-                  itemExtent: screenHeight * 0.1,
-                  itemCount: widget.currentLoggedInUser != null
-                      ? widget.currentLoggedInUser.tripInvites.length > 0
-                          ? widget.currentLoggedInUser.tripInvites.length
-                          : 0
-                      : 0,
+                  itemCount: notifications.length,
                   itemBuilder: (BuildContext ctx, int index) {
-                    return ListTile(
-                      leading: Icon(
-                        Icons.group,
-                      ),
-                      title: Text(
-                        'Trip invitation:',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                    return Container(
+                      color: notifications[index].unread
+                          ? Colors.grey[300]
+                          : Colors.grey[50],
+                      child: ListTile(
+                        leading: Container(
+                          width: 30,
+                          child: getIcon(index),
                         ),
-                      ),
-                      subtitle: Text(
-                        '${widget.currentLoggedInUser.tripInvites[index].organizerFirstName} ${widget.currentLoggedInUser.tripInvites[index].organizerLastName[0]}. has invited you on their ${widget.currentLoggedInUser.tripInvites[index].tripTitle} trip.',
-                      ),
-                      trailing: widget.currentLoggedInUser.tripInvites[index]
-                                  .status ==
-                              'pending'
-                          ? Container(
-                              width: 100,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.check),
-                                    onPressed: () => invitationResponse(
-                                        context, index, 'Accepted'),
+                        title: Text(
+                          '${notifications[index].notificationMessage}',
+                        ),
+                        trailing: notifications[index].status == 'na'
+                            ? Container(
+                                width: 1,
+                              )
+                            : notifications[index].status == 'pending'
+                                ? Container(
+                                    width: 100,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.check),
+                                          onPressed: () => invitationResponse(
+                                              context, index, 'Accepted'),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.clear),
+                                          onPressed: () => invitationResponse(
+                                              context, index, 'Declined'),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    width: 65,
+                                    child: Text(
+                                      '${notifications[index].status}',
+                                      style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                  IconButton(
-                                    icon: Icon(Icons.clear),
-                                    onPressed: () => invitationResponse(
-                                        context, index, 'Declined'),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              width: 65,
-                              child: Text(
-                                '${widget.currentLoggedInUser.tripInvites[index].status}',
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                      onTap: () => widget.currentLoggedInUser.tripInvites[index]
-                                  .status ==
-                              'pending'
-                          ? displayNotificationInvitationResponse(
-                              context, index)
-                          : null,
-                      dense: true,
+                        onTap: () => notifications[index].status == 'pending'
+                            ? displayNotificationInvitationResponse(
+                                context,
+                                index,
+                              )
+                            : null,
+                        dense: true,
+                      ),
                     );
                   },
                 ),
