@@ -262,7 +262,6 @@ class _PlacesState extends State<Places> {
       city: detailsResult.formattedAddress,
       latitude: detailsResult.geometry.location.lat,
       longitude: detailsResult.geometry.location.lng,
-      places: null,
     );
 
     city = tempCity;

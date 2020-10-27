@@ -10,6 +10,7 @@ import './widgets/personal_info.dart';
 import './widgets/about_section.dart';
 import './widgets/contact_info.dart';
 import './edit_personal_info_screen.dart';
+import '../../screens/tab_bar_screen.dart';
 
 class AccountProfileScreen extends StatefulWidget {
   static const routeName = '/account-profile-screen';
@@ -67,16 +68,21 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Account Profile',
-          style: TextStyle(
+          title: Text(
+            'Account Profile',
+            style: TextStyle(
+              color: Theme.of(context).secondaryHeaderColor,
+            ),
+          ),
+          iconTheme: new IconThemeData(
             color: Theme.of(context).secondaryHeaderColor,
           ),
-        ),
-        iconTheme: new IconThemeData(
-          color: Theme.of(context).secondaryHeaderColor,
-        ),
-      ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed(TabBarScreen.routeName);
+            },
+          )),
       body: FutureBuilder(
         future: _setUser(user),
         builder: (BuildContext ctx, AsyncSnapshot snapshot) {
@@ -119,7 +125,7 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                   Divider(
                     thickness: 8,
                   ),
-                  AboutSection(_loadedUser),
+                  AboutSection(_loadedUser, user),
                   Divider(
                     thickness: 8,
                   ),

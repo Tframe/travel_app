@@ -1,13 +1,30 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:groupy/widgets/notification_end_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-
+import 'package:map_launcher/map_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../screens/edit_trip_screen.dart';
+import '../../providers/notification_provider.dart';
+import './edit_trip_screen.dart';
+import './edit_lodgings_screen.dart';
+import './add_or_edit_lodging_screen.dart';
+import './edit_transportations_screen.dart';
+import './add_or_edit_transportation_screen.dart';
+import './edit_activities_screen.dart';
+import './add_or_edit_activity_screen.dart';
+import './edit_group_screen.dart';
+import './add_companion_screen.dart';
+import './edit_restaurants_screen.dart';
+import './add_or_edit_restaurant_screen.dart';
+import './edit_flights_screen.dart';
+import './add_or_edit_flight_screen.dart';
+import '../timeline_screens/timeline_screen.dart';
+import '../../widgets/launchers.dart';
 
 //Destination Popup Menu Options
 enum FilterDestinationOptions {
@@ -20,6 +37,16 @@ enum FilterDestinationOptions {
 //Group Popup Menu Options
 enum FilterGroupOptions {
   EditGroup,
+}
+
+//Flight Popup Menu Options
+enum FilterFlightOptions {
+  EditFlight,
+}
+
+//Restaurant Popup Menu Options
+enum FilterRestaurantOptions {
+  EditRestaurant,
 }
 
 //Lodging Popup Menu Options
@@ -48,9 +75,14 @@ class TripDetailsScreen extends StatefulWidget {
 }
 
 class _TripDetailsScreenState extends State<TripDetailsScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  UserProvider currentLoggedInUser;
+  List<NotificationProvider> notifications;
   String tripId;
   // TripProvider trip;
   TripProvider loadedTrip;
+  double screenWidth = 0;
+  double screenHeight = 0;
   bool _loadedTrip = false;
 
   //Bool Values for filtering by countries and/or cities
@@ -62,17 +94,27 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   bool _lodgingsComplete = false;
   bool _activitiesComplete = false;
 
+  User user = FirebaseAuth.instance.currentUser;
+
   //get the trip details as arguments from trip list screen
   @override
   void didChangeDependencies() {
+    currentLoggedInUser =
+        Provider.of<UserProvider>(context, listen: false).loggedInUser;
+    notifications =
+        Provider.of<NotificationProvider>(context, listen: false).notifications;
     if (!_loadedTrip) {
       tripId = ModalRoute.of(context).settings.arguments;
       _loadedTrip = true;
+      loadedTrip = Provider.of<TripsProvider>(
+        context,
+      ).findById(tripId);
     }
     super.didChangeDependencies();
   }
 
-  String listCountries(TripProvider loadedTrip) {
+  //Returns a text string of countries
+  String listCountries() {
     String textString = '';
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       textString = textString +
@@ -82,14 +124,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //reusable function to create a badding container with text, padding, and height
-  Widget paddingText(String text, double topPadding, double screenHeight,
+  Widget paddingText(String text, double topPadding, double fontSize,
       FontWeight weight, TextAlign alignment) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: topPadding),
+      padding: EdgeInsets.only(top: topPadding),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: screenHeight,
+          fontSize: fontSize,
           fontWeight: weight,
         ),
         textAlign: alignment,
@@ -133,12 +175,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   //Returns widget for creating avatar for group
   Widget groupAvatar(List<UserProvider> group) {
     return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: group.length,
-        itemBuilder: (ctx, index) {
+      scrollDirection: Axis.horizontal,
+      itemCount: group.length,
+      itemBuilder: (ctx, index) {
+        if (group[index].invitationStatus == 'Accepted') {
           return Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20.0,
+            padding: const EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+              bottom: 10,
             ),
             child: Column(
               children: [
@@ -149,10 +194,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           Icons.person,
                         ),
                       )
-                    : CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(
+                    : ClipOval(
+                        child: Image.network(
                           group[index].profilePicUrl,
+                          fit: BoxFit.cover,
+                          height: 60,
+                          width: 60,
                         ),
                       ),
                 Spacer(),
@@ -160,123 +207,653 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               ],
             ),
           );
-        });
+        } else if (group[index].invitationStatus == 'pending') {
+          return Padding(
+            padding: const EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+              bottom: 10,
+            ),
+            child: Column(
+              children: [
+                group[index].profilePicUrl.isEmpty
+                    ? CircleAvatar(
+                        radius: 30,
+                        child: Icon(
+                          Icons.person,
+                        ),
+                      )
+                    : ClipOval(
+                        child: Image.network(
+                          group[index].profilePicUrl,
+                          fit: BoxFit.cover,
+                          height: 60,
+                          width: 60,
+                          color: Color.fromRGBO(255, 255, 255, 0.5),
+                          colorBlendMode: BlendMode.modulate,
+                        ),
+                      ),
+                Spacer(),
+                Text('Pending...'),
+              ],
+            ),
+          );
+        }
+        return null;
+      },
+    );
+  }
+
+  //Returns listtile for flight or transportation information
+  Widget flightOrTransportationTile(String type) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: type == 'Flight'
+          ? loadedTrip.flights.length
+          : type == 'Transportation' ? loadedTrip.transportations.length : 0,
+      itemBuilder: (BuildContext ctx, int index) {
+        return Container(
+          height: screenHeight,
+          width: screenWidth,
+          child: Container(
+            width: screenWidth * 0.75,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                type == 'Flight'
+                    ? Text(
+                        loadedTrip.flights[index].airline,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : Text(
+                        loadedTrip.transportations[index].company,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                type == 'Flight'
+                    ? Text(
+                        loadedTrip.flights[index].flightNumber,
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      )
+                    : Text(''),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 18.0,
+                      ),
+                      child: type == 'Flight'
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(
+                                    loadedTrip.flights[index].departureAirport),
+                                Text(
+                                    '${DateFormat.yMd().format(loadedTrip.flights[index].departureDateTime)}'),
+                                Text(
+                                    '${DateFormat.jm().format(loadedTrip.flights[index].departureDateTime)}'),
+                              ],
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(loadedTrip.transportations[index].company),
+                                Text(
+                                    '${DateFormat.yMd().format(loadedTrip.transportations[index].startingDateTime)}'),
+                                Text(
+                                    '${DateFormat.jm().format(loadedTrip.transportations[index].startingDateTime)}'),
+                              ],
+                            ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Container(
+                        height: 1.0,
+                        width: screenWidth * 0.11,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Transform.rotate(
+                      angle: type == 'Flight' ? 90 * math.pi / 180 : 0,
+                      child: Icon(
+                        type == 'Flight'
+                            ? Icons.airplanemode_active
+                            : type == 'Transportation'
+                                ? loadedTrip.transportations[index]
+                                            .transportationType ==
+                                        'train'
+                                    ? Icons.train
+                                    : loadedTrip.transportations[index]
+                                                .transportationType ==
+                                            'boat'
+                                        ? Icons.directions_boat
+                                        : loadedTrip.transportations[index]
+                                                    .transportationType ==
+                                                'carRental'
+                                            ? Icons.directions_car
+                                            : Icons.local_taxi
+                                : Icons.device_unknown,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Container(
+                        height: 1.0,
+                        width: screenWidth * 0.11,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 18.0,
+                      ),
+                      child: type == 'Flight'
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(loadedTrip.flights[index].arrivalAirport),
+                                Text(
+                                    '${DateFormat.yMd().format(loadedTrip.flights[index].arrivalDateTime)}'),
+                                Text(
+                                    '${DateFormat.jm().format(loadedTrip.flights[index].arrivalDateTime)}'),
+                              ],
+                            )
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Text(loadedTrip.transportations[index].company),
+                                Text(
+                                    '${DateFormat.yMd().format(loadedTrip.transportations[index].endingDateTime)}'),
+                                Text(
+                                    '${DateFormat.jm().format(loadedTrip.transportations[index].endingDateTime)}'),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   //Returns Containers for Destination, Travel, Lodging, and Activities
-  Widget cardWidget(double screenHeight, double screenWidth, String cardTitle,
-      TripProvider trip) {
+  Widget cardWidget(String cardTitle) {
     var _totalCities = 0;
     var _totalDestinations = 0;
-    for (int i = 0; i < trip.countries.length; i++) {
-      _totalCities = _totalCities + trip.countries[i].cities.length;
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      _totalCities = _totalCities + loadedTrip.countries[i].cities.length;
     }
-    _totalDestinations = _totalCities + trip.countries.length;
+    _totalDestinations = _totalCities + loadedTrip.countries.length;
     return ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: cardTitle == 'Destinations'
             ? ((_countriesOnly && !_citiesOnly)
-                ? trip.countries.length
+                ? loadedTrip.countries.length
                 : ((!_countriesOnly && _citiesOnly)
                     ? _totalCities
                     : ((!_countriesOnly && !_citiesOnly)
                         ? _totalDestinations
-                        : (cardTitle == 'Lodgings'
-                            ? trip.lodgings.length
-                            : (cardTitle == 'Transportations'
-                                ? trip.transportations.length
-                                : (cardTitle == 'Activities'
-                                    ? trip.activities.length
-                                    : 0))))))
-            : 0,
+                        : 0)))
+            : ((cardTitle == 'Lodgings')
+                ? loadedTrip.lodgings.length
+                : ((cardTitle == 'Transportations')
+                    ? loadedTrip.transportations.length
+                    : ((cardTitle == 'Activities')
+                        ? loadedTrip.activities.length
+                        : ((cardTitle == 'Restaurants')
+                            ? loadedTrip.restaurants.length
+                            : 0)))),
         itemBuilder: (ctx, index) {
           return Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8.0,
-              horizontal: 10,
-            ),
-            child: cardTitle == 'Destinations'
-                ? ((_countriesOnly && !_citiesOnly)
-                    ? cardImage(trip, index, _totalDestinations, screenHeight,
-                        screenWidth, 'Country')
-                    : ((!_countriesOnly && _citiesOnly)
-                        ? cardImage(trip, index, _totalDestinations,
-                            screenHeight, screenWidth, 'City')
-                        : (cardTitle == 'Lodgings'
-                            ? Text('hi')
-                            : (cardTitle == 'Transportations'
-                                ? Text('hi')
-                                : (cardTitle == 'Activities'
-                                    ? Text('hi')
-                                    : 0)))))
-                : 0,
-          );
+              padding: const EdgeInsets.symmetric(
+                vertical: 0.0,
+                horizontal: 0.0,
+              ),
+              child: cardTitle == 'Destinations'
+                  ? ((_countriesOnly && !_citiesOnly)
+                      ? destinationCardImageAndInfo(index, 'Country')
+                      : ((!_countriesOnly && _citiesOnly)
+                          ? destinationCardImageAndInfo(index, 'City')
+                          : 0))
+                  : ((cardTitle == 'Lodgings')
+                      ? cardImageAndInfo(index, 'Lodgings')
+                      : ((cardTitle == 'Activities')
+                          ? cardImageAndInfo(index, 'Activities')
+                          : ((cardTitle == 'Restaurants')
+                              ? cardImageAndInfo(index, 'Restaurants')
+                              : 0))));
         });
   }
 
-  //Returns a widget that will display image and name of destiantion
-  Widget cardImage(TripProvider trip, int index, int totalDestinations,
-      double screenHeight, double screenWidth, String cardType) {
+  //Returns a widget that will display image and name of destiantion, lodging,
+  //activity, transportation.
+  Widget cardImageAndInfo(int index, String cardType) {
     //Create a temp list of all cities to display
     List<String> allCities = [];
-    for (int i = 0; i < trip.countries.length; i++) {
-      for (int j = 0; j < trip.countries[i].cities.length; j++) {
-        allCities.add(trip.countries[i].cities[j].city);
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        allCities.add(loadedTrip.countries[i].cities[j].city);
       }
     }
     return Container(
-      width: screenWidth * 0.4,
+      width: screenWidth,
+      height: screenHeight,
+      padding: EdgeInsets.only(
+        left: 28,
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Flexible(
-            flex: 2,
-            fit: FlexFit.tight,
-            child: ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8.0),
-                topRight: Radius.circular(8.0),
-              ),
-              child: Container(
-                width: screenWidth * 0.4,
-                height: screenHeight * 0.105,
-                child: IconButton(
-                  icon: Icon(Icons.photo_camera),
-                  //TODO
-                  onPressed: () {},
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0),
                 ),
-                color: Colors.grey,
+                child: cardImage(
+                  cardType,
+                  index,
+                  allCities,
+                  screenHeight,
+                  screenWidth,
+                ),
+                //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
               ),
-              //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-              //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
+              Container(
+                width: screenWidth * 0.625,
+                height: screenHeight * 0.125,
+                padding: const EdgeInsets.only(
+                  left: 15,
+                ),
+                child: cardTextInfo(cardType, index),
+              ),
+            ],
+          ),
+          Container(
+            width: screenWidth * 0.75,
+            padding: const EdgeInsets.only(
+              top: 20,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  child: Column(
+                    children: [
+                      Icon(Icons.phone),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 10,
+                        ),
+                      ),
+                      const Text(
+                        'Call',
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    cardType == 'Lodgings'
+                        ? Launchers().phoneLauncher(
+                            'tel:${loadedTrip.lodgings[index].phoneNumber}')
+                        : cardType == 'Activities'
+                            ? Launchers().phoneLauncher(
+                                'tel:${loadedTrip.activities[index].phoneNumber}')
+                            : cardType == 'Restaurants'
+                                ? Launchers().phoneLauncher(
+                                    'tel:${loadedTrip.restaurants[index].phoneNumber}')
+                                // ignore: unnecessary_statements
+                                : () {};
+                  },
+                ),
+                GestureDetector(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.directions,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 10,
+                        ),
+                      ),
+                      const Text(
+                        'Directions',
+                      ),
+                    ],
+                  ),
+                  onTap: () async {
+                    List<AvailableMap> availableMaps =
+                        await Launchers().getAvailableMaps();
+                    String title;
+                    double latitude;
+                    double longitude;
+
+                    if (cardType == 'Lodgings') {
+                      title = loadedTrip.lodgings[index].name;
+                      latitude = loadedTrip.lodgings[index].latitude;
+                      longitude = loadedTrip.lodgings[index].longitude;
+                    } else if (cardType == 'Activities') {
+                      title = loadedTrip.activities[index].title;
+                      latitude = loadedTrip.activities[index].latitude;
+                      longitude = loadedTrip.activities[index].longitude;
+                    } else if (cardType == 'Restaurants') {
+                      title = loadedTrip.restaurants[index].name;
+                      latitude = loadedTrip.restaurants[index].latitude;
+                      longitude = loadedTrip.restaurants[index].longitude;
+                    }
+
+                    return showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext ctx) {
+                        return SafeArea(
+                          child: SingleChildScrollView(
+                            child: Container(
+                              child: Wrap(
+                                children: <Widget>[
+                                  for (var map in availableMaps)
+                                    ListTile(
+                                      onTap: () => map.showMarker(
+                                        coords: Coords(latitude, longitude),
+                                        title: title,
+                                      ),
+                                      title: Text(map.mapName),
+                                      leading: Image(
+                                        image: map.icon,
+                                        height: 30.0,
+                                        width: 30.0,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                GestureDetector(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.open_in_browser,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 10,
+                        ),
+                      ),
+                      const Text('Website'),
+                    ],
+                  ),
+                  onTap: () {
+                    cardType == 'Lodgings'
+                        ? Launchers()
+                            .urlLauncher(loadedTrip.lodgings[index].website)
+                        : cardType == 'Activities'
+                            ? Launchers().urlLauncher(
+                                loadedTrip.activities[index].website)
+                            : cardType == 'Restaurants'
+                                ? Launchers().urlLauncher(
+                                    loadedTrip.restaurants[index].website)
+                                // ignore: unnecessary_statements
+                                : () {};
+                  },
+                ),
+              ],
             ),
           ),
-          if (cardType == 'Country')
-            Flexible(
-              flex: 1,
-              fit: FlexFit.tight,
-              child: Text(
-                trip.countries[index].country,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          if (cardType == 'City')
-            Flexible(
-              flex: 1,
-              fit: FlexFit.tight,
-              child: Text(
-                allCities[index],
-                textAlign: TextAlign.center,
-              ),
-            ),
         ],
       ),
     );
   }
 
+  Widget cardTextInfo(String cardType, int index) {
+    return cardType == 'Lodgings'
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loadedTrip.lodgings[index].name,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)}',
+              ),
+              Text(
+                '${DateFormat.jm().format(loadedTrip.lodgings[index].checkInDateTime)}',
+              ),
+            ],
+          )
+        : cardType == 'Activities'
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loadedTrip.activities[index].title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${DateFormat.yMd().format(loadedTrip.activities[index].startingDateTime)}',
+                  ),
+                  Text(
+                    '${DateFormat.jm().format(loadedTrip.activities[index].startingDateTime)}',
+                  ),
+                ],
+              )
+            : cardType == 'Restaurants'
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        loadedTrip.restaurants[index].name,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${DateFormat.yMd().format(loadedTrip.restaurants[index].startingDateTime)}',
+                      ),
+                      Text(
+                        '${DateFormat.jm().format(loadedTrip.restaurants[index].startingDateTime)}',
+                      ),
+                    ],
+                  )
+                : Container();
+  }
+
+  //Returns a widget that will display image and name of destiantion, lodging,
+  //activity, transportation.
+  Widget destinationCardImageAndInfo(int index, String cardType) {
+    //Create a temp list of all cities to display
+    List<String> allCities = [];
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        allCities.add(loadedTrip.countries[i].cities[j].city);
+      }
+    }
+    return Container(
+      width: screenWidth,
+      height: screenHeight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8.0),
+              topRight: Radius.circular(8.0),
+            ),
+            child: cardImage(
+              cardType,
+              index,
+              allCities,
+              screenHeight,
+              screenWidth,
+            ),
+            //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+            //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  //Returns a flexible widget used for displaying
+  //card info.
+  Widget flexibleCardInfo(String text) {
+    return Flexible(
+      flex: 1,
+      fit: FlexFit.tight,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  //Displays the appropriate card image based on type of event
+  Widget cardImage(
+    String type,
+    int index,
+    List<String> allCities,
+    double screenHeight,
+    double screenWidth,
+  ) {
+    if (type == 'Country') {
+      if (loadedTrip.countries[index].countryImageUrl != null) {
+        return Container(
+          alignment: Alignment.center,
+          height: screenHeight * 0.225,
+          width: screenWidth,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Image.network(
+                  loadedTrip.countries[index].countryImageUrl,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  loadedTrip.countries[index].country,
+                ),
+              )
+            ],
+          ),
+        );
+      } else {
+        return Container(
+          width: screenWidth * 0.5,
+          height: screenHeight * 0.2,
+          child: IconButton(
+            icon: Icon(Icons.photo_camera),
+            //TODO
+            onPressed: () {},
+          ),
+          color: Colors.grey,
+        );
+      }
+    } else if (type == 'City') {
+      if (loadedTrip.countries[0].cities[0].cityImageUrl != null) {
+        return Container(
+          alignment: Alignment.center,
+          height: screenHeight * 0.225,
+          width: screenWidth,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Image.network(
+                  loadedTrip.countries[0].cities[0].cityImageUrl,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  loadedTrip.countries[0].cities[0].city,
+                ),
+              ),
+            ],
+          ),
+        );
+      } else {
+        return Container(
+          width: screenWidth * 0.5,
+          height: screenHeight * 0.2,
+          child: IconButton(
+            icon: Icon(Icons.photo_camera),
+            //TODO
+            onPressed: () {},
+          ),
+          color: Colors.grey,
+        );
+      }
+    } else if (type == 'Lodgings') {
+      if (loadedTrip.lodgings[index].lodgingImageUrl != null) {
+        return Image.network(
+          loadedTrip.lodgings[index].lodgingImageUrl,
+        );
+      }
+    } else if (type == 'Activities') {
+      if (loadedTrip.activities[index].activityImageUrl != null) {
+        return Image.network(
+          loadedTrip.activities[index].activityImageUrl,
+        );
+      }
+    } else if (type == 'Restaurants') {
+      if (loadedTrip.restaurants[index].restaurantImageUrl != null) {
+        return Image.network(
+          loadedTrip.restaurants[index].restaurantImageUrl,
+        );
+      }
+    }
+    return Container(
+      width: screenWidth * 0.275,
+      height: screenHeight * 0.125,
+      child: IconButton(
+        icon: Icon(Icons.photo_camera),
+        //TODO
+        onPressed: () {},
+      ),
+      color: Colors.grey,
+    );
+  }
+
   //Container with horizontal scrollable cards
-  Widget cardScroller(String cardTitle, double screenHeight, double screenWidth,
-      double avatarMultiplier, Widget widget, BuildContext ctx) {
+  Widget cardScroller(
+    String cardTitle,
+    double avatarMultiplier,
+    Widget widget,
+    BuildContext ctx,
+  ) {
     return Container(
       width: double.infinity,
       child: Column(
@@ -289,40 +866,54 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 padding: const EdgeInsets.only(left: 10.0),
                 child: paddingText(
                   cardTitle,
-                  5,
-                  screenHeight * 0.025,
+                  0,
+                  18,
                   FontWeight.bold,
                   TextAlign.left,
                 ),
               ),
-              Container(
-                height: screenHeight * 0.05,
-                child: cardTitle == 'Destinations'
-                    ? _destinationMenuButton(cardTitle)
-                    : (cardTitle == 'Group'
-                        ? _groupMenuButton()
-                        : (cardTitle == 'Lodging'
-                            ? _lodgingMenuButton()
-                            : (cardTitle == 'Transportation'
-                                ? _transportationMenuButton()
-                                : (cardTitle == 'Activities'
-                                    ? _activitiesMenuButton()
-                                    : null)))),
+              Row(
+                children: [
+                  Container(
+                    height: screenHeight * 0.065,
+                    child: cardTitle == 'Destinations'
+                        ? _destinationMenuButton(cardTitle)
+                        : (cardTitle == 'Group'
+                            ? _groupMenuButton(loadedTrip)
+                            : (cardTitle == 'Flights'
+                                ? _flightMenuButton(loadedTrip)
+                                : (cardTitle == 'Lodging'
+                                    ? _lodgingMenuButton(loadedTrip)
+                                    : (cardTitle == 'Transportation'
+                                        ? _transportationMenuButton(loadedTrip)
+                                        : (cardTitle == 'Activities'
+                                            ? _activitiesMenuButton(loadedTrip)
+                                            : (cardTitle == 'Restaurants'
+                                                ? _restaurantsMenuButton(
+                                                    loadedTrip)
+                                                : null)))))),
+                  ),
+                ],
               ),
             ],
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 8),
-          ),
           Container(
-            height: screenHeight * 0.175 * avatarMultiplier,
+            height: cardTitle == 'Group' || cardTitle == 'Flights'
+                ? screenHeight * 0.185 * avatarMultiplier
+                : screenHeight * 0.25 * avatarMultiplier,
             child: widget,
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 10),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _displayMessage(String sectionTitle) {
+    return IconButton(
+      icon: Icon(
+        Icons.message,
+      ),
+      onPressed: () {},
     );
   }
 
@@ -366,11 +957,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _groupMenuButton() {
+  Widget _groupMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterGroupOptions selectedOption) {
         if (selectedOption == FilterGroupOptions.EditGroup) {
-          //Navigator to add or remove companions
+          Navigator.of(context).pushNamed(
+            EditGroupScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
         }
       },
       icon: Icon(
@@ -386,11 +980,37 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _lodgingMenuButton() {
+  Widget _flightMenuButton(TripProvider loadedTrip) {
+    return PopupMenuButton(
+      onSelected: (FilterFlightOptions selectedOption) {
+        if (selectedOption == FilterFlightOptions.EditFlight) {
+          Navigator.of(context).pushNamed(
+            EditFlightsScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
+        }
+      },
+      icon: Icon(
+        Icons.more_vert,
+      ),
+      itemBuilder: (BuildContext ctx) => [
+        PopupMenuItem(
+          child: Text('Edit Flight'),
+          value: FilterFlightOptions.EditFlight,
+        )
+      ],
+    );
+  }
+
+  //Menu button for adding group members
+  Widget _lodgingMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterLodgingOptions _selectedOption) {
         if (_selectedOption == FilterLodgingOptions.EditLodging) {
-          //Navigator to add or remove lodgings
+          Navigator.of(context).pushNamed(
+            EditLodgingsScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
         } else if (_selectedOption == FilterLodgingOptions.MarkComplete) {
           setState(() {
             _lodgingsComplete = !_lodgingsComplete;
@@ -417,11 +1037,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _transportationMenuButton() {
+  Widget _transportationMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterTransportationOptions _selectedOption) {
         if (_selectedOption == FilterTransportationOptions.EditTransporation) {
-          //Navigator to add or remove transportations
+          Navigator.of(context).pushNamed(
+            EditTransportationsScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
         } else if (_selectedOption ==
             FilterTransportationOptions.MarkComplete) {
           setState(() {
@@ -449,11 +1072,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //Menu button for adding group members
-  Widget _activitiesMenuButton() {
+  Widget _activitiesMenuButton(TripProvider loadedTrip) {
     return PopupMenuButton(
       onSelected: (FilterActivityOptions selectedOption) {
         if (selectedOption == FilterActivityOptions.EditActivity) {
-          //Navigator to add or remove activities
+          Navigator.of(context).pushNamed(
+            EditActivitiesScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
         } else if (selectedOption == FilterActivityOptions.MarkComplete) {
           setState(() {
             _activitiesComplete = !_activitiesComplete;
@@ -479,9 +1105,31 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     );
   }
 
+  //Menu button for adding group members
+  Widget _restaurantsMenuButton(TripProvider loadedTrip) {
+    return PopupMenuButton(
+      onSelected: (FilterActivityOptions selectedOption) {
+        if (selectedOption == FilterActivityOptions.EditActivity) {
+          Navigator.of(context).pushNamed(
+            EditRestaurantsScreen.routeName,
+            arguments: {'loadedTrip': loadedTrip},
+          );
+        }
+      },
+      icon: Icon(
+        Icons.more_vert,
+      ),
+      itemBuilder: (BuildContext ctx) => [
+        PopupMenuItem(
+          child: Text('Edit Restaurants'),
+          value: FilterActivityOptions.EditActivity,
+        ),
+      ],
+    );
+  }
+
   //Method to update completedItem on Firestore
   Future<void> updateTask(String taskCompleted, bool mark) async {
-    User user = FirebaseAuth.instance.currentUser;
     try {
       await Provider.of<TripsProvider>(context, listen: false)
           .updateTripCompleted(tripId, taskCompleted, mark, user);
@@ -490,10 +1138,283 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     }
   }
 
+  //Navigate to timeline screen
+  void _timeLine() async {
+    Navigator.of(context).pushNamed(
+      TimelineScreen.routeName,
+      arguments: {
+        'loadedTrip': loadedTrip,
+      },
+    );
+  }
+
+  //Displays a bottom modal sheet for user to add event to trip
+  Future<Widget> showBottomModalAddTrip(BuildContext context) async {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: screenHeight * 0.9,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppBar(
+                  title: Text(
+                    'Add to trip',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                  automaticallyImplyLeading: false,
+                  iconTheme: new IconThemeData(
+                    color: Colors.white,
+                  ),
+                  actions: [
+                    SizedBox(),
+                  ],
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.person,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Companion',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddCompanionScreen.routeName,
+                      arguments: {'loadedTrip': loadedTrip},
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.place,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Destination',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.flight,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Flight',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddOrEditFlightScreen.routeName,
+                      arguments: {
+                        'loadedTrip': loadedTrip,
+                        'editIndex': -1,
+                      },
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.hotel,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Lodging',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddOrEditLodgingScreen.routeName,
+                      arguments: {
+                        'loadedTrip': loadedTrip,
+                        'editIndex': -1,
+                      },
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.local_activity,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Activity',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddOrEditActivityScreen.routeName,
+                      arguments: {
+                        'loadedTrip': loadedTrip,
+                        'editIndex': -1,
+                      },
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.restaurant,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Restaurant',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddOrEditRestaurantScreen.routeName,
+                      arguments: {
+                        'loadedTrip': loadedTrip,
+                        'editIndex': -1,
+                      },
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+                Divider(
+                  thickness: 2,
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.tram,
+                    color: Theme.of(context).secondaryHeaderColor,
+                    size: screenHeight * .065,
+                  ),
+                  title: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Text(
+                      'Transportation',
+                      style: TextStyle(
+                        color: Theme.of(context).secondaryHeaderColor,
+                        fontSize: 25,
+                      ),
+                    ),
+                  ),
+                  //NAVIGATION TO NEW SCREEN
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      AddOrEditTransportationScreen.routeName,
+                      arguments: {
+                        'loadedTrip': loadedTrip,
+                        'editIndex': -1,
+                      },
+                    ).then((value) {
+                      setState(() {
+                        print('updated and popped');
+                      });
+                      Navigator.of(context).pop();
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
     final tripId = ModalRoute.of(context).settings.arguments as String;
     // final tripId = routeArgs['id'];
     final loadedTrip = Provider.of<TripsProvider>(
@@ -505,6 +1426,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       _transportationsComplete = loadedTrip.transportationsComplete;
     });
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
           '${loadedTrip.title}',
@@ -516,13 +1438,47 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           color: Theme.of(context).secondaryHeaderColor,
         ),
         actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: Theme.of(context).secondaryHeaderColor,
+          Stack(
+            fit: StackFit.loose,
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications,
+                  size: 30,
+                ),
+                onPressed: () {
+                  _scaffoldKey.currentState.openEndDrawer();
+                  if (_scaffoldKey.currentState.isEndDrawerOpen) {
+                    setState(() {
+                      Provider.of<NotificationProvider>(context, listen: false)
+                          .clearNotificationsList();
+                    });
+                  }
+                },
               ),
-              //TODO...... CREATE EDIT FUNCTION
-              onPressed: () {})
+              notifications
+                          .where((notification) => notification.unread)
+                          .length >
+                      0
+                  ? Container(
+                      height: 25,
+                      width: 25,
+                      child: Card(
+                        elevation: 5,
+                        color: Colors.red,
+                        child: Text(
+                          '${notifications.where((notification) => notification.unread).length}',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -536,7 +1492,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 right: screenWidth * 0.03,
                 left: screenWidth * 0.03,
               ),
-              child: loadedTrip.image == null
+              child: loadedTrip.tripImageUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(8.0),
@@ -566,7 +1522,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           child: Hero(
                             tag: loadedTrip.id,
                             child: Image.network(
-                              loadedTrip.image,
+                              'https://traveloregon.com/wp-content/uploads/2018/08/2018BendFall_oldmill.jpg',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -589,21 +1545,21 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             paddingText(
               loadedTrip.title,
               8,
-              screenHeight * 0.03,
+              19,
               FontWeight.bold,
               TextAlign.center,
             ),
             paddingText(
-              listCountries(loadedTrip),
+              listCountries(),
               6.5,
-              screenHeight * 0.025,
+              17,
               FontWeight.bold,
               TextAlign.center,
             ),
             paddingText(
               '${DateFormat.yMMMd().format(loadedTrip.startDate)} - ${DateFormat.yMMMd().format(loadedTrip.endDate)}',
               6.5,
-              screenHeight * 0.025,
+              17,
               FontWeight.bold,
               TextAlign.center,
             ),
@@ -617,7 +1573,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     ? 'Enter a descritpion'
                     : '${loadedTrip.description}',
                 6.5,
-                screenHeight * 0.023,
+                15,
                 FontWeight.normal,
                 TextAlign.left,
               ),
@@ -626,8 +1582,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               width: screenWidth * 0.9,
               child: FlatButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(EditTripScreen.routeName,
-                      arguments: loadedTrip.id);
+                  Navigator.of(context).pushNamed(
+                    EditTripScreen.routeName,
+                    arguments: {'trip': loadedTrip, 'user': user},
+                  );
                 },
                 child: Text(
                   'Edit Trip',
@@ -650,17 +1608,19 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             Divider(
               thickness: 10,
             ),
-            cardScroller(
-              'Group',
-              screenHeight,
-              screenWidth,
-              .65,
-              groupAvatar(loadedTrip.group),
-              context,
-            ),
-            Divider(
-              thickness: 10,
-            ),
+            loadedTrip.group.length > 0
+                ? cardScroller(
+                    'Group',
+                    .65,
+                    groupAvatar(loadedTrip.group),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.group.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
             Container(
               height: screenHeight * 0.065,
               padding: EdgeInsets.symmetric(
@@ -677,7 +1637,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     ),
                     'Timeline',
                     //TODO
-                    () {},
+                    _timeLine,
                     context,
                   ),
                   flatButton(
@@ -716,53 +1676,105 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             Divider(
               thickness: 10,
             ),
-            cardScroller(
-              'Destinations',
-              screenHeight,
-              screenWidth,
-              1,
-              cardWidget(screenHeight, screenWidth, 'Destinations', loadedTrip),
-              context,
-            ),
-            Divider(
-              thickness: 10,
-            ),
-            cardScroller(
-              'Lodging',
-              screenHeight,
-              screenWidth,
-              1,
-              cardWidget(screenHeight, screenWidth, 'Lodging', loadedTrip),
-              context,
-            ),
-            Divider(
-              thickness: 10,
-            ),
-            cardScroller(
-              'Transportation',
-              screenHeight,
-              screenWidth,
-              1,
-              cardWidget(
-                  screenHeight, screenWidth, 'Transportation', loadedTrip),
-              context,
-            ),
-            Divider(
-              thickness: 10,
-            ),
-            cardScroller(
-              'Activities',
-              screenHeight,
-              screenWidth,
-              1,
-              cardWidget(screenHeight, screenWidth, 'Activities', loadedTrip),
-              context,
-            ),
+            loadedTrip.flights.length > 0
+                ? cardScroller(
+                    'Flights',
+                    1,
+                    flightOrTransportationTile(
+                      'Flight',
+                    ),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.flights.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
+            loadedTrip.countries.length > 0
+                ? cardScroller(
+                    'Destinations',
+                    1,
+                    cardWidget('Destinations'),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.lodgings.length > 0 ||
+                    loadedTrip.activities.length > 0 ||
+                    loadedTrip.transportations.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
+            loadedTrip.lodgings.length > 0
+                ? cardScroller(
+                    'Lodging',
+                    1,
+                    cardWidget('Lodgings'),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.lodgings.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
+            loadedTrip.activities.length > 0
+                ? cardScroller(
+                    'Activities',
+                    1,
+                    cardWidget('Activities'),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.restaurants.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
+            loadedTrip.restaurants.length > 0
+                ? cardScroller(
+                    'Restaurants',
+                    1,
+                    cardWidget('Restaurants'),
+                    context,
+                  )
+                : Container(),
+            loadedTrip.transportations.length > 0
+                ? Divider(
+                    thickness: 10,
+                  )
+                : Container(),
+            loadedTrip.transportations.length > 0
+                ? cardScroller(
+                    'Transportation',
+                    1,
+                    flightOrTransportationTile(
+                      'Transportation',
+                    ),
+                    context,
+                  )
+                : Container(),
             Padding(
-              padding: EdgeInsets.only(bottom: 12),
+              padding: EdgeInsets.only(bottom: 75),
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).primaryColor,
+        child: Icon(
+          Icons.add,
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
+        onPressed: () {
+          showBottomModalAddTrip(context);
+        },
+      ),
+      endDrawerEnableOpenDragGesture: false,
+      endDrawer: Container(
+        width: screenWidth * 0.9,
+        child: NotificationEndDrawer(currentLoggedInUser),
       ),
     );
   }

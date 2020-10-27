@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../providers/user_provider.dart';
+import '../edit_about_screen.dart';
 
 class AboutSection extends StatelessWidget {
   final UserProvider _loadedUser;
+  final User user;
 
-  AboutSection(this._loadedUser);
+  AboutSection(this._loadedUser, this.user);
+
+  //routes to edit contact info screen, sends the loadeduser current info 
+  //and user info for firestore
+  void _editAbout(BuildContext context) {
+    Navigator.of(context).pushNamed(
+      EditAboutScreen.routeName,
+      arguments: {'loadedUser': _loadedUser, 'user': user},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +40,7 @@ class AboutSection extends StatelessWidget {
               ),
               IconButton(
                 icon: Icon(Icons.edit),
-                onPressed: () {},
+                onPressed: () => _editAbout(context),
               ),
             ],
           ),

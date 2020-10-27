@@ -43,7 +43,6 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
             city: null,
             longitude: null,
             latitude: null,
-            places: null,
           ),
         ],
       ),

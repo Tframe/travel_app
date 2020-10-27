@@ -17,7 +17,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
+    location: '',
   );
 
   void _savePhone() {

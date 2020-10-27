@@ -22,9 +22,11 @@ class _UserImagePickerState extends State<UserImagePicker> {
   File _pickedImage;
 
   //Get image and store as new profile pic
-  void _pickImage() async {
+  void _getImage(bool takePhoto) async {
     final picker = ImagePicker();
-    final pickedImage = await picker.getImage(source: ImageSource.camera);
+    final pickedImage = await picker.getImage(
+      source: takePhoto ? ImageSource.camera : ImageSource.gallery,
+    );
     File pickedImageFile = File(pickedImage.path);
     setState(() {
       _pickedImage = pickedImageFile;
@@ -45,6 +47,31 @@ class _UserImagePickerState extends State<UserImagePicker> {
         .update({
       'profilePicUrl': url,
     });
+    Navigator.of(context).pop();
+  }
+
+  _showMaterialDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Photo'),
+        content: const Text('Take a new photo or select one from your gallery'),
+        actions: [
+          FlatButton(
+            onPressed: () => _getImage(true),
+            child: const Text(
+              'Take a new photo',
+            ),
+          ),
+          FlatButton(
+            onPressed: () => _getImage(false),
+            child: const Text(
+              'Choose from gallery',
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -52,7 +79,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
-      onTap: _pickImage,
+      onTap: _showMaterialDialog,
       child: Padding(
         padding: EdgeInsets.only(top: screenHeight * 0.075),
         child: CircleAvatar(

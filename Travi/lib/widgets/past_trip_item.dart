@@ -44,7 +44,7 @@ class PastTripItem extends StatelessWidget {
                   height: screenHeight * 0.20,
                   width: double.infinity,
                   alignment: Alignment.center,
-                  child: foundTrip.image == null
+                  child: foundTrip.tripImageUrl == null
                       ? ClipRRect(
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
@@ -67,7 +67,7 @@ class PastTripItem extends StatelessWidget {
                             topRight: Radius.circular(8.0),
                           ),
                           child: Image.network(
-                            foundTrip.image,
+                            foundTrip.tripImageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),

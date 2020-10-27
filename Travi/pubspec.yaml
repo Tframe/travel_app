@@ -37,6 +37,9 @@ dependencies:
   firebase_storage: ^4.0.0
   firebase_messaging: ^7.0.0
   flutter_dotenv: ^2.1.0
+  timeline_tile: ^1.0.0
+  url_launcher: ^5.7.2
+  map_launcher: ^0.12.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

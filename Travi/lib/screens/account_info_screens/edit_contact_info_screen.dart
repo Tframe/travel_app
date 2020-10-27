@@ -24,7 +24,7 @@ class _EditContactInfoScreenState extends State<EditContactInfoScreen> {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
+    location: '',
   );
 
   @override
@@ -161,7 +161,7 @@ class _EditContactInfoScreenState extends State<EditContactInfoScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
                               color: Theme.of(context).primaryColor,
                             ),

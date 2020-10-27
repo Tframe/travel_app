@@ -21,7 +21,7 @@ class _SignUpNameScreenState extends State<SignUpNameScreen> {
     lastName: '',
     email: '',
     phone: '',
-    address: '',
+    location: '',
   );
 
   @override

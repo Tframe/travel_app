@@ -10,7 +10,7 @@ import './screens/discover_screen.dart';
 import './screens/current_trips_screen.dart';
 import './screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
-import './screens/edit_trip_screen.dart';
+import './screens/trip_details_screens/edit_trip_screen.dart';
 import './screens/login_signup_screen.dart';
 import './screens/trip_details_screens/trip_detail_screen.dart';
 import './screens/login_screen.dart';
@@ -30,11 +30,27 @@ import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
 import './screens/account_info_screens/account_profile_screen.dart';
 import './screens/account_info_screens/edit_personal_info_screen.dart';
 import './screens/account_info_screens/edit_contact_info_screen.dart';
+import './screens/account_info_screens/edit_about_screen.dart';
+import './screens/trip_details_screens/edit_lodgings_screen.dart';
+import './screens/trip_details_screens/add_or_edit_lodging_screen.dart';
+import './screens/trip_details_screens/edit_transportations_screen.dart';
+import './screens/trip_details_screens/edit_activities_screen.dart';
+import './screens/trip_details_screens/edit_group_screen.dart';
+import './screens/trip_details_screens/add_companion_screen.dart';
+import './screens/trip_details_screens/add_or_edit_transportation_screen.dart';
+import './screens/trip_details_screens/edit_flights_screen.dart';
+import './screens/trip_details_screens/add_or_edit_flight_screen.dart';
+import './screens/trip_details_screens/add_or_edit_activity_screen.dart';
+import './screens/trip_details_screens/edit_restaurants_screen.dart';
+import './screens/trip_details_screens/add_or_edit_restaurant_screen.dart';
+import './screens/timeline_screens/timeline_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
 import './providers/countries_provider.dart';
 import './providers/cities_provider.dart';
+import './providers/notification_provider.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,6 +133,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => Cities(),
         ),
+        ChangeNotifierProvider(
+          create: (ctx) => NotificationProvider(),
+        ),
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -170,6 +189,23 @@ class MyApp extends StatelessWidget {
           AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
           EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
           EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
+          EditAboutScreen.routeName: (ctx) => EditAboutScreen(),
+          EditGroupScreen.routeName: (ctx) => EditGroupScreen(),
+          AddCompanionScreen.routeName: (ctx) => AddCompanionScreen(),
+          EditLodgingsScreen.routeName: (ctx) => EditLodgingsScreen(),
+          AddOrEditLodgingScreen.routeName: (ctx) => AddOrEditLodgingScreen(),
+          EditTransportationsScreen.routeName: (ctx) =>
+              EditTransportationsScreen(),
+          AddOrEditTransportationScreen.routeName: (ctx) =>
+              AddOrEditTransportationScreen(),
+          EditFlightsScreen.routeName: (ctx) => EditFlightsScreen(),
+          AddOrEditFlightScreen.routeName: (ctx) => AddOrEditFlightScreen(),
+          EditActivitiesScreen.routeName: (ctx) => EditActivitiesScreen(),
+          AddOrEditActivityScreen.routeName: (ctx) => AddOrEditActivityScreen(),
+          EditRestaurantsScreen.routeName: (ctx) => EditRestaurantsScreen(),
+          AddOrEditRestaurantScreen.routeName: (ctx) =>
+              AddOrEditRestaurantScreen(),
+          TimelineScreen.routeName: (ctx) => TimelineScreen(),
         },
       ),
     );
