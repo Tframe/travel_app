@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../providers/trip_provider.dart';
-import '../../providers/trips_provider.dart';
+import '../../providers/lodging_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_lodging_screen.dart';
 
@@ -15,7 +15,8 @@ class EditLodgingsScreen extends StatefulWidget {
 
 class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
   TripProvider loadedTrip;
-
+  int countryIndex = 0;
+  int cityIndex = 0;
   //Add new loading
   //if editIndex == -1, then adding lodging,
   //if editIndex > -1, then editing lodging.
@@ -43,7 +44,11 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
       appBar: AppBar(
         title: Text('Edit Lodgings'),
       ),
-      body: loadedTrip.lodgings == null || loadedTrip.lodgings.length == 0
+      body: loadedTrip.countries[countryIndex].cities[cityIndex].lodgings ==
+                  null ||
+              loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
+                      .length ==
+                  0
           ? Center(
               child: Text('No Lodgings Added'),
             )
@@ -59,12 +64,18 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.lodgings == null ? 0 : loadedTrip.lodgings.length,
+                        itemCount: loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].lodgings ==
+                                null
+                            ? 0
+                            : loadedTrip.countries[countryIndex]
+                                .cities[cityIndex].lodgings.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.lodgings),
+                              key: ValueKey(loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].lodgings),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -72,28 +83,40 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                     Icons.hotel,
                                   ),
                                 ),
-                                title: Text(loadedTrip.lodgings[index].name),
+                                title: Text(loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].lodgings[index].name),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      loadedTrip.lodgings[index].address != null
-                                          ? '${loadedTrip.lodgings[index].address}'
+                                      loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .lodgings[index]
+                                                  .address !=
+                                              null
+                                          ? '${loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].address}'
                                           : '',
                                     ),
                                     Text(
-                                      loadedTrip.lodgings[index]
+                                      loadedTrip
+                                                      .countries[countryIndex]
+                                                      .cities[cityIndex]
+                                                      .lodgings[index]
                                                       .checkInDateTime !=
                                                   null &&
-                                              loadedTrip.lodgings[index]
+                                              loadedTrip
+                                                      .countries[countryIndex]
+                                                      .cities[cityIndex]
+                                                      .lodgings[index]
                                                       .checkOutDateTime !=
                                                   null
-                                          ? '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)} - ${DateFormat.yMd().format(loadedTrip.lodgings[index].checkOutDateTime)}'
+                                          ? '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].checkInDateTime)} - ${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].checkOutDateTime)}'
                                           : '',
                                     ),
                                   ],
                                 ),
-                                
+
                                 //TODO Navigate to the lodging profile page
                                 onTap: () => _addOrEditLodging(index),
                               ),
@@ -116,17 +139,28 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.lodgings[index].name}?',
+                                      'Are you sure you want to delete ${loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].name}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
                                         child: const Text('Yes'),
                                         onPressed: () {
                                           setState(() {
-                                            Provider.of<TripsProvider>(context,
+                                            Provider.of<Lodging>(context,
                                                     listen: false)
-                                                .removeLodging(loadedTrip,
-                                                    user.uid, index);
+                                                .removeLodging(
+                                              loadedTrip.id,
+                                              user.uid,
+                                              loadedTrip
+                                                  .countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex]
+                                                  .cities[cityIndex].id,
+                                              loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .lodgings[index]
+                                                  .id,
+                                            );
                                           });
                                           Navigator.of(context).pop();
                                         },

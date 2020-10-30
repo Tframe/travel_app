@@ -35,22 +35,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     title: null,
     startDate: null,
     endDate: null,
-    countries: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-        cities: [
-          City(
-            id: null,
-            city: null,
-            longitude: null,
-            latitude: null,
-          ),
-        ],
-      ),
-    ],
     group: [
       UserProvider(
         id: null,

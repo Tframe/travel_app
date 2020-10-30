@@ -47,9 +47,14 @@ import './screens/timeline_screens/timeline_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trips_provider.dart';
-import './providers/countries_provider.dart';
-import './providers/cities_provider.dart';
+import './providers/country_provider.dart';
+import './providers/city_provider.dart';
 import './providers/notification_provider.dart';
+import './providers/flight_provider.dart';
+import './providers/activity_provider.dart';
+import './providers/lodging_provider.dart';
+import './providers/transportation_provider.dart';
+import './providers/restaurant_provider.dart';
 
 
 Future<void> main() async {
@@ -128,10 +133,26 @@ class MyApp extends StatelessWidget {
           create: (ctx) => UserProvider(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => Countries(),
+          create: (ctx) => Country(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => Cities(),
+          create: (ctx) => City(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Flight(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Lodging(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Activity(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Restaurant(),
+        ),
+
+        ChangeNotifierProvider(
+          create: (ctx) => Transportation(),
         ),
         ChangeNotifierProvider(
           create: (ctx) => NotificationProvider(),

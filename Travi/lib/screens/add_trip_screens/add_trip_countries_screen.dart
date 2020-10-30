@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/countries_provider.dart';
 import './add_trip_cities_screen.dart';
 import './add_trip_group_invite_screen.dart';
 
@@ -41,7 +40,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
   );
 
   Future<void> _addCountry() async {
-    final newCountry = Provider.of<Countries>(context, listen: false).countries;
+    final newCountry = Provider.of<Country>(context, listen: false).countries;
     tripValues.countries = newCountry;
     if (newCountry.length != _placesIndex || newCountry.length == 0) {
       return showDialog<void>(
@@ -114,7 +113,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() async {
-    await Provider.of<Countries>(context, listen: false)
+    await Provider.of<Country>(context, listen: false)
         .removeAllCountries();
     Navigator.of(context)
         .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
@@ -122,7 +121,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Pop back a page and clear out provider
   void _backPage() async {
-    await Provider.of<Countries>(context, listen: false)
+    await Provider.of<Country>(context, listen: false)
         .removeAllCountries();
     Navigator.of(context).pop();
   }
@@ -134,7 +133,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
-    final newCountry = Provider.of<Countries>(context, listen: false).countries;
+    final newCountry = Provider.of<Country>(context, listen: false).countries;
     return Scaffold(
       appBar: AppBar(
         title: const Text(

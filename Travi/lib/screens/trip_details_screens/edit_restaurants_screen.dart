@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../providers/trip_provider.dart';
-import '../../providers/trips_provider.dart';
+import '../../providers/restaurant_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_restaurant_screen.dart';
 
@@ -15,7 +15,8 @@ class EditRestaurantsScreen extends StatefulWidget {
 
 class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
   TripProvider loadedTrip;
-
+  int countryIndex = 0;
+  int cityIndex = 0;
   //Add new loading
   //if editIndex == -1, then adding lodging,
   //if editIndex > -1, then editing lodging.
@@ -43,7 +44,11 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
       appBar: AppBar(
         title: Text('Edit Restaurants'),
       ),
-      body: loadedTrip.restaurants == null || loadedTrip.restaurants.length == 0
+      body: loadedTrip.countries[countryIndex].cities[cityIndex].restaurants ==
+                  null ||
+              loadedTrip.countries[countryIndex].cities[cityIndex].restaurants
+                      .length ==
+                  0
           ? Center(
               child: Text('No Restaurants Added'),
             )
@@ -59,12 +64,18 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.restaurants == null ? 0 : loadedTrip.restaurants.length,
+                        itemCount: loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].restaurants ==
+                                null
+                            ? 0
+                            : loadedTrip.countries[countryIndex]
+                                .cities[cityIndex].restaurants.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.restaurants),
+                              key: ValueKey(loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].restaurants),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -72,20 +83,29 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
                                     Icons.restaurant,
                                   ),
                                 ),
-                                title: Text(loadedTrip.restaurants[index].name),
+                                title: Text(loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].restaurants[index].name),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      loadedTrip.restaurants[index].address != null
-                                          ? '${loadedTrip.restaurants[index].address}'
+                                      loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .restaurants[index]
+                                                  .address !=
+                                              null
+                                          ? '${loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].address}'
                                           : '',
                                     ),
                                     Text(
-                                      loadedTrip.restaurants[index]
-                                                      .startingDateTime !=
-                                                  null 
-                                          ? '${DateFormat.yMd().format(loadedTrip.restaurants[index].startingDateTime)}'
+                                      loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .restaurants[index]
+                                                  .startingDateTime !=
+                                              null
+                                          ? '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].startingDateTime)}'
                                           : '',
                                     ),
                                   ],
@@ -112,17 +132,22 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.restaurants[index].name}?',
+                                      'Are you sure you want to delete ${loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].name}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
                                         child: const Text('Yes'),
                                         onPressed: () {
                                           setState(() {
-                                            Provider.of<TripsProvider>(context,
+                                            Provider.of<Restaurant>(context,
                                                     listen: false)
-                                                .removeRestaurant(loadedTrip,
-                                                    user.uid, index);
+                                                .removeRestaurant(
+                                              loadedTrip.id,
+                                              user.uid,
+                                              loadedTrip.countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex].cities[cityIndex].id,
+                                              loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].id,
+                                            );
                                           });
                                           Navigator.of(context).pop();
                                         },

@@ -7,9 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_place/google_place.dart';
 
 import '../providers/country_provider.dart';
-import '../providers/countries_provider.dart';
 import '../providers/city_provider.dart';
-import '../providers/cities_provider.dart';
 
 class Places extends StatefulWidget {
   final countryPicker;
@@ -245,7 +243,7 @@ class _PlacesState extends State<Places> {
 
     country = tempCountry;
 
-    await Provider.of<Countries>(context, listen: false).addCountry(country);
+    await Provider.of<Country>(context, listen: false).addCountry(country);
 
     setState(() {
       predictions = [];
@@ -265,7 +263,7 @@ class _PlacesState extends State<Places> {
     );
 
     city = tempCity;
-    await Provider.of<Cities>(context, listen: false).addCity(city);
+    await Provider.of<City>(context, listen: false).addCity(city);
 
     setState(() {
       _cityController.text = detailsResult.formattedAddress;

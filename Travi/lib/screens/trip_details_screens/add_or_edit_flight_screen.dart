@@ -35,6 +35,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   TripProvider loadedTrip;
   bool edit = false;
   int editIndex = -1;
+  int countryIndex = 0;
 
   List<DropdownMenuItem<int>> transportationType = [];
   Flight newFlight = Flight(
@@ -195,13 +196,22 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
         newFlight.participants =
             Provider.of<UserProvider>(context, listen: false).getParticipants;
         newFlight.chosen = !_suggestion;
-        await Provider.of<TripsProvider>(context, listen: false)
-            .addOrEditFlight(
-          loadedTrip,
-          loadedTrip.organizerId,
-          newFlight,
-          edit ? editIndex : -1,
-        );
+        if (edit) {
+          await Provider.of<Flight>(context, listen: false).editFlight(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            newFlight,
+            newFlight.id,
+          );
+        } else {
+          await Provider.of<Flight>(context, listen: false).addFlight(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            newFlight,
+          );
+        }
 
         //create notification to be sent to other companions
         for (int i = 0; i < loadedTrip.group.length; i++) {
@@ -293,7 +303,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newFlight = loadedTrip.flights[editIndex];
+        newFlight = loadedTrip.countries[countryIndex].flights[editIndex];
       });
     }
     return Scaffold(
@@ -709,7 +719,10 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             'Group',
                             .65,
                             GroupAvatars(
-                                loadedTrip, editIndex, loadedTrip.flights),
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex].flights,
+                            ),
                             context,
                           ),
                           Container(

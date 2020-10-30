@@ -32,6 +32,8 @@ class _AddOrEditTransportationScreenState
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   List<DropdownMenuItem<int>> transportationType = [];
   int _selectedTransportationType = 0;
@@ -234,50 +236,63 @@ class _AddOrEditTransportationScreenState
         newTransportation.organizerId = userId;
         newTransportation.participants =
             Provider.of<UserProvider>(context, listen: false).getParticipants;
-        await Provider.of<TripsProvider>(context, listen: false)
-            .addOrEditTransportation(
-          loadedTrip,
-          loadedTrip.organizerId,
-          newTransportation,
-          edit ? editIndex : -1,
-        );
+        if (edit) {
+          await Provider.of<Transportation>(context, listen: false)
+              .editTransportation(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            loadedTrip.countries[countryIndex].cities[cityIndex].id,
+            newTransportation,
+            newTransportation.id,
+          );
+        } else {
+          await Provider.of<Transportation>(context, listen: false)
+              .addTransportation(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            loadedTrip.countries[countryIndex].cities[cityIndex].id,
+            newTransportation,
+          );
+        }
 
         //create notification to be sent to other companions
-      for (int i = 0; i < loadedTrip.group.length; i++) {
-        //if not the user that is logged in, send notification
-        if (loggedInUser.id != loadedTrip.group[i].id) {
-          NotificationProvider newNotification;
-          //create the add activity notification
-          if (!edit) {
-            newNotification =
-                Provider.of<NotificationProvider>(context, listen: false)
-                    .createAddEventNotification(
-              loggedInUser.id,
-              loggedInUser.firstName,
-              loggedInUser.lastName,
-              loadedTrip.id,
-              loadedTrip.title,
-              'transportation',
-            );
-          } else {
-            newNotification =
-                Provider.of<NotificationProvider>(context, listen: false)
-                    .createEditEventNotification(
-              loggedInUser.id,
-              loggedInUser.firstName,
-              loggedInUser.lastName,
-              loadedTrip.id,
-              loadedTrip.title,
-              newTransportation.company,
-              'transportation',
-            );
-          }
+        for (int i = 0; i < loadedTrip.group.length; i++) {
+          //if not the user that is logged in, send notification
+          if (loggedInUser.id != loadedTrip.group[i].id) {
+            NotificationProvider newNotification;
+            //create the add activity notification
+            if (!edit) {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createAddEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                'transportation',
+              );
+            } else {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createEditEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                newTransportation.company,
+                'transportation',
+              );
+            }
 
-          //add notification to each companion added
-          await Provider.of<NotificationProvider>(context, listen: false)
-              .addNotification(loadedTrip.group[i].id, newNotification);
+            //add notification to each companion added
+            await Provider.of<NotificationProvider>(context, listen: false)
+                .addNotification(loadedTrip.group[i].id, newNotification);
+          }
         }
-      }
 
         Provider.of<UserProvider>(context, listen: false)
             .resetParticipantsList();
@@ -361,7 +376,8 @@ class _AddOrEditTransportationScreenState
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newTransportation = loadedTrip.transportations[editIndex];
+        newTransportation = loadedTrip.countries[countryIndex].cities[cityIndex]
+            .transportations[editIndex];
         setEditType();
       });
     }
@@ -606,8 +622,12 @@ class _AddOrEditTransportationScreenState
                           cardScroller(
                             'Group',
                             .65,
-                            GroupAvatars(loadedTrip, editIndex,
-                                loadedTrip.transportations),
+                            GroupAvatars(
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].transportations,
+                            ),
                             context,
                           ),
                           Container(

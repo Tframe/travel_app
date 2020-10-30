@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:groupy/providers/flight_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import '../../providers/flight_provider.dart';
 import '../../providers/trip_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_flight_screen.dart';
 
@@ -15,7 +16,8 @@ class EditFlightsScreen extends StatefulWidget {
 
 class _EditFlightsScreenState extends State<EditFlightsScreen> {
   TripProvider loadedTrip;
-
+  int countryIndex = 0;
+  int cityIndex = 0;
   void addOrEditFlight(int editIndex) async {
     Navigator.of(context).pushNamed(
       AddOrEditFlightScreen.routeName,
@@ -40,7 +42,8 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
       appBar: AppBar(
         title: Text('Edit Flights'),
       ),
-      body: loadedTrip.flights == null || loadedTrip.flights.length == 0
+      body: loadedTrip.countries[countryIndex].flights == null ||
+              loadedTrip.countries[countryIndex].flights.length == 0
           ? Center(
               child: Text('No Flights Added'),
             )
@@ -57,14 +60,16 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.flights == null
+                        itemCount: loadedTrip.countries[countryIndex].flights ==
+                                null
                             ? 0
-                            : loadedTrip.flights.length,
+                            : loadedTrip.countries[countryIndex].flights.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.flights),
+                              key: ValueKey(
+                                  loadedTrip.countries[countryIndex].flights),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -76,19 +81,21 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
                                         'Flight #:',
                                       ),
                                       Text(
-                                        loadedTrip.flights[index].flightNumber,
+                                        loadedTrip.countries[countryIndex]
+                                            .flights[index].flightNumber,
                                       ),
                                     ],
                                   ),
                                 ),
-                                title: Text(loadedTrip.flights[index].airline),
+                                title: Text(loadedTrip.countries[countryIndex]
+                                    .flights[index].airline),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        '${loadedTrip.flights[index].departureAirport}'),
+                                        '${loadedTrip.countries[countryIndex].flights[index].departureAirport}'),
                                     Text(
-                                      '${DateFormat.yMd().add_jm().format(loadedTrip.flights[index].departureDateTime)}',
+                                      '${DateFormat.yMd().add_jm().format(loadedTrip.countries[countryIndex].flights[index].departureDateTime)}',
                                     ),
                                   ],
                                 ),
@@ -113,19 +120,22 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete flight number ${loadedTrip.flights[index].flightNumber}?',
+                                      'Are you sure you want to delete flight number ${loadedTrip.countries[countryIndex].flights[index].flightNumber}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
                                         child: const Text('Yes'),
                                         onPressed: () {
                                           setState(() {
-                                            Provider.of<TripsProvider>(context,
+                                            Provider.of<Flight>(context,
                                                     listen: false)
                                                 .removeFlight(
-                                              loadedTrip,
+                                              loadedTrip.id,
                                               user.uid,
-                                              index,
+                                              loadedTrip
+                                                  .countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex]
+                                                  .flights[index].id,
                                             );
                                           });
                                           Navigator.of(context).pop();

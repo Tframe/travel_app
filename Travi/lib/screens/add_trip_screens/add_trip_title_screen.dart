@@ -22,7 +22,6 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
     title: null,
     startDate: DateTime.now(),
     endDate: DateTime.now(),
-    countries: null,
     description: null,
   );
 

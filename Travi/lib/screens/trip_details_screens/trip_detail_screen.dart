@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:groupy/widgets/notification_end_drawer.dart';
+
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -10,6 +10,12 @@ import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/lodging_provider.dart';
+import '../../providers/flight_provider.dart';
+import '../../providers/transportation_provider.dart';
+import '../../providers/activity_provider.dart';
+import '../../providers/restaurant_provider.dart';
+
 import './edit_trip_screen.dart';
 import './edit_lodgings_screen.dart';
 import './add_or_edit_lodging_screen.dart';
@@ -25,6 +31,7 @@ import './edit_flights_screen.dart';
 import './add_or_edit_flight_screen.dart';
 import '../timeline_screens/timeline_screen.dart';
 import '../../widgets/launchers.dart';
+import '../../widgets/notification_end_drawer.dart';
 
 //Destination Popup Menu Options
 enum FilterDestinationOptions {
@@ -81,6 +88,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   String tripId;
   // TripProvider trip;
   TripProvider loadedTrip;
+  //Other values
+  List<Flight> loadedFlights;
+  List<Lodging> loadedLodgings;
+  List<Activity> loadedActivities;
+  List<Transportation> loadedTransportations;
+  List<Restaurant> loadedRestaurants;
+
   double screenWidth = 0;
   double screenHeight = 0;
   bool _loadedTrip = false;
@@ -96,6 +110,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
 
   User user = FirebaseAuth.instance.currentUser;
 
+  int countryIndex = 0;
+  int cityIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   //get the trip details as arguments from trip list screen
   @override
   void didChangeDependencies() {
@@ -110,7 +132,103 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         context,
       ).findById(tripId);
     }
+
+    getFlights();
+    getLodgings();
+    getActivities();
+    getTransportations();
+    getRestaurants();
     super.didChangeDependencies();
+  }
+
+  Future<void> getFlights() async {
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      //get flights from firebase
+      await Provider.of<Flight>(context, listen: false).fetchAndSetFlights(
+        tripId,
+        currentLoggedInUser.id,
+        loadedTrip.countries[i].id,
+      );
+      loadedFlights = Provider.of<Flight>(context, listen: false).flights;
+      setState(() {
+        loadedTrip.countries[i].flights = loadedFlights;
+      });
+    }
+  }
+
+  Future<void> getLodgings() async {
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        //get lodgings from firebase
+        await Provider.of<Lodging>(context, listen: false).fetchAndSetLodging(
+          tripId,
+          currentLoggedInUser.id,
+          loadedTrip.countries[i].id,
+          loadedTrip.countries[i].cities[j].id,
+        );
+        loadedLodgings = Provider.of<Lodging>(context, listen: false).lodgings;
+        setState(() {
+          loadedTrip.countries[i].cities[j].lodgings = loadedLodgings;
+        });
+      }
+    }
+  }
+
+  Future<void> getActivities() async {
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        await Provider.of<Activity>(context, listen: false).fetchAndSetActivity(
+          tripId,
+          currentLoggedInUser.id,
+          loadedTrip.countries[i].id,
+          loadedTrip.countries[i].cities[j].id,
+        );
+        loadedActivities =
+            Provider.of<Activity>(context, listen: false).activities;
+        setState(() {
+          loadedTrip.countries[i].cities[j].activities = loadedActivities;
+        });
+      }
+    }
+  }
+
+  Future<void> getTransportations() async {
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        await Provider.of<Transportation>(context, listen: false)
+            .fetchAndSetTransportations(
+          tripId,
+          currentLoggedInUser.id,
+          loadedTrip.countries[i].id,
+          loadedTrip.countries[i].cities[j].id,
+        );
+        loadedTransportations =
+            Provider.of<Transportation>(context, listen: false).transportations;
+        setState(() {
+          loadedTrip.countries[i].cities[j].transportations =
+              loadedTransportations;
+        });
+      }
+    }
+  }
+
+  Future<void> getRestaurants() async {
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        await Provider.of<Restaurant>(context, listen: false)
+            .fetchAndSetRestaurants(
+          tripId,
+          currentLoggedInUser.id,
+          loadedTrip.countries[i].id,
+          loadedTrip.countries[i].cities[j].id,
+        );
+        loadedRestaurants =
+            Provider.of<Restaurant>(context, listen: false).restaurants;
+        setState(() {
+          loadedTrip.countries[i].cities[j].restaurants = loadedRestaurants;
+        });
+      }
+    }
   }
 
   //Returns a text string of countries
@@ -249,8 +367,11 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       itemCount: type == 'Flight'
-          ? loadedTrip.flights.length
-          : type == 'Transportation' ? loadedTrip.transportations.length : 0,
+          ? loadedTrip.countries[countryIndex].flights.length
+          : type == 'Transportation'
+              ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                  .transportations.length
+              : 0,
       itemBuilder: (BuildContext ctx, int index) {
         return Container(
           height: screenHeight,
@@ -263,14 +384,16 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               children: [
                 type == 'Flight'
                     ? Text(
-                        loadedTrip.flights[index].airline,
+                        loadedTrip
+                            .countries[countryIndex].flights[index].airline,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
                       )
                     : Text(
-                        loadedTrip.transportations[index].company,
+                        loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .transportations[index].company,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -278,7 +401,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                       ),
                 type == 'Flight'
                     ? Text(
-                        loadedTrip.flights[index].flightNumber,
+                        loadedTrip.countries[countryIndex].flights[index]
+                            .flightNumber,
                         style: TextStyle(
                           fontSize: 16,
                         ),
@@ -295,22 +419,26 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
+                                Text(loadedTrip.countries[countryIndex]
+                                    .flights[index].departureAirport),
                                 Text(
-                                    loadedTrip.flights[index].departureAirport),
+                                    '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].flights[index].departureDateTime)}'),
                                 Text(
-                                    '${DateFormat.yMd().format(loadedTrip.flights[index].departureDateTime)}'),
-                                Text(
-                                    '${DateFormat.jm().format(loadedTrip.flights[index].departureDateTime)}'),
+                                    '${DateFormat.jm().format(loadedTrip.countries[countryIndex].flights[index].departureDateTime)}'),
                               ],
                             )
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text(loadedTrip.transportations[index].company),
+                                Text(loadedTrip
+                                    .countries[countryIndex]
+                                    .cities[cityIndex]
+                                    .transportations[index]
+                                    .company),
                                 Text(
-                                    '${DateFormat.yMd().format(loadedTrip.transportations[index].startingDateTime)}'),
+                                    '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].startingDateTime)}'),
                                 Text(
-                                    '${DateFormat.jm().format(loadedTrip.transportations[index].startingDateTime)}'),
+                                    '${DateFormat.jm().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].startingDateTime)}'),
                               ],
                             ),
                     ),
@@ -328,15 +456,24 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         type == 'Flight'
                             ? Icons.airplanemode_active
                             : type == 'Transportation'
-                                ? loadedTrip.transportations[index]
+                                ? loadedTrip
+                                            .countries[countryIndex]
+                                            .cities[cityIndex]
+                                            .transportations[index]
                                             .transportationType ==
                                         'train'
                                     ? Icons.train
-                                    : loadedTrip.transportations[index]
+                                    : loadedTrip
+                                                .countries[countryIndex]
+                                                .cities[cityIndex]
+                                                .transportations[index]
                                                 .transportationType ==
                                             'boat'
                                         ? Icons.directions_boat
-                                        : loadedTrip.transportations[index]
+                                        : loadedTrip
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .transportations[index]
                                                     .transportationType ==
                                                 'carRental'
                                             ? Icons.directions_car
@@ -360,21 +497,26 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                           ? Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text(loadedTrip.flights[index].arrivalAirport),
+                                Text(loadedTrip.countries[countryIndex]
+                                    .flights[index].arrivalAirport),
                                 Text(
-                                    '${DateFormat.yMd().format(loadedTrip.flights[index].arrivalDateTime)}'),
+                                    '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].flights[index].arrivalDateTime)}'),
                                 Text(
-                                    '${DateFormat.jm().format(loadedTrip.flights[index].arrivalDateTime)}'),
+                                    '${DateFormat.jm().format(loadedTrip.countries[countryIndex].flights[index].arrivalDateTime)}'),
                               ],
                             )
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Text(loadedTrip.transportations[index].company),
+                                Text(loadedTrip
+                                    .countries[countryIndex]
+                                    .cities[cityIndex]
+                                    .transportations[index]
+                                    .company),
                                 Text(
-                                    '${DateFormat.yMd().format(loadedTrip.transportations[index].endingDateTime)}'),
+                                    '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].endingDateTime)}'),
                                 Text(
-                                    '${DateFormat.jm().format(loadedTrip.transportations[index].endingDateTime)}'),
+                                    '${DateFormat.jm().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].endingDateTime)}'),
                               ],
                             ),
                     ),
@@ -407,13 +549,17 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         ? _totalDestinations
                         : 0)))
             : ((cardTitle == 'Lodgings')
-                ? loadedTrip.lodgings.length
+                ? loadedTrip
+                    .countries[countryIndex].cities[cityIndex].lodgings.length
                 : ((cardTitle == 'Transportations')
-                    ? loadedTrip.transportations.length
+                    ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                        .transportations.length
                     : ((cardTitle == 'Activities')
-                        ? loadedTrip.activities.length
+                        ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .activities.length
                         : ((cardTitle == 'Restaurants')
-                            ? loadedTrip.restaurants.length
+                            ? loadedTrip.countries[countryIndex]
+                                .cities[cityIndex].restaurants.length
                             : 0)))),
         itemBuilder: (ctx, index) {
           return Padding(
@@ -510,13 +656,13 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   onTap: () {
                     cardType == 'Lodgings'
                         ? Launchers().phoneLauncher(
-                            'tel:${loadedTrip.lodgings[index].phoneNumber}')
+                            'tel:${loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].phoneNumber}')
                         : cardType == 'Activities'
                             ? Launchers().phoneLauncher(
-                                'tel:${loadedTrip.activities[index].phoneNumber}')
+                                'tel:${loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].phoneNumber}')
                             : cardType == 'Restaurants'
                                 ? Launchers().phoneLauncher(
-                                    'tel:${loadedTrip.restaurants[index].phoneNumber}')
+                                    'tel:${loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].phoneNumber}')
                                 // ignore: unnecessary_statements
                                 : () {};
                   },
@@ -545,17 +691,26 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     double longitude;
 
                     if (cardType == 'Lodgings') {
-                      title = loadedTrip.lodgings[index].name;
-                      latitude = loadedTrip.lodgings[index].latitude;
-                      longitude = loadedTrip.lodgings[index].longitude;
+                      title = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].lodgings[index].name;
+                      latitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].lodgings[index].latitude;
+                      longitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].lodgings[index].longitude;
                     } else if (cardType == 'Activities') {
-                      title = loadedTrip.activities[index].title;
-                      latitude = loadedTrip.activities[index].latitude;
-                      longitude = loadedTrip.activities[index].longitude;
+                      title = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].activities[index].title;
+                      latitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].activities[index].latitude;
+                      longitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].activities[index].longitude;
                     } else if (cardType == 'Restaurants') {
-                      title = loadedTrip.restaurants[index].name;
-                      latitude = loadedTrip.restaurants[index].latitude;
-                      longitude = loadedTrip.restaurants[index].longitude;
+                      title = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].restaurants[index].name;
+                      latitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].restaurants[index].latitude;
+                      longitude = loadedTrip.countries[countryIndex]
+                          .cities[cityIndex].restaurants[index].longitude;
                     }
 
                     return showModalBottomSheet(
@@ -604,14 +759,23 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   ),
                   onTap: () {
                     cardType == 'Lodgings'
-                        ? Launchers()
-                            .urlLauncher(loadedTrip.lodgings[index].website)
+                        ? Launchers().urlLauncher(loadedTrip
+                            .countries[countryIndex]
+                            .cities[cityIndex]
+                            .lodgings[index]
+                            .website)
                         : cardType == 'Activities'
-                            ? Launchers().urlLauncher(
-                                loadedTrip.activities[index].website)
+                            ? Launchers().urlLauncher(loadedTrip
+                                .countries[countryIndex]
+                                .cities[cityIndex]
+                                .activities[index]
+                                .website)
                             : cardType == 'Restaurants'
-                                ? Launchers().urlLauncher(
-                                    loadedTrip.restaurants[index].website)
+                                ? Launchers().urlLauncher(loadedTrip
+                                    .countries[countryIndex]
+                                    .cities[cityIndex]
+                                    .restaurants[index]
+                                    .website)
                                 // ignore: unnecessary_statements
                                 : () {};
                   },
@@ -631,17 +795,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                loadedTrip.lodgings[index].name,
+                loadedTrip.countries[countryIndex].cities[cityIndex]
+                    .lodgings[index].name,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                '${DateFormat.yMd().format(loadedTrip.lodgings[index].checkInDateTime)}',
+                '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].checkInDateTime)}',
               ),
               Text(
-                '${DateFormat.jm().format(loadedTrip.lodgings[index].checkInDateTime)}',
+                '${DateFormat.jm().format(loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index].checkInDateTime)}',
               ),
             ],
           )
@@ -651,17 +816,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    loadedTrip.activities[index].title,
+                    loadedTrip.countries[countryIndex].cities[cityIndex]
+                        .activities[index].title,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${DateFormat.yMd().format(loadedTrip.activities[index].startingDateTime)}',
+                    '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].startingDateTime)}',
                   ),
                   Text(
-                    '${DateFormat.jm().format(loadedTrip.activities[index].startingDateTime)}',
+                    '${DateFormat.jm().format(loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].startingDateTime)}',
                   ),
                 ],
               )
@@ -671,17 +837,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        loadedTrip.restaurants[index].name,
+                        loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .restaurants[index].name,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
-                        '${DateFormat.yMd().format(loadedTrip.restaurants[index].startingDateTime)}',
+                        '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].startingDateTime)}',
                       ),
                       Text(
-                        '${DateFormat.jm().format(loadedTrip.restaurants[index].startingDateTime)}',
+                        '${DateFormat.jm().format(loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].startingDateTime)}',
                       ),
                     ],
                   )
@@ -817,21 +984,30 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         );
       }
     } else if (type == 'Lodgings') {
-      if (loadedTrip.lodgings[index].lodgingImageUrl != null) {
+      if (loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index]
+              .lodgingImageUrl !=
+          null) {
         return Image.network(
-          loadedTrip.lodgings[index].lodgingImageUrl,
+          loadedTrip.countries[countryIndex].cities[cityIndex].lodgings[index]
+              .lodgingImageUrl,
         );
       }
     } else if (type == 'Activities') {
-      if (loadedTrip.activities[index].activityImageUrl != null) {
+      if (loadedTrip.countries[countryIndex].cities[cityIndex].activities[index]
+              .activityImageUrl !=
+          null) {
         return Image.network(
-          loadedTrip.activities[index].activityImageUrl,
+          loadedTrip.countries[countryIndex].cities[cityIndex].activities[index]
+              .activityImageUrl,
         );
       }
     } else if (type == 'Restaurants') {
-      if (loadedTrip.restaurants[index].restaurantImageUrl != null) {
+      if (loadedTrip.countries[countryIndex].cities[cityIndex]
+              .restaurants[index].restaurantImageUrl !=
+          null) {
         return Image.network(
-          loadedTrip.restaurants[index].restaurantImageUrl,
+          loadedTrip.countries[countryIndex].cities[cityIndex]
+              .restaurants[index].restaurantImageUrl,
         );
       }
     }
@@ -1676,20 +1852,24 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             Divider(
               thickness: 10,
             ),
-            loadedTrip.flights.length > 0
-                ? cardScroller(
-                    'Flights',
-                    1,
-                    flightOrTransportationTile(
-                      'Flight',
-                    ),
-                    context,
-                  )
+            loadedTrip.countries[countryIndex].flights != null
+                ? loadedTrip.countries[countryIndex].flights.length > 0
+                    ? cardScroller(
+                        'Flights',
+                        1,
+                        flightOrTransportationTile(
+                          'Flight',
+                        ),
+                        context,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.flights.length > 0
-                ? Divider(
-                    thickness: 10,
-                  )
+            loadedTrip.countries[countryIndex].flights != null
+                ? loadedTrip.countries[countryIndex].flights.length > 0
+                    ? Divider(
+                        thickness: 10,
+                      )
+                    : Container()
                 : Container(),
             loadedTrip.countries.length > 0
                 ? cardScroller(
@@ -1699,61 +1879,107 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     context,
                   )
                 : Container(),
-            loadedTrip.lodgings.length > 0 ||
-                    loadedTrip.activities.length > 0 ||
-                    loadedTrip.transportations.length > 0
-                ? Divider(
-                    thickness: 10,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
+                                .length >
+                            0 ||
+                        loadedTrip.countries[countryIndex].cities[cityIndex]
+                                .activities.length >
+                            0 ||
+                        loadedTrip.countries[countryIndex].cities[cityIndex]
+                                .transportations.length >
+                            0
+                    ? Divider(
+                        thickness: 10,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.lodgings.length > 0
-                ? cardScroller(
-                    'Lodging',
-                    1,
-                    cardWidget('Lodgings'),
-                    context,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
+                            .length >
+                        0
+                    ? cardScroller(
+                        'Lodging',
+                        1,
+                        cardWidget('Lodgings'),
+                        context,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.lodgings.length > 0
-                ? Divider(
-                    thickness: 10,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
+                            .length >
+                        0
+                    ? Divider(
+                        thickness: 10,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.activities.length > 0
-                ? cardScroller(
-                    'Activities',
-                    1,
-                    cardWidget('Activities'),
-                    context,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].activities !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .activities.length >
+                        0
+                    ? cardScroller(
+                        'Activities',
+                        1,
+                        cardWidget('Activities'),
+                        context,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.restaurants.length > 0
-                ? Divider(
-                    thickness: 10,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].restaurants !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .restaurants.length >
+                        0
+                    ? Divider(
+                        thickness: 10,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.restaurants.length > 0
-                ? cardScroller(
-                    'Restaurants',
-                    1,
-                    cardWidget('Restaurants'),
-                    context,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex].restaurants !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .restaurants.length >
+                        0
+                    ? cardScroller(
+                        'Restaurants',
+                        1,
+                        cardWidget('Restaurants'),
+                        context,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.transportations.length > 0
-                ? Divider(
-                    thickness: 10,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex]
+                        .transportations !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .transportations.length >
+                        0
+                    ? Divider(
+                        thickness: 10,
+                      )
+                    : Container()
                 : Container(),
-            loadedTrip.transportations.length > 0
-                ? cardScroller(
-                    'Transportation',
-                    1,
-                    flightOrTransportationTile(
-                      'Transportation',
-                    ),
-                    context,
-                  )
+            loadedTrip.countries[countryIndex].cities[cityIndex]
+                        .transportations !=
+                    null
+                ? loadedTrip.countries[countryIndex].cities[cityIndex]
+                            .transportations.length >
+                        0
+                    ? cardScroller(
+                        'Transportation',
+                        1,
+                        flightOrTransportationTile(
+                          'Transportation',
+                        ),
+                        context,
+                      )
+                    : Container()
                 : Container(),
             Padding(
               padding: EdgeInsets.only(bottom: 75),

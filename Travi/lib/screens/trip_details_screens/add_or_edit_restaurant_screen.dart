@@ -30,6 +30,8 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   Restaurant newRestaurant = Restaurant(
     id: null,
@@ -66,17 +68,29 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     try {
       String userId = await Provider.of<UserProvider>(context, listen: false)
           .getCurrentUserId();
-      UserProvider loggedInUser = Provider.of<UserProvider>(context, listen: false).loggedInUser;
+      UserProvider loggedInUser =
+          Provider.of<UserProvider>(context, listen: false).loggedInUser;
       newRestaurant.organizerId = userId;
       newRestaurant.participants =
           Provider.of<UserProvider>(context, listen: false).getParticipants;
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditRestaurant(
-        loadedTrip,
-        loadedTrip.organizerId,
-        newRestaurant,
-        edit ? editIndex : -1,
-      );
+      if (edit) {
+        await Provider.of<Restaurant>(context, listen: false).editRestaurant(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newRestaurant,
+          newRestaurant.id,
+        );
+      } else {
+        await Provider.of<Restaurant>(context, listen: false).addRestaurant(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newRestaurant,
+        );
+      }
 
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
@@ -228,7 +242,8 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newRestaurant = loadedTrip.restaurants[editIndex];
+        newRestaurant = loadedTrip
+            .countries[countryIndex].cities[cityIndex].restaurants[editIndex];
       });
     }
     return Scaffold(
@@ -428,7 +443,11 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             'Group',
                             .65,
                             GroupAvatars(
-                                loadedTrip, editIndex, loadedTrip.restaurants),
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].restaurants,
+                            ),
                             context,
                           ),
                           Container(

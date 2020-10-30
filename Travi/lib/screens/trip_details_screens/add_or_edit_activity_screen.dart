@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../providers/trip_provider.dart';
 import '../../providers/activity_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/notification_provider.dart';
 import './widgets/group_avatars.dart';
@@ -31,6 +30,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   Activity newActivity = Activity(
     chosen: false,
@@ -79,14 +80,26 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
           Provider.of<UserProvider>(context, listen: false).getParticipants;
       newActivity.chosen = !_suggestion;
 
-      //add or edit activity
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditActivity(
-        loadedTrip,
-        loadedTrip.organizerId,
-        newActivity,
-        edit ? editIndex : -1,
-      );
+      if (edit) {
+        //edit activity
+        await Provider.of<Activity>(context, listen: false).editActivity(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newActivity,
+          newActivity.id,
+        );
+      } else {
+        //add activity
+        await Provider.of<Activity>(context, listen: false).addActivity(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newActivity,
+        );
+      }
 
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
@@ -281,7 +294,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newActivity = loadedTrip.activities[editIndex];
+        newActivity = loadedTrip
+            .countries[countryIndex].cities[cityIndex].activities[editIndex];
       });
     }
     return Scaffold(
@@ -519,7 +533,11 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             'Group',
                             .65,
                             GroupAvatars(
-                                loadedTrip, editIndex, loadedTrip.activities),
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].activities,
+                            ),
                             context,
                           ),
                           Container(

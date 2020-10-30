@@ -39,9 +39,6 @@ class _EditTripScreenState extends State<EditTripScreen> {
     tripImageUrl: '',
     description: '',
     group: [],
-    lodgings: [],
-    activities: [],
-    transportations: [],
   );
 
 
