@@ -182,10 +182,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       fontSize: 20,
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
+
                   Container(
                     height: screenHeight * 0.50,
                     margin: EdgeInsets.only(
@@ -238,10 +235,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       },
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
+
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
@@ -258,7 +252,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -278,7 +272,7 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

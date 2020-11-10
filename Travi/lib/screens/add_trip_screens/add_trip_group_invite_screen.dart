@@ -171,7 +171,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).buttonColor,
                 width: 1.5,
               ),
             ),
@@ -208,14 +208,14 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
               icon: Icon(Icons.email),
               onPressed: () => _switchSeachBy(index),
               color: _searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
             IconButton(
               icon: Icon(Icons.phone_android),
               onPressed: () => _switchSeachBy(index),
               color: !_searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
           ],
@@ -301,10 +301,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     height: screenHeight * 0.50,
                     width: screenWidth,
@@ -328,7 +324,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                       : 'Moible #',
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
+                                      color: Theme.of(context).buttonColor,
                                       width: 1.5,
                                     ),
                                   ),
@@ -373,14 +369,14 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                     icon: Icon(Icons.email),
                                     onPressed: () => _switchSeachBy(index),
                                     color: _searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.phone_android),
                                     onPressed: () => _switchSeachBy(index),
                                     color: !_searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   Transform.rotate(
@@ -414,10 +410,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
@@ -434,7 +426,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -453,7 +445,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

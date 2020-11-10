@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../providers/flight_provider.dart';
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_flight_screen.dart';
@@ -55,7 +56,6 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
@@ -137,6 +137,26 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
                                               loadedTrip.countries[countryIndex]
                                                   .flights[index].id,
                                             );
+                                            loadedTrip
+                                                .countries[countryIndex].flights
+                                                .removeAt(index);
+                                            List<TripProvider> trips =
+                                                Provider.of<TripsProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .trips;
+                                            var tripIndex = trips.indexWhere(
+                                                (trip) =>
+                                                    trip.id == loadedTrip.id);
+                                            trips[tripIndex]
+                                                    .countries[countryIndex]
+                                                    .flights =
+                                                loadedTrip
+                                                    .countries[countryIndex]
+                                                    .flights;
+                                            Provider.of<TripsProvider>(context,
+                                                    listen: false)
+                                                .setTripsList(trips);
                                           });
                                           Navigator.of(context).pop();
                                         },

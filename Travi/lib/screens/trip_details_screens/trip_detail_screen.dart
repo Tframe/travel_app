@@ -32,6 +32,7 @@ import './add_or_edit_flight_screen.dart';
 import '../timeline_screens/timeline_screen.dart';
 import '../../widgets/launchers.dart';
 import '../../widgets/notification_end_drawer.dart';
+import '../../widgets/post_comment.dart';
 
 //Destination Popup Menu Options
 enum FilterDestinationOptions {
@@ -128,9 +129,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     if (!_loadedTrip) {
       tripId = ModalRoute.of(context).settings.arguments;
       _loadedTrip = true;
-      loadedTrip = Provider.of<TripsProvider>(
-        context,
-      ).findById(tripId);
+      loadedTrip =
+          Provider.of<TripsProvider>(context).findById(tripId);
     }
 
     getFlights();
@@ -138,7 +138,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     getActivities();
     getTransportations();
     getRestaurants();
+    setTrip();
     super.didChangeDependencies();
+  }
+
+  Future<void> setTrip() async {
+    await Provider.of<TripProvider>(context, listen: false).setTrip(loadedTrip);
   }
 
   Future<void> getFlights() async {
@@ -146,13 +151,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       //get flights from firebase
       await Provider.of<Flight>(context, listen: false).fetchAndSetFlights(
         tripId,
-        currentLoggedInUser.id,
+        loadedTrip.organizerId,
         loadedTrip.countries[i].id,
       );
-      loadedFlights = Provider.of<Flight>(context, listen: false).flights;
-      setState(() {
-        loadedTrip.countries[i].flights = loadedFlights;
-      });
+      if (Provider.of<Flight>(context, listen: false).assertFlightList()) {
+        loadedFlights = Provider.of<Flight>(context, listen: false).flights;
+        setState(() {
+          loadedTrip.countries[i].flights = loadedFlights;
+        });
+      }
     }
   }
 
@@ -162,14 +169,17 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         //get lodgings from firebase
         await Provider.of<Lodging>(context, listen: false).fetchAndSetLodging(
           tripId,
-          currentLoggedInUser.id,
+          loadedTrip.organizerId,
           loadedTrip.countries[i].id,
           loadedTrip.countries[i].cities[j].id,
         );
-        loadedLodgings = Provider.of<Lodging>(context, listen: false).lodgings;
-        setState(() {
-          loadedTrip.countries[i].cities[j].lodgings = loadedLodgings;
-        });
+        if (Provider.of<Lodging>(context, listen: false).assertLodgingList()) {
+          loadedLodgings =
+              Provider.of<Lodging>(context, listen: false).lodgings;
+          setState(() {
+            loadedTrip.countries[i].cities[j].lodgings = loadedLodgings;
+          });
+        }
       }
     }
   }
@@ -179,15 +189,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
         await Provider.of<Activity>(context, listen: false).fetchAndSetActivity(
           tripId,
-          currentLoggedInUser.id,
+          loadedTrip.organizerId,
           loadedTrip.countries[i].id,
           loadedTrip.countries[i].cities[j].id,
         );
-        loadedActivities =
-            Provider.of<Activity>(context, listen: false).activities;
-        setState(() {
-          loadedTrip.countries[i].cities[j].activities = loadedActivities;
-        });
+        if (Provider.of<Activity>(context, listen: false)
+            .assertActivityList()) {
+          loadedActivities =
+              Provider.of<Activity>(context, listen: false).activities;
+          setState(() {
+            loadedTrip.countries[i].cities[j].activities = loadedActivities;
+          });
+        }
       }
     }
   }
@@ -198,16 +211,20 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         await Provider.of<Transportation>(context, listen: false)
             .fetchAndSetTransportations(
           tripId,
-          currentLoggedInUser.id,
+          loadedTrip.organizerId,
           loadedTrip.countries[i].id,
           loadedTrip.countries[i].cities[j].id,
         );
-        loadedTransportations =
-            Provider.of<Transportation>(context, listen: false).transportations;
-        setState(() {
-          loadedTrip.countries[i].cities[j].transportations =
-              loadedTransportations;
-        });
+        if (Provider.of<Transportation>(context, listen: false)
+            .assertTransportationList()) {
+          loadedTransportations =
+              Provider.of<Transportation>(context, listen: false)
+                  .transportations;
+          setState(() {
+            loadedTrip.countries[i].cities[j].transportations =
+                loadedTransportations;
+          });
+        }
       }
     }
   }
@@ -218,15 +235,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         await Provider.of<Restaurant>(context, listen: false)
             .fetchAndSetRestaurants(
           tripId,
-          currentLoggedInUser.id,
+          loadedTrip.organizerId,
           loadedTrip.countries[i].id,
           loadedTrip.countries[i].cities[j].id,
         );
-        loadedRestaurants =
-            Provider.of<Restaurant>(context, listen: false).restaurants;
-        setState(() {
-          loadedTrip.countries[i].cities[j].restaurants = loadedRestaurants;
-        });
+        if (Provider.of<Restaurant>(context, listen: false)
+            .assertRestaurantList()) {
+          loadedRestaurants =
+              Provider.of<Restaurant>(context, listen: false).restaurants;
+          setState(() {
+            loadedTrip.countries[i].cities[j].restaurants = loadedRestaurants;
+          });
+        }
       }
     }
   }
@@ -258,8 +278,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   }
 
   //reusable flatbutton to with button text and functions on pressed.
-  Widget flatButton(
-      Icon icon, String buttonText, Function onPressed, BuildContext ctx) {
+  Widget flatButton(Icon icon, String buttonText, Color buttonTextColor,
+      Function onPressed, BuildContext ctx) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8.0,
@@ -277,12 +297,12 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             Text(
               buttonText,
               style: TextStyle(
-                color: Theme.of(ctx).secondaryHeaderColor,
+                color: buttonTextColor,
               ),
             ),
           ],
         ),
-        color: Theme.of(ctx).buttonColor,
+        color: Colors.grey[200],
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
         ),
@@ -596,62 +616,68 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     return Container(
       width: screenWidth,
       height: screenHeight,
-      padding: EdgeInsets.only(
-        left: 28,
-      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8.0),
-                  topRight: Radius.circular(8.0),
-                ),
-                child: cardImage(
-                  cardType,
-                  index,
-                  allCities,
-                  screenHeight,
-                  screenWidth,
-                ),
-                //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-                //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
-              ),
-              Container(
-                width: screenWidth * 0.625,
-                height: screenHeight * 0.125,
-                padding: const EdgeInsets.only(
-                  left: 15,
-                ),
-                child: cardTextInfo(cardType, index),
-              ),
-            ],
-          ),
-          Container(
-            width: screenWidth * 0.75,
+          Padding(
             padding: const EdgeInsets.only(
-              top: 20,
+              left: 20.0,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(8.0),
+                    topRight: Radius.circular(8.0),
+                  ),
+                  child: cardImage(
+                    cardType,
+                    index,
+                    allCities,
+                    screenHeight,
+                    screenWidth,
+                  ),
+                  //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                  //cardType == 'Country ? PlacesImages(foundTrip.countries[0].id) : cardType == 'City' ? PlacesImages(foundTrip.countries[0].id) : null,
+                ),
+                Container(
+                  width: screenWidth * 0.625,
+                  height: screenHeight * 0.125,
+                  padding: const EdgeInsets.only(
+                    left: 15,
+                  ),
+                  child: cardTextInfo(cardType, index),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 25,
+            thickness: 1.5,
+          ),
+          Container(
+            width: screenWidth,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 GestureDetector(
-                  child: Column(
-                    children: [
-                      Icon(Icons.phone),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 10,
+                  child: Container(
+                    width: screenWidth * 0.3,
+                    child: Column(
+                      children: [
+                        Icon(Icons.phone),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 10,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        'Call',
-                      ),
-                    ],
+                        const Text(
+                          'Call',
+                        ),
+                      ],
+                    ),
                   ),
                   onTap: () {
                     cardType == 'Lodgings'
@@ -667,21 +693,30 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                 : () {};
                   },
                 ),
+                Container(
+                  height: 40,
+                  child: VerticalDivider(
+                    thickness: 1.5,
+                  ),
+                ),
                 GestureDetector(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.directions,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 10,
+                  child: Container(
+                    width: screenWidth * 0.3,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.directions,
                         ),
-                      ),
-                      const Text(
-                        'Directions',
-                      ),
-                    ],
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 10,
+                          ),
+                        ),
+                        const Text(
+                          'Directions',
+                        ),
+                      ],
+                    ),
                   ),
                   onTap: () async {
                     List<AvailableMap> availableMaps =
@@ -743,19 +778,28 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                     );
                   },
                 ),
+                Container(
+                  height: 40,
+                  child: VerticalDivider(
+                    thickness: 1.5,
+                  ),
+                ),
                 GestureDetector(
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.open_in_browser,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 10,
+                  child: Container(
+                    width: screenWidth * 0.3,
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.open_in_browser,
                         ),
-                      ),
-                      const Text('Website'),
-                    ],
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: 10,
+                          ),
+                        ),
+                        const Text('Website'),
+                      ],
+                    ),
                   ),
                   onTap: () {
                     cardType == 'Lodgings'
@@ -1339,10 +1383,14 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 AppBar(
                   title: Text(
                     'Add to trip',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      fontSize: 30,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
+                  backgroundColor: Colors.grey[50],
+                  elevation: 0,
                   automaticallyImplyLeading: false,
                   iconTheme: new IconThemeData(
                     color: Colors.white,
@@ -1596,20 +1644,31 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     final loadedTrip = Provider.of<TripsProvider>(
       context,
     ).findById(tripId);
+
     setState(() {
       _activitiesComplete = loadedTrip.activitiesComplete;
       _lodgingsComplete = loadedTrip.lodgingsComplete;
       _transportationsComplete = loadedTrip.transportationsComplete;
     });
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(
-          '${loadedTrip.title}',
-          style: TextStyle(
-            color: Theme.of(context).secondaryHeaderColor,
+        // title: Text(
+        //   '${loadedTrip.title}',
+        //   style: TextStyle(
+        //     color: Theme.of(context).secondaryHeaderColor,
+        //   ),
+        // ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
           ),
+          preferredSize: Size.fromHeight(1.0),
         ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         iconTheme: new IconThemeData(
           color: Theme.of(context).secondaryHeaderColor,
         ),
@@ -1661,7 +1720,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         child: Column(
           children: <Widget>[
             Container(
-              height: screenHeight * 0.25,
+              height: loadedTrip.tripImageUrl != null &&
+                      loadedTrip.tripImageUrl != ''
+                  ? screenHeight * 0.25
+                  : 0,
               alignment: Alignment.center,
               padding: EdgeInsets.only(
                 top: screenHeight * 0.03,
@@ -1675,15 +1737,15 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                         topRight: Radius.circular(8.0),
                       ),
                       child: Container(
-                        child: IconButton(
-                          icon: Icon(Icons.photo_camera),
-                          //TODO
-                          onPressed: () {},
-                        ),
-                        color: Colors.grey,
-                        height: double.infinity,
-                        width: double.infinity,
-                      ),
+                          // child: IconButton(
+                          //   icon: Icon(Icons.photo_camera),
+                          //   //TODO
+                          //   onPressed: () {},
+                          // ),
+                          // color: Colors.grey,
+                          // height: double.infinity,
+                          // width: double.infinity,
+                          ),
                       //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
                       //PlacesImages(loadedTrip.countries[0].id),
                     )
@@ -1766,7 +1828,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 child: Text(
                   'Edit Trip',
                   style: TextStyle(
-                    color: Theme.of(context).secondaryHeaderColor,
+                    color: Theme.of(context).accentColor,
                     fontSize: screenHeight * 0.023,
                   ),
                 ),
@@ -1808,10 +1870,22 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 children: <Widget>[
                   flatButton(
                     Icon(
+                      Icons.photo,
+                      color: Colors.blue,
+                    ),
+                    'Photos',
+                    Colors.blue,
+                    //TODO
+                    () {},
+                    context,
+                  ),
+                  flatButton(
+                    Icon(
                       Icons.timeline,
-                      color: Theme.of(context).secondaryHeaderColor,
+                      color: Colors.green,
                     ),
                     'Timeline',
+                    Colors.green,
                     //TODO
                     _timeLine,
                     context,
@@ -1819,9 +1893,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   flatButton(
                     Icon(
                       Icons.note,
-                      color: Theme.of(context).secondaryHeaderColor,
+                      color: Colors.indigo,
                     ),
                     'Notes',
+                    Colors.indigo,
                     //TODO
                     () {},
                     context,
@@ -1829,19 +1904,10 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                   flatButton(
                     Icon(
                       Icons.lightbulb_outline,
-                      color: Theme.of(context).secondaryHeaderColor,
+                      color: Colors.red,
                     ),
                     'Tips',
-                    //TODO
-                    () {},
-                    context,
-                  ),
-                  flatButton(
-                    Icon(
-                      Icons.photo,
-                      color: Theme.of(context).secondaryHeaderColor,
-                    ),
-                    'Photos',
+                    Colors.red,
                     //TODO
                     () {},
                     context,
@@ -1849,72 +1915,57 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ],
               ),
             ),
-            Divider(
-              thickness: 10,
-            ),
             loadedTrip.countries[countryIndex].flights != null
                 ? loadedTrip.countries[countryIndex].flights.length > 0
-                    ? cardScroller(
-                        'Flights',
-                        1,
-                        flightOrTransportationTile(
-                          'Flight',
-                        ),
-                        context,
-                      )
-                    : Container()
-                : Container(),
-            loadedTrip.countries[countryIndex].flights != null
-                ? loadedTrip.countries[countryIndex].flights.length > 0
-                    ? Divider(
-                        thickness: 10,
+                    ? Column(
+                        children: [
+                          Divider(
+                            thickness: 10,
+                          ),
+                          cardScroller(
+                            'Flights',
+                            1,
+                            flightOrTransportationTile(
+                              'Flight',
+                            ),
+                            context,
+                          ),
+                        ],
                       )
                     : Container()
                 : Container(),
             loadedTrip.countries.length > 0
-                ? cardScroller(
-                    'Destinations',
-                    1,
-                    cardWidget('Destinations'),
-                    context,
+                ? Column(
+                    children: [
+                      Divider(
+                        thickness: 10,
+                      ),
+                      cardScroller(
+                        'Destinations',
+                        1,
+                        cardWidget('Destinations'),
+                        context,
+                      ),
+                    ],
                   )
                 : Container(),
             loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
                     null
                 ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
-                                .length >
-                            0 ||
-                        loadedTrip.countries[countryIndex].cities[cityIndex]
-                                .activities.length >
-                            0 ||
-                        loadedTrip.countries[countryIndex].cities[cityIndex]
-                                .transportations.length >
-                            0
-                    ? Divider(
-                        thickness: 10,
-                      )
-                    : Container()
-                : Container(),
-            loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
-                    null
-                ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
                             .length >
                         0
-                    ? cardScroller(
-                        'Lodging',
-                        1,
-                        cardWidget('Lodgings'),
-                        context,
-                      )
-                    : Container()
-                : Container(),
-            loadedTrip.countries[countryIndex].cities[cityIndex].lodgings !=
-                    null
-                ? loadedTrip.countries[countryIndex].cities[cityIndex].lodgings
-                            .length >
-                        0
-                    ? Divider(
-                        thickness: 10,
+                    ? Column(
+                        children: [
+                          Divider(
+                            thickness: 10,
+                          ),
+                          cardScroller(
+                            'Lodging',
+                            1,
+                            cardWidget('Lodgings'),
+                            context,
+                          ),
+                        ],
                       )
                     : Container()
                 : Container(),
@@ -1923,11 +1974,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ? loadedTrip.countries[countryIndex].cities[cityIndex]
                             .activities.length >
                         0
-                    ? cardScroller(
-                        'Activities',
-                        1,
-                        cardWidget('Activities'),
-                        context,
+                    ? Column(
+                        children: [
+                          Divider(
+                            thickness: 10,
+                          ),
+                          cardScroller(
+                            'Activities',
+                            1,
+                            cardWidget('Activities'),
+                            context,
+                          ),
+                        ],
                       )
                     : Container()
                 : Container(),
@@ -1936,21 +1994,18 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ? loadedTrip.countries[countryIndex].cities[cityIndex]
                             .restaurants.length >
                         0
-                    ? Divider(
-                        thickness: 10,
-                      )
-                    : Container()
-                : Container(),
-            loadedTrip.countries[countryIndex].cities[cityIndex].restaurants !=
-                    null
-                ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                            .restaurants.length >
-                        0
-                    ? cardScroller(
-                        'Restaurants',
-                        1,
-                        cardWidget('Restaurants'),
-                        context,
+                    ? Column(
+                        children: [
+                          Divider(
+                            thickness: 10,
+                          ),
+                          cardScroller(
+                            'Restaurants',
+                            1,
+                            cardWidget('Restaurants'),
+                            context,
+                          ),
+                        ],
                       )
                     : Container()
                 : Container(),
@@ -1960,38 +2015,36 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                 ? loadedTrip.countries[countryIndex].cities[cityIndex]
                             .transportations.length >
                         0
-                    ? Divider(
-                        thickness: 10,
+                    ? Column(
+                        children: [
+                          Divider(
+                            thickness: 10,
+                          ),
+                          cardScroller(
+                            'Transportation',
+                            1,
+                            flightOrTransportationTile(
+                              'Transportation',
+                            ),
+                            context,
+                          ),
+                        ],
                       )
                     : Container()
                 : Container(),
-            loadedTrip.countries[countryIndex].cities[cityIndex]
-                        .transportations !=
-                    null
-                ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                            .transportations.length >
-                        0
-                    ? cardScroller(
-                        'Transportation',
-                        1,
-                        flightOrTransportationTile(
-                          'Transportation',
-                        ),
-                        context,
-                      )
-                    : Container()
-                : Container(),
+            Container(
+              child: PostComment(),
+            ),
             Padding(
-              padding: EdgeInsets.only(bottom: 75),
+              padding: EdgeInsets.only(bottom: 100),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
           Icons.add,
-          color: Theme.of(context).secondaryHeaderColor,
+          color: Theme.of(context).accentColor,
         ),
         onPressed: () {
           showBottomModalAddTrip(context);

@@ -63,6 +63,15 @@ class Transportation extends ChangeNotifier {
     return [..._transportations];
   }
 
+  //verify if list of restaurants is empty
+  bool assertTransportationList() {
+    if(_transportations.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //add transportation
   Future<void> addTransportation(
     String tripId,
@@ -218,14 +227,14 @@ class Transportation extends ChangeNotifier {
                       startingLongitude:
                           transportationData.data()['startingLongitude'],
                       startingDateTime:
-                          transportationData.data()['startingDateTime'],
+                          transportationData.data()['startingDateTime'].toDate(),
                       endingAddress: transportationData.data()['endingAddress'],
                       endingLatitude:
                           transportationData.data()['endingLatitude'],
                       endingLongitude:
                           transportationData.data()['endingLongitude'],
                       endingDateTime:
-                          transportationData.data()['endingDateTime'],
+                          transportationData.data()['endingDateTime'].toDate(),
                       transportationType:
                           transportationData.data()['transportationType'],
                       transportationImageUrl:

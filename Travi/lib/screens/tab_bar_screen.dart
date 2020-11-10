@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../screens/current_trips_screen.dart';
 import '../screens/discover_screen.dart';
 import '../screens/past_trips_screen.dart';
@@ -92,13 +91,23 @@ class _TabBarScreenState extends State<TabBarScreen> {
 
   Widget _builderAppBar(BuildContext ctx) {
     return AppBar(
-      title: Text(_pages[_selectedPageIndex]['title'],
-          style: TextStyle(
-            color: Theme.of(context).secondaryHeaderColor,
-          )),
+      title: Text(
+        _pages[_selectedPageIndex]['title'],
+        style: TextStyle(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
+      ),
       iconTheme: new IconThemeData(
         color: Theme.of(context).secondaryHeaderColor,
       ),
+      bottom: PreferredSize(
+        child: Container(
+          color: Colors.grey[400],
+          height: 1,
+        ),
+        preferredSize: Size.fromHeight(1.0),
+      ),
+      backgroundColor: Colors.grey[50],
       actions: <Widget>[
         Stack(
           fit: StackFit.loose,
@@ -161,6 +170,7 @@ class _TabBarScreenState extends State<TabBarScreen> {
           ],
         ),
       ],
+      elevation: 0,
     );
   }
 
@@ -171,31 +181,48 @@ class _TabBarScreenState extends State<TabBarScreen> {
       key: _scaffoldKey,
       appBar: _builderAppBar(context),
       drawer: AppDrawer(),
-      body: _pages[_selectedPageIndex]['page'],
+      body:  _pages[_selectedPageIndex]['page'],
       endDrawer: Container(
           width: screenWidth * 0.9,
           child: NotificationEndDrawer(currentLoggedInUser)),
       endDrawerEnableOpenDragGesture: false,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Theme.of(context).accentColor,
-        selectedItemColor: Theme.of(context).secondaryHeaderColor,
-        onTap: _selectPage,
-        currentIndex: _selectedPageIndex,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.beach_access),
-            title: Text('Current Trips'),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey[500],
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          elevation: 0,
+          //backgroundColor: Theme.of(context).primaryColor,
+          unselectedItemColor: Colors.grey[500],
+          selectedItemColor: Theme.of(context).buttonColor,
+          selectedFontSize: 17,
+          selectedIconTheme: IconThemeData(
+            size: 35,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            title: Text('Discover'),
+          selectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            title: Text('Past Trips'),
-          ),
-        ],
+          onTap: _selectPage,
+          currentIndex: _selectedPageIndex,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.beach_access),
+              title: Text('Current Trips'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              title: Text('Discover'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              title: Text('Past Trips'),
+            ),
+          ],
+        ),
       ),
     );
   }

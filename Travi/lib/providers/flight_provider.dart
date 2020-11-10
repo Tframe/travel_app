@@ -62,6 +62,15 @@ class Flight extends ChangeNotifier {
     return [..._flights];
   }
 
+  //verify if list of restaurants is empty
+  bool assertFlightList() {
+    if(_flights.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //add flight
   Future<void> addFlight(
     String tripId,
@@ -295,6 +304,7 @@ class Flight extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    
     notifyListeners();
   }
 }

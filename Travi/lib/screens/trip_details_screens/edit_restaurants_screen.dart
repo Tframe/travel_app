@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/user_provider.dart';
@@ -59,7 +60,6 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
@@ -144,10 +144,38 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
                                                 .removeRestaurant(
                                               loadedTrip.id,
                                               user.uid,
-                                              loadedTrip.countries[countryIndex].id,
-                                              loadedTrip.countries[countryIndex].cities[cityIndex].id,
-                                              loadedTrip.countries[countryIndex].cities[cityIndex].restaurants[index].id,
+                                              loadedTrip
+                                                  .countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex]
+                                                  .cities[cityIndex].id,
+                                              loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .restaurants[index]
+                                                  .id,
                                             );
+                                            loadedTrip.countries[countryIndex]
+                                                .cities[cityIndex].restaurants
+                                                .removeAt(index);
+                                            List<TripProvider> trips =
+                                                Provider.of<TripsProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .trips;
+                                            var tripIndex = trips.indexWhere(
+                                                (trip) =>
+                                                    trip.id == loadedTrip.id);
+                                            trips[tripIndex]
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .restaurants =
+                                                loadedTrip
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .restaurants;
+                                            Provider.of<TripsProvider>(context,
+                                                    listen: false)
+                                                .setTripsList(trips);
                                           });
                                           Navigator.of(context).pop();
                                         },

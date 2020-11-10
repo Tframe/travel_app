@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './user_provider.dart';
+import './trips_provider.dart';
 
 class Lodging extends ChangeNotifier {
   String id;
@@ -48,6 +49,15 @@ class Lodging extends ChangeNotifier {
     return [..._lodgings];
   }
 
+  //verify if list of restaurants is empty
+  bool assertLodgingList() {
+    if(_lodgings.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //Add lodging
   Future<void> addLodging(
     String tripId,
@@ -56,6 +66,7 @@ class Lodging extends ChangeNotifier {
     String cityId,
     Lodging lodging,
   ) async {
+
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -95,6 +106,8 @@ class Lodging extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+
+    _lodgings.add(lodging);
     notifyListeners();
   }
 

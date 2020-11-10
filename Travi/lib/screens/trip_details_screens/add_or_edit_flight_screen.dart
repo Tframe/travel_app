@@ -181,7 +181,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
   }
 
   //Saves transporation
-  void _addOrEditTransportation() async {
+  void _addOrEditFlight() async {
     if (!_formKey.currentState.validate()) {
       return;
     } else {
@@ -196,6 +196,12 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
         newFlight.participants =
             Provider.of<UserProvider>(context, listen: false).getParticipants;
         newFlight.chosen = !_suggestion;
+
+        //get current list of trips to update
+        List<TripProvider> trips =
+            Provider.of<TripsProvider>(context, listen: false).trips;
+        var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
         if (edit) {
           await Provider.of<Flight>(context, listen: false).editFlight(
             loadedTrip.id,
@@ -204,6 +210,10 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
             newFlight,
             newFlight.id,
           );
+          //update flight to trip data
+          List<Flight> flights =
+              Provider.of<Flight>(context, listen: false).flights;
+          trips[tripIndex].countries[countryIndex].flights = flights;
         } else {
           await Provider.of<Flight>(context, listen: false).addFlight(
             loadedTrip.id,
@@ -211,8 +221,10 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
             loadedTrip.countries[countryIndex].id,
             newFlight,
           );
+          //add flight to trip data
+          trips[tripIndex].countries[countryIndex].flights.add(newFlight);
         }
-
+        Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
         //create notification to be sent to other companions
         for (int i = 0; i < loadedTrip.group.length; i++) {
           //if not the user that is logged in, send notification
@@ -249,7 +261,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                 .addNotification(loadedTrip.group[i].id, newNotification);
           }
         }
-
+        //reset participant list
         Provider.of<UserProvider>(context, listen: false)
             .resetParticipantsList();
       } catch (error) {
@@ -738,7 +750,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                                   color: Theme.of(context).accentColor,
                                 ),
                               ),
-                              onPressed: () => _addOrEditTransportation(),
+                              onPressed: () => _addOrEditFlight(),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),

@@ -175,10 +175,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
+
                   Container(
                     height: screenHeight * 0.50,
                     margin: EdgeInsets.only(
@@ -232,10 +229,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       },
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
+
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
@@ -252,7 +246,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -272,7 +266,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

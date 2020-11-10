@@ -78,6 +78,12 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
       tempLodging.participants =
           Provider.of<UserProvider>(context, listen: false).getParticipants;
       tempLodging.chosen = !_suggestion;
+
+      //get current list of trips to update
+        List<TripProvider> trips =
+            Provider.of<TripsProvider>(context, listen: false).trips;
+        var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
       if (edit) {
         await Provider.of<Lodging>(context, listen: false).editLodging(
           loadedTrip.id,
@@ -87,6 +93,10 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
           tempLodging,
           tempLodging.id,
         );
+        //update lodging to trip data
+          List<Lodging> lodgings =
+              Provider.of<Lodging>(context, listen: false).lodgings;
+          trips[tripIndex].countries[countryIndex].cities[cityIndex].lodgings = lodgings;
       } else {
         await Provider.of<Lodging>(context, listen: false).addLodging(
           loadedTrip.id,
@@ -95,8 +105,14 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
           loadedTrip.countries[countryIndex].cities[cityIndex].id,
           tempLodging,
         );
+        //add activity to trip data
+        trips[tripIndex]
+            .countries[countryIndex]
+            .cities[cityIndex]
+            .lodgings
+            .add(tempLodging);
       }
-
+      Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
         //if not the user that is logged in, send notification

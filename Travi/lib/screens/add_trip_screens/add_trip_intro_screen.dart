@@ -70,7 +70,7 @@ class AddTripIntroScreen extends StatelessWidget {
                     width: screenWidth * 0.8,
                     child: FlatButton(
                       onPressed: () => Navigator.of(context).pushNamed(AddTripTitleScreen.routeName),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                       child: Text(
                         'Next',
                         style: TextStyle(

@@ -62,10 +62,9 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
             )
           : CurrentTripCardList(),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).primaryColor,
         child: Icon(
           Icons.add,
-          color: Theme.of(context).secondaryHeaderColor,
+          color: Theme.of(context).accentColor,
         ),
         onPressed: () {
           Navigator.of(context).pushNamed(AddTripIntroScreen.routeName);

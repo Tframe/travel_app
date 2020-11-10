@@ -46,6 +46,15 @@ class Restaurant extends ChangeNotifier {
     return [..._restaurants];
   }
 
+  //verify if list of restaurants is empty
+  bool assertRestaurantList() {
+    if(_restaurants.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //add restaurant
   Future<void> addRestaurant(
     String tripId,
@@ -157,7 +166,6 @@ class Restaurant extends ChangeNotifier {
   ) async {
     List<Restaurant> restaurantList = [];
     List<UserProvider> participantsList = [];
-
     try {
       await FirebaseFirestore.instance
           .collection('users')

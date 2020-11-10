@@ -80,7 +80,8 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed(TabBarScreen.routeName);
+              Navigator.of(context)
+                  .pushReplacementNamed(TabBarScreen.routeName);
             },
           )),
       body: FutureBuilder(
@@ -105,13 +106,19 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                         children: [
                           Padding(
                             padding: EdgeInsets.only(
-                                left: screenWidth * (0.5 - 0.17),
-                                bottom: screenHeight * 0.0125),
+                              left: screenWidth * (0.5 - 0.17),
+                              bottom: screenHeight * 0.0125,
+                            ),
                             child: UserImagePicker(
-                                _pickedImage, user, _loadedUser),
+                              _pickedImage,
+                              user,
+                              _loadedUser,
+                            ),
                           ),
                           Padding(
-                            padding: EdgeInsets.only(top: screenHeight * 0.18),
+                            padding: EdgeInsets.only(
+                              top: screenHeight * 0.18,
+                            ),
                             child: IconButton(
                               icon: Icon(Icons.edit),
                               onPressed: _editPersonalInfo,

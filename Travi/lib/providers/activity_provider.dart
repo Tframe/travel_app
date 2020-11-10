@@ -48,6 +48,15 @@ class Activity extends ChangeNotifier {
     return [..._activities];
   }
 
+  //verify if list of restaurants is empty
+  bool assertActivityList() {
+    if(_activities.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   //add activity
   Future<void> addActivity(
     String tripId,
@@ -192,8 +201,8 @@ class Activity extends ChangeNotifier {
                     longitude: activityData.data()['longitude'],
                     chosen: activityData.data()['chosen'],
                     reservationID: activityData.data()['reservationID'],
-                    startingDateTime: activityData.data()['startingDateTime'],
-                    endingDateTime: activityData.data()['endingDateTime'],
+                    startingDateTime: activityData.data()['startingDateTime'].toDate(),
+                    endingDateTime: activityData.data()['endingDateTime'].toDate(),
                     activityImageUrl: activityData.data()['activityImageUrl'],
                     participants: activityData.data()['participants'] != null
                         ? activityData.data()['participants'].asMap().forEach(

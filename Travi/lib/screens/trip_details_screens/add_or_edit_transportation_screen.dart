@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/transportation_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/notification_provider.dart';
 import './widgets/group_avatars.dart';
@@ -236,6 +235,13 @@ class _AddOrEditTransportationScreenState
         newTransportation.organizerId = userId;
         newTransportation.participants =
             Provider.of<UserProvider>(context, listen: false).getParticipants;
+        newTransportation.chosen = !_suggestion;
+
+        //get current list of trips to update
+        List<TripProvider> trips =
+            Provider.of<TripsProvider>(context, listen: false).trips;
+        var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
         if (edit) {
           await Provider.of<Transportation>(context, listen: false)
               .editTransportation(
@@ -246,6 +252,14 @@ class _AddOrEditTransportationScreenState
             newTransportation,
             newTransportation.id,
           );
+          //update transportation to trip data
+          List<Transportation> transportations =
+              Provider.of<Transportation>(context, listen: false)
+                  .transportations;
+          trips[tripIndex]
+              .countries[countryIndex]
+              .cities[cityIndex]
+              .transportations = transportations;
         } else {
           await Provider.of<Transportation>(context, listen: false)
               .addTransportation(
@@ -255,8 +269,25 @@ class _AddOrEditTransportationScreenState
             loadedTrip.countries[countryIndex].cities[cityIndex].id,
             newTransportation,
           );
-        }
 
+          if (trips[tripIndex]
+                  .countries[countryIndex]
+                  .cities[cityIndex]
+                  .transportations ==
+              null) {
+            trips[tripIndex]
+                .countries[countryIndex]
+                .cities[cityIndex]
+                .transportations = [];
+          }
+          //add activity to trip data
+          trips[tripIndex]
+              .countries[countryIndex]
+              .cities[cityIndex]
+              .transportations
+              .add(newTransportation);
+        }
+        Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
         //create notification to be sent to other companions
         for (int i = 0; i < loadedTrip.group.length; i++) {
           //if not the user that is logged in, send notification

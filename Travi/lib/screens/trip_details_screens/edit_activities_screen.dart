@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:groupy/providers/activity_provider.dart';
+import 'package:groupy/providers/trips_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/trip_provider.dart';
@@ -55,12 +56,11 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
             )
           : SingleChildScrollView(
               child: Container(
-                width: screenWidth * 0.9,
+                width: screenWidth,
                 child: Column(
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
@@ -140,6 +140,28 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
                                                   .activities[index]
                                                   .id,
                                             );
+                                            loadedTrip.countries[countryIndex]
+                                                .cities[cityIndex].activities
+                                                .removeAt(index);
+                                            List<TripProvider> trips =
+                                                Provider.of<TripsProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .trips;
+                                            var tripIndex = trips.indexWhere(
+                                                (trip) =>
+                                                    trip.id == loadedTrip.id);
+                                            trips[tripIndex]
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .activities =
+                                                loadedTrip
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .activities;
+                                            Provider.of<TripsProvider>(context,
+                                                    listen: false)
+                                                .setTripsList(trips);
                                           });
                                           Navigator.of(context).pop();
                                         },

@@ -73,6 +73,12 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
       newRestaurant.organizerId = userId;
       newRestaurant.participants =
           Provider.of<UserProvider>(context, listen: false).getParticipants;
+
+      //get current list of trips to update
+      List<TripProvider> trips =
+          Provider.of<TripsProvider>(context, listen: false).trips;
+      var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
       if (edit) {
         await Provider.of<Restaurant>(context, listen: false).editRestaurant(
           loadedTrip.id,
@@ -82,6 +88,10 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
           newRestaurant,
           newRestaurant.id,
         );
+        //update restaurant to trip data
+          List<Restaurant> restaurants =
+              Provider.of<Restaurant>(context, listen: false).restaurants;
+          trips[tripIndex].countries[countryIndex].cities[cityIndex].restaurants = restaurants;
       } else {
         await Provider.of<Restaurant>(context, listen: false).addRestaurant(
           loadedTrip.id,
@@ -90,8 +100,14 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
           loadedTrip.countries[countryIndex].cities[cityIndex].id,
           newRestaurant,
         );
+        //add activity to trip data
+        trips[tripIndex]
+            .countries[countryIndex]
+            .cities[cityIndex]
+            .restaurants
+            .add(newRestaurant);
       }
-
+      Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
         //if not the user that is logged in, send notification

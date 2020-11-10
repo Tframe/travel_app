@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/user_provider.dart';
@@ -80,6 +80,11 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
           Provider.of<UserProvider>(context, listen: false).getParticipants;
       newActivity.chosen = !_suggestion;
 
+      //get current list of trips to update
+      List<TripProvider> trips =
+          Provider.of<TripsProvider>(context, listen: false).trips;
+      var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
       if (edit) {
         //edit activity
         await Provider.of<Activity>(context, listen: false).editActivity(
@@ -90,6 +95,11 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
           newActivity,
           newActivity.id,
         );
+        //update activity to trip data
+        List<Activity> activities =
+            Provider.of<Activity>(context, listen: false).activities;
+        trips[tripIndex].countries[countryIndex].cities[cityIndex].activities =
+            activities;
       } else {
         //add activity
         await Provider.of<Activity>(context, listen: false).addActivity(
@@ -99,8 +109,14 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
           loadedTrip.countries[countryIndex].cities[cityIndex].id,
           newActivity,
         );
+        //add activity to trip data
+        trips[tripIndex]
+            .countries[countryIndex]
+            .cities[cityIndex]
+            .activities
+            .add(newActivity);
       }
-
+      Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
         //if not the user that is logged in, send notification

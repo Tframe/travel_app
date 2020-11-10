@@ -36,4 +36,16 @@ class TripProvider extends ChangeNotifier {
     this.lodgingsComplete,
     this.transportationsComplete,
   });
+
+  TripProvider _currentTrip;
+
+
+  Future<void> setTrip(TripProvider trip) async{
+    _currentTrip = trip;
+  }
+
+  TripProvider get currentTrip {
+    return _currentTrip;
+  }
+
 }

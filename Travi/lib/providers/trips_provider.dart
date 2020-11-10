@@ -110,6 +110,7 @@ class TripsProvider extends ChangeNotifier {
   //used to set trips once trips are loaded from firebase
   Future<void> setTripsList(List<TripProvider> loadedTrip) async {
     _trips = loadedTrip;
+    notifyListeners();
   }
 
   //Get trips list of specific user from Firebase Firestore
@@ -159,8 +160,8 @@ class TripsProvider extends ChangeNotifier {
                         ));
                       })
                     : [],
-                
                 isPrivate: trip.docs[index].data()['isPrivate'],
+                
               );
               loadedTrips.add(tempTrip);
               loadedTrips[index].group = loadedUsers;
@@ -349,7 +350,6 @@ class TripsProvider extends ChangeNotifier {
     int groupIndex,
   ) async {
     final tripIndex = _trips.indexWhere((trip) => trip.id == currentTrip.id);
-
     _trips[tripIndex].group.removeAt(groupIndex);
     if (tripIndex >= 0) {
       try {

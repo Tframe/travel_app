@@ -24,7 +24,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
     //for each country get list of cities
     for (int i = 0; i < countryList.length; i++) {
       await Provider.of<City>(context, listen: false).fetchAndSetCities(
-        userId,
+        foundTrip.organizerId,
         foundTrip.id,
         countryList[i].id,
       );
@@ -38,7 +38,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
 
   Future<void> getCountryData() async {
     await Provider.of<Country>(context, listen: false).fetchAndSetCountries(
-      userId,
+      foundTrip.organizerId,
       foundTrip.id,
     );
 

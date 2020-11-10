@@ -173,7 +173,8 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                           labelText: 'Trip Description',
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
-                                color: Theme.of(context).secondaryHeaderColor),
+                              color: Theme.of(context).secondaryHeaderColor,
+                            ),
                           ),
                         ),
                         textInputAction: TextInputAction.done,
@@ -218,7 +219,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                               alignment: Alignment.center,
                               child: IconButton(
                                 icon: Icon(Icons.calendar_today),
-                                color: Theme.of(context).primaryColor,
+                                color: Theme.of(context).buttonColor,
                                 onPressed: _showStartDatePicker,
                               ),
                             ),
@@ -257,7 +258,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                               padding: EdgeInsets.only(left: 5),
                               child: IconButton(
                                 icon: Icon(Icons.calendar_today),
-                                color: Theme.of(context).primaryColor,
+                                color: Theme.of(context).buttonColor,
                                 onPressed: _showEndDatePicker,
                               ),
                             ),
@@ -283,9 +284,8 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         child: FlatButton(
                           child: Text(
                             'Next',
-                            style: TextStyle(
-                              color: Theme.of(context).accentColor,
-                            ),
+                            style:
+                                TextStyle(color: Theme.of(context).accentColor),
                           ),
                           onPressed: _saveName,
                           shape: RoundedRectangleBorder(
@@ -293,7 +293,7 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                           ),
                           padding: EdgeInsets.symmetric(
                               horizontal: 30.0, vertical: 8.0),
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).buttonColor,
                         ),
                       ),
                     ],

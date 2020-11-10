@@ -44,8 +44,11 @@ import './screens/trip_details_screens/add_or_edit_activity_screen.dart';
 import './screens/trip_details_screens/edit_restaurants_screen.dart';
 import './screens/trip_details_screens/add_or_edit_restaurant_screen.dart';
 import './screens/timeline_screens/timeline_screen.dart';
+import './screens/post_comments_screens/post_comment_screen.dart';
 
 import './providers/user_provider.dart';
+import './providers/trip_provider.dart';
+
 import './providers/trips_provider.dart';
 import './providers/country_provider.dart';
 import './providers/city_provider.dart';
@@ -55,7 +58,8 @@ import './providers/activity_provider.dart';
 import './providers/lodging_provider.dart';
 import './providers/transportation_provider.dart';
 import './providers/restaurant_provider.dart';
-
+import './providers/post_provider.dart';
+import './providers/tag_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -127,6 +131,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (ctx) => TripProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (ctx) => TripsProvider(),
         ),
         ChangeNotifierProvider(
@@ -150,22 +157,32 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (ctx) => Restaurant(),
         ),
-
         ChangeNotifierProvider(
           create: (ctx) => Transportation(),
         ),
         ChangeNotifierProvider(
           create: (ctx) => NotificationProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (ctx) => PostProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => TagProvider(),
+        ),
       ],
       child: MaterialApp(
         theme: ThemeData(
           //scaffoldBackgroundColor: lemonMeringue,
+          primaryColor: Colors.white,
           primarySwatch: sandyBrown,
           secondaryHeaderColor: indigoDye,
-          accentColor: lemonMeringue,
-          buttonColor: lemonMeringue,
+          accentColor: lemonMeringue, //lemonMeringue,
+          buttonColor: sandyBrown,
           fontFamily: 'OpenSans',
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: sandyBrown,
+            
+          ),
           buttonTheme: ButtonTheme.of(context).copyWith(
             buttonColor: sandyBrown,
             textTheme: ButtonTextTheme.primary,
@@ -227,6 +244,7 @@ class MyApp extends StatelessWidget {
           AddOrEditRestaurantScreen.routeName: (ctx) =>
               AddOrEditRestaurantScreen(),
           TimelineScreen.routeName: (ctx) => TimelineScreen(),
+          PostCommentScreen.routeName: (ctx) => PostCommentScreen(),
         },
       ),
     );
