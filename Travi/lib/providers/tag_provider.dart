@@ -2,30 +2,56 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import './post_provider.dart';
+
 class TagProvider extends ChangeNotifier {
   String id;
   String tagWord;
-  List<String> authorId;
-  List<String> postId;
+  List<PostProvider> postInfo;
 
   TagProvider({
     this.id,
     this.tagWord,
-    this.authorId,
-    this.postId,
+    this.postInfo,
   });
 
+  TagProvider _currentTag;
+
+  TagProvider get currentTag {
+    return _currentTag;
+  }
+
   //Add tag to firestore
-  Future<void> addNewTag(TagProvider tag) async {
+  Future<String> addNewTag(TagProvider tag) async {
     try {
       await FirebaseFirestore.instance.collection('tags').add({
         'tagWord': tag.tagWord,
-        'authorId': tag.authorId.toList(),
-        'postId': tag.postId.toList(),
-      });
+        'postInfo': tag.postInfo
+            .map((post) => {
+                  'id': post.id,
+                  'dateTime': post.dateTime,
+                  'authorId': post.authorId,
+                  'tripId': post.tripId,
+                  'lodgingId': post.lodgingId,
+                  'flightId': post.flightId,
+                  'transportationId': post.transportationId,
+                  'restaurantId': post.restaurantId,
+                  'activityId': post.activityId,
+                  'message': post.message,
+                  'photosURL': post.photosURL,
+                  'location': post.location,
+                  'locationLatitude': post.locationLatitude,
+                  'locationLongitude': post.locationLongitude,
+                })
+            .toList()
+      }).then((docRef) => tag.id = docRef.id);
     } catch (error) {
       throw error;
     }
+
+    _currentTag = tag;
+    notifyListeners();
+    return tag.id;
   }
 
   //Check for existing tag. If it exists, return the tag id, otherwise
@@ -41,8 +67,6 @@ class TagProvider extends ChangeNotifier {
         tag.docs.asMap().forEach((tagIndex, tagData) {
           tempTag = TagProvider(
             id: tag.docs[tagIndex].id,
-            authorId: tagData.data()['authorId'],
-            postId: tagData.data()['postId'],
             tagWord: tagData.data()['tagWord'],
           );
         });
@@ -54,6 +78,36 @@ class TagProvider extends ChangeNotifier {
       return tempTag.id;
     } else {
       return null;
+    }
+  }
+
+  Future<void> addToExistingTag(
+    TagProvider tag,
+    String tagId,
+  ) async {
+    try {
+      FirebaseFirestore.instance.collection('tags').doc(tagId).update({
+        'postInfo': FieldValue.arrayUnion(tag.postInfo
+            .map((post) => {
+                  'id': post.id,
+                  'dateTime': DateTime.now(),
+                  'authorId': post.authorId,
+                  'tripId': post.tripId,
+                  'lodgingId': post.lodgingId,
+                  'flightId': post.flightId,
+                  'transportationId': post.transportationId,
+                  'restaurantId': post.restaurantId,
+                  'activityId': post.activityId,
+                  'photosURL': post.photosURL,
+                  'message': post.message,
+                  'location': post.location,
+                  'locationLatitude': post.locationLatitude,
+                  'locationLongitude': post.locationLongitude,
+                })
+            .toList())
+      }).then((docRef) => print('Tag updated'));
+    } catch (error) {
+      throw error;
     }
   }
 }

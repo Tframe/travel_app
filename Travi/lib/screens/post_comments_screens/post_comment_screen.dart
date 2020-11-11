@@ -1,14 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:location/location.dart';
 
 import '../../providers/user_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../providers/post_provider.dart';
 import '../../providers/trip_provider.dart';
-import '../../widgets/pickers/image_video_pickers.dart';
 import '../../widgets/pickers/image_video.dart';
+import '../../widgets/location_helper.dart';
 
 class PostCommentScreen extends StatefulWidget {
   static const routeName = '/post-comment';
@@ -34,10 +36,11 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     activityId: null,
     transportationId: null,
     restaurantId: null,
+    location: null,
     locationLatitude: null,
     locationLongitude: null,
     tagIds: [],
-    photosURL: [],
+    photosURL: null,
   );
 
   final GlobalKey<FormState> _formKey = GlobalKey();
@@ -46,6 +49,14 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
 
   int _selectedEventType = 0;
   int _selectedSpecifiedEventType = 0;
+  List<Map<String, int>> eventIndicies = [
+    {
+      'countryIndex': 0,
+      'cityIndex': 0,
+      'eventIndex': 0,
+    }
+  ];
+
   //List of dropdowns for selecting what type of event to comment on
   List<DropdownMenuItem<int>> commentOnEventType = [];
   //List of actual events for the specified event type
@@ -100,6 +111,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
 
   void updateSpecificEventDropDown() {
     commentOnSpecifiedEvent = [];
+    eventIndicies = [];
     if (_selectedEventType == 1) {
       updateFlightDropDown();
     } else if (_selectedEventType == 2) {
@@ -113,8 +125,9 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     }
   }
 
+  //When selectEventType dropdown is selected for flight,
+  //update the specificEventType dropdown to display flight options
   void updateFlightDropDown() {
-    print('Flight');
     for (int i = 0; i < currentTrip.countries.length; i++) {
       for (int j = 0; j < currentTrip.countries[i].flights.length; j++) {
         commentOnSpecifiedEvent.add(
@@ -124,12 +137,18 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
             value: i + j,
           ),
         );
+        eventIndicies.add({
+          'countryIndex': i,
+          'cityIndex': 0,
+          'eventIndex': j,
+        });
       }
     }
   }
 
+  //When selectEventType dropdown is selected for loding,
+  //update the specificEventType dropdown to display lodging options
   void updateLodgingDropDown() {
-    print('Lodging');
     for (int i = 0; i < currentTrip.countries.length; i++) {
       for (int j = 0; j < currentTrip.countries[i].cities.length; j++) {
         for (int k = 0;
@@ -142,13 +161,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
               value: i + j + k,
             ),
           );
+          eventIndicies.add({
+            'countryIndex': i,
+            'cityIndex': j,
+            'eventIndex': k,
+          });
         }
       }
     }
   }
 
+  //When selectEventType dropdown is selected for activity,
+  //update the specificEventType dropdown to display activity options
   void updateActivityDropDown() {
-    print('Activity');
     for (int i = 0; i < currentTrip.countries.length; i++) {
       for (int j = 0; j < currentTrip.countries[i].cities.length; j++) {
         for (int k = 0;
@@ -161,13 +186,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
               value: i + j + k,
             ),
           );
+          eventIndicies.add({
+            'countryIndex': i,
+            'cityIndex': j,
+            'eventIndex': k,
+          });
         }
       }
     }
   }
 
+  //When selectEventType dropdown is selected for restaurant,
+  //update the specificEventType dropdown to display restaurant options
   void updateRestaurantDropDown() {
-    print('Restaurant');
     for (int i = 0; i < currentTrip.countries.length; i++) {
       for (int j = 0; j < currentTrip.countries[i].cities.length; j++) {
         for (int k = 0;
@@ -180,13 +211,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
               value: i + j + k,
             ),
           );
+          eventIndicies.add({
+            'countryIndex': i,
+            'cityIndex': j,
+            'eventIndex': k,
+          });
         }
       }
     }
   }
 
+  //When selectEventType dropdown is selected for transportation,
+  //update the specificEventType dropdown to display transportation options
   void updateTransportationDropDown() {
-    print('Transportation');
     for (int i = 0; i < currentTrip.countries.length; i++) {
       for (int j = 0; j < currentTrip.countries[i].cities.length; j++) {
         for (int k = 0;
@@ -199,6 +236,11 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
               value: i + j + k,
             ),
           );
+          eventIndicies.add({
+            'countryIndex': i,
+            'cityIndex': j,
+            'eventIndex': k,
+          });
         }
       }
     }
@@ -207,7 +249,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   @override
   void dispose() {
     _eventTypeFocusNode.dispose();
-    // TODO: implement dispose
+    _eventFocusNode.dispose();
     super.dispose();
   }
 
@@ -216,6 +258,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
       loggedInUser =
           Provider.of<UserProvider>(context, listen: false).loggedInUser;
     });
+    newPost.authorId = loggedInUser.id;
   }
 
   Widget appBar() {
@@ -258,7 +301,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   }
 
   //Parses message looking for any '#' for adding word as a tag.
-  void parseMessage() async {
+  void parseMessage() {
     List<String> parsedMessage = message.split(' ');
     const hashTag = '#';
 
@@ -266,8 +309,8 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     //words that start with '#' to add to list of tags
     for (int i = 0; i < parsedMessage.length; i++) {
       if (parsedMessage[i].startsWith(hashTag)) {
-        parsedMessage[i] =
-            parsedMessage[i].substring(1, parsedMessage[i].length - 1);
+        // parsedMessage[i] =
+        //     parsedMessage[i].substring(1, parsedMessage[i].length);
         parsedMessage[i] =
             parsedMessage[i].replaceAll(new RegExp(r"[^\s\w]"), '');
         tags.add(parsedMessage[i]);
@@ -282,6 +325,33 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   //lodgingId, etc.
   void getPostLocation() {
     newPost.tripId = currentTrip.id;
+
+    int countryIndex =
+        eventIndicies[_selectedSpecifiedEventType]['countryIndex'];
+    int cityIndex = eventIndicies[_selectedSpecifiedEventType]['cityIndex'];
+    int eventIndex = eventIndicies[_selectedSpecifiedEventType]['eventIndex'];
+
+    //If event type is flight get flight id
+    if (_selectedEventType == 1) {
+      newPost.flightId =
+          currentTrip.countries[countryIndex].flights[eventIndex].id;
+      //If event type is lodging get lodging id
+    } else if (_selectedEventType == 2) {
+      newPost.lodgingId = currentTrip
+          .countries[countryIndex].cities[cityIndex].lodgings[eventIndex].id;
+      //If event type is activity get activity id
+    } else if (_selectedEventType == 3) {
+      newPost.activityId = currentTrip
+          .countries[countryIndex].cities[cityIndex].activities[eventIndex].id;
+      //If event type is restaurant get restaurant id
+    } else if (_selectedEventType == 4) {
+      newPost.restaurantId = currentTrip
+          .countries[countryIndex].cities[cityIndex].restaurants[eventIndex].id;
+      //If event type is transportation get transportation id
+    } else if (_selectedEventType == 5) {
+      newPost.transportationId = currentTrip.countries[countryIndex]
+          .cities[cityIndex].transportations[eventIndex].id;
+    }
   }
 
   //Look for existing tags that contain tag word.
@@ -290,34 +360,43 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     for (int j = 0; j < tags.length; j++) {
       String tagId = await Provider.of<TagProvider>(context, listen: false)
           .checkForExistingTag(tags[j]);
-      List<String> authors = [];
-      authors.add(loggedInUser.id);
-      List<String> posts = [];
+      String authorId = loggedInUser.id;
+      PostProvider postInfo = PostProvider(
+          id: newPost.id,
+          dateTime: newPost.dateTime,
+          authorId: authorId,
+          tripId: newPost.tripId,
+          flightId: newPost.flightId,
+          lodgingId: newPost.lodgingId,
+          activityId: newPost.activityId,
+          restaurantId: newPost.restaurantId,
+          transportationId: newPost.transportationId,
+          message: newPost.message,
+          photosURL: newPost.photosURL,
+          location: newPost.location,
+          locationLatitude: newPost.locationLatitude,
+          locationLongitude: newPost.locationLongitude);
 
       //Create the tag
       TagProvider tag = TagProvider(
-        authorId: authors,
+        postInfo: [
+          postInfo,
+        ],
         tagWord: tags[j],
-        postId: posts,
       );
 
       //If receive a tagId, then add to existing tag
       //otherwise add a new tag collection
       if (tagId != null) {
-        print('exist');
-        await Provider.of<TagProvider>(context).addNewTag(tag);
+        Provider.of<TagProvider>(context, listen: false)
+            .addToExistingTag(tag, tagId);
       } else {
-        print('doesnt exist');
-        //Provider.of<TagProvider>(context).addToExistingTag(tag);
+        tagId = await Provider.of<TagProvider>(context, listen: false)
+            .addNewTag(tag);
       }
+      await Provider.of<PostProvider>(context, listen: false)
+          .updateTagId(loggedInUser.id, currentTrip.id, newPost.id, tagId);
     }
-  }
-
-  //Set user info
-  Future<void> setUserInfo() async {
-    String userId = await Provider.of<UserProvider>(context, listen: false)
-        .getCurrentUserId();
-    newPost.authorId = userId;
   }
 
   //Get trip info
@@ -332,10 +411,20 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     } else {
       _formKey.currentState.save();
       try {
+        newPost.dateTime = DateTime.now();
         parseMessage();
         getPostLocation();
+        //add post to trip
         await Provider.of<PostProvider>(context, listen: false)
             .addPostToTrip(currentTrip.organizerId, currentTrip.id, newPost);
+        newPost.id =
+            Provider.of<PostProvider>(context, listen: false).currentPost.id;
+        //store photo and set url
+        await storePhotoAndSetUrl();
+        //update photo url into post and tag
+        await Provider.of<PostProvider>(context, listen: false)
+            .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+        //create or update tag
         checkThenAddTags();
       } catch (error) {
         throw error;
@@ -343,10 +432,24 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     }
   }
 
-  void setImage(File image) {
+  //set current photo to store
+  void setImage(File image) async {
     setState(() {
       _imageFile = image;
     });
+  }
+
+  Future<void> storePhotoAndSetUrl() async {
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('post_images')
+        .child('${loggedInUser.id}')
+        .child(newPost.id + '.jpg');
+
+    await ref.putFile(_imageFile).onComplete;
+    final url = await ref.getDownloadURL();
+
+    newPost.photosURL = url;
   }
 
   Future<Widget> showBottomModalSheet(BuildContext context) async {
@@ -374,7 +477,9 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                             color: Colors.red,
                           ),
                           title: Text('Check In'),
-                          onTap: () {},
+                          onTap: () {
+                            getCurrentUserLocation();
+                          },
                         ),
                       ],
                     ),
@@ -397,6 +502,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                             _imageFile = await ImageVideo()
                                 .getImage(ImageSource.gallery);
                             setImage(_imageFile);
+                            Navigator.of(context).pop();
                           },
                         ),
                       ],
@@ -457,6 +563,39 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     );
   }
 
+  //get Coordinates of current user location and the string location
+  Future<void> getCurrentUserLocation() async {
+    Location location = new Location();
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final locData = await location.getLocation();
+    newPost.locationLatitude = locData.latitude;
+    newPost.locationLongitude = locData.longitude;
+
+    String currentLocation =
+        await LocationHelper().getAddress(locData.latitude, locData.longitude);
+    setState(() {
+      newPost.location = currentLocation;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
@@ -507,22 +646,25 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                 Icons.person,
                                               ),
                                             )
-                                          : ClipOval(
-                                              child: Image.network(
-                                                loggedInUser.profilePicUrl,
-                                                fit: BoxFit.cover,
-                                                height: 60,
-                                                width: 60,
+                                          : Padding(
+                                            padding: const EdgeInsets.only(left: 10.0),
+                                            child: ClipOval(
+                                                child: Image.network(
+                                                  loggedInUser.profilePicUrl,
+                                                  fit: BoxFit.cover,
+                                                  height: 60,
+                                                  width: 60,
+                                                ),
                                               ),
-                                            ),
+                                          ),
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Container(
                                             padding: const EdgeInsets.only(
-                                              left: 18.0,
-                                              bottom: 10.0,
+                                              left: 10.0,
+                                              bottom: 7.0,
                                             ),
                                             child: Text(
                                               '${loggedInUser.firstName} ${loggedInUser.lastName}',
@@ -531,9 +673,21 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                               ),
                                             ),
                                           ),
+                                          newPost.location != null
+                                              ? Container(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    left: 10.0,
+                                                    bottom: 10.0,
+                                                  ),
+                                                  child: Text(
+                                                    '${newPost.location}',
+                                                  ),
+                                                )
+                                              : Container(),
                                           Container(
                                             padding: const EdgeInsets.only(
-                                              left: 18.0,
+                                              left: 10.0,
                                             ),
                                             width: screenWidth * 0.73,
                                             child: Row(
@@ -553,7 +707,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                         horizontal: 5,
                                                         vertical: 0,
                                                       ),
-                                                      labelText: 'Post to...',
+                                                      labelText: 'Event type',
                                                       enabledBorder:
                                                           OutlineInputBorder(
                                                         borderRadius:
@@ -587,7 +741,8 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                         horizontal: 5,
                                                         vertical: 0,
                                                       ),
-                                                      labelText: 'Post to...',
+                                                      labelText:
+                                                          'Specific event',
                                                       enabledBorder:
                                                           OutlineInputBorder(
                                                         borderRadius:
@@ -607,8 +762,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                             selectedValue;
                                                       });
                                                     },
-                                                    focusNode:
-                                                        _eventTypeFocusNode,
+                                                    focusNode: _eventFocusNode,
                                                   ),
                                                 ),
                                               ],
@@ -630,7 +784,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                           ),
                           Flexible(
                             fit: FlexFit.tight,
-                            flex: 10,
+                            flex: 8,
                             child: Container(
                               child: SingleChildScrollView(
                                 child: Container(

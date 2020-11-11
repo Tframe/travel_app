@@ -4,6 +4,7 @@ import './comment_provider.dart';
 
 class PostProvider extends ChangeNotifier {
   String id;
+  DateTime dateTime;
   String authorId;
   String tripId;
   String activityId;
@@ -14,13 +15,15 @@ class PostProvider extends ChangeNotifier {
   String message;
   double locationLatitude;
   double locationLongitude;
+  String location;
   List<String> tagIds;
-  List<String> photosURL;
+  String photosURL;
   int likes;
   List<CommentProvider> comments;
 
   PostProvider({
     this.id,
+    this.dateTime,
     this.authorId,
     this.tripId,
     this.activityId,
@@ -31,11 +34,18 @@ class PostProvider extends ChangeNotifier {
     this.message,
     this.locationLatitude,
     this.locationLongitude,
+    this.location,
     this.tagIds,
     this.photosURL,
     this.likes,
     this.comments,
   });
+
+  PostProvider _currentPost;
+
+  PostProvider get currentPost {
+    return _currentPost;
+  }
 
   Future<void> addPostToTrip(
     String organizerId,
@@ -52,6 +62,7 @@ class PostProvider extends ChangeNotifier {
           .add({
         'authorId': post.authorId,
         'message': post.message,
+        'dateTime': post.dateTime,
         'tripId': post.tripId,
         'activityId': post.activityId,
         'lodgingId': post.lodgingId,
@@ -60,11 +71,61 @@ class PostProvider extends ChangeNotifier {
         'restaurantId': post.restaurantId,
         'locationLatitude': post.locationLatitude,
         'locationLongitude': post.locationLatitude,
-        'photosURL': post.photosURL.toList(),
+        'location': post.location,
+        'photosURL': post.photosURL,
         'likes': 0,
       }).then((docRef) {
         post.id = docRef.id;
         print('post added to trip');
+      });
+    } catch (error) {
+      throw error;
+    }
+    _currentPost = post;
+    notifyListeners();
+  }
+
+  Future<void> updateTagId(
+    String organizerId,
+    String tripId,
+    String postId,
+    String tagId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .collection('posts')
+          .doc('$postId')
+          .update({
+        'tagIds': FieldValue.arrayUnion([tagId]),
+      }).then((docRef) {
+        print('Added tag ids');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> addPhotoUrl(
+    String organizerId,
+    String tripId,
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .collection('posts')
+          .doc('${post.id}')
+          .update({
+        'photosURL': post.photosURL,
+      }).then((docRef) {
+        print('Added photo url');
       });
     } catch (error) {
       throw error;
