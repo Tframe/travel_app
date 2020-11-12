@@ -4,7 +4,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:location/location.dart';
-
 import '../../providers/user_provider.dart';
 import '../../providers/tag_provider.dart';
 import '../../providers/post_provider.dart';
@@ -23,7 +22,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   double screenHeight = 0;
   String message = '';
   List<String> tags = [];
-
+  bool _video = false;
   TripProvider currentTrip;
 
   PostProvider newPost = PostProvider(
@@ -65,6 +64,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   UserProvider loggedInUser;
 
   File _imageFile;
+  File _videoFile;
 
   @override
   void initState() {
@@ -287,7 +287,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                   10.0,
                 ),
               ),
-              onPressed: () => submitPost(),
+              onPressed: () => submitPost(context),
               child: Text(
                 'POST',
               ),
@@ -355,7 +355,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   }
 
   //Look for existing tags that contain tag word.
-  void checkThenAddTags() async {
+  Future<void> checkThenAddTags(BuildContext context) async {
     //For each tag, check if exists in firestore
     for (int j = 0; j < tags.length; j++) {
       String tagId = await Provider.of<TagProvider>(context, listen: false)
@@ -373,6 +373,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
           transportationId: newPost.transportationId,
           message: newPost.message,
           photosURL: newPost.photosURL,
+          videosURL: newPost.videosURL,
           location: newPost.location,
           locationLatitude: newPost.locationLatitude,
           locationLongitude: newPost.locationLongitude);
@@ -405,7 +406,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   }
 
   //Function called once post is tapped
-  void submitPost() async {
+  void submitPost(BuildContext context) async {
     if (!_formKey.currentState.validate()) {
       return;
     } else {
@@ -420,15 +421,24 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
         newPost.id =
             Provider.of<PostProvider>(context, listen: false).currentPost.id;
         //store photo and set url
-        await storePhotoAndSetUrl();
-        //update photo url into post and tag
-        await Provider.of<PostProvider>(context, listen: false)
-            .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+        if (!_video) {
+          await storePhotoAndSetUrl();
+          //update photo url into post and tag
+          await Provider.of<PostProvider>(context, listen: false)
+              .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+        }
+        if (_video) {
+          await storeVideoAndSetUrl();
+          //update photo url into post and tag
+          await Provider.of<PostProvider>(context, listen: false)
+              .addVideoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+        }
         //create or update tag
-        checkThenAddTags();
+        await checkThenAddTags(context);
       } catch (error) {
         throw error;
       }
+      Navigator.of(context).pop();
     }
   }
 
@@ -436,9 +446,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   void setImage(File image) async {
     setState(() {
       _imageFile = image;
+      _video = false;
     });
   }
 
+  //set current photo to store
+  void setVideo(File image) async {
+    setState(() {
+      _videoFile = image;
+      _video = true;
+    });
+  }
+
+  //stores file as a jpg image file.
   Future<void> storePhotoAndSetUrl() async {
     final ref = FirebaseStorage.instance
         .ref()
@@ -450,6 +470,22 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     final url = await ref.getDownloadURL();
 
     newPost.photosURL = url;
+  }
+
+  //stores file as a mp4 video file
+  Future<void> storeVideoAndSetUrl() async {
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('post_videos')
+        .child('${loggedInUser.id}')
+        .child(newPost.id + '.mp4');
+
+    await ref
+        .putFile(_videoFile, StorageMetadata(contentType: 'video/mp4'))
+        .onComplete;
+    final url = await ref.getDownloadURL();
+
+    newPost.videosURL = url;
   }
 
   Future<Widget> showBottomModalSheet(BuildContext context) async {
@@ -523,9 +559,10 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                           ),
                           title: Text('Video'),
                           onTap: () async {
-                            _imageFile = await ImageVideo()
+                            _videoFile = await ImageVideo()
                                 .getVideo(ImageSource.gallery);
-                            setImage(_imageFile);
+                            setVideo(_videoFile);
+                            Navigator.of(context).pop();
                           },
                         ),
                       ],
@@ -589,11 +626,17 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     newPost.locationLatitude = locData.latitude;
     newPost.locationLongitude = locData.longitude;
 
-    String currentLocation =
-        await LocationHelper().getAddress(locData.latitude, locData.longitude);
+    String currentLocation = await LocationHelper()
+        .getCityStateCountry(locData.latitude, locData.longitude);
+
+    //rome italy test
+    // String currentLocation =
+    //     await LocationHelper().getCityStateCountry(41.902782, 12.496366);
+
     setState(() {
       newPost.location = currentLocation;
     });
+    Navigator.of(context).pop();
   }
 
   @override
@@ -631,7 +674,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                         children: [
                           Flexible(
                             fit: FlexFit.tight,
-                            flex: 2,
+                            flex: newPost.location != null ? 3 : 2,
                             child: Container(
                               child: Column(
                                 children: [
@@ -647,8 +690,9 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                               ),
                                             )
                                           : Padding(
-                                            padding: const EdgeInsets.only(left: 10.0),
-                                            child: ClipOval(
+                                              padding: const EdgeInsets.only(
+                                                  left: 10.0),
+                                              child: ClipOval(
                                                 child: Image.network(
                                                   loggedInUser.profilePicUrl,
                                                   fit: BoxFit.cover,
@@ -656,7 +700,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                   width: 60,
                                                 ),
                                               ),
-                                          ),
+                                            ),
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -675,13 +719,14 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                           ),
                                           newPost.location != null
                                               ? Container(
+                                                  width: 250,
                                                   padding:
                                                       const EdgeInsets.only(
                                                     left: 10.0,
-                                                    bottom: 10.0,
+                                                    bottom: 15.0,
                                                   ),
                                                   child: Text(
-                                                    '${newPost.location}',
+                                                    'in ${newPost.location}',
                                                   ),
                                                 )
                                               : Container(),
@@ -784,7 +829,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                           ),
                           Flexible(
                             fit: FlexFit.tight,
-                            flex: 8,
+                            flex: 10,
                             child: Container(
                               child: SingleChildScrollView(
                                 child: Container(

@@ -18,6 +18,7 @@ class PostProvider extends ChangeNotifier {
   String location;
   List<String> tagIds;
   String photosURL;
+  String videosURL;
   int likes;
   List<CommentProvider> comments;
 
@@ -37,6 +38,7 @@ class PostProvider extends ChangeNotifier {
     this.location,
     this.tagIds,
     this.photosURL,
+    this.videosURL,
     this.likes,
     this.comments,
   });
@@ -73,7 +75,9 @@ class PostProvider extends ChangeNotifier {
         'locationLongitude': post.locationLatitude,
         'location': post.location,
         'photosURL': post.photosURL,
+        'videosURL': post.videosURL,
         'likes': 0,
+        'tagIds': [],
       }).then((docRef) {
         post.id = docRef.id;
         print('post added to trip');
@@ -126,6 +130,29 @@ class PostProvider extends ChangeNotifier {
         'photosURL': post.photosURL,
       }).then((docRef) {
         print('Added photo url');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> addVideoUrl(
+    String organizerId,
+    String tripId,
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .collection('posts')
+          .doc('${post.id}')
+          .update({
+        'videosURL': post.videosURL,
+      }).then((docRef) {
+        print('Added video url');
       });
     } catch (error) {
       throw error;

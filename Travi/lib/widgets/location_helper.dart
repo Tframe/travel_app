@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class LocationHelper {
-  Future<String> getAddress(
+  Future<String> getCityStateCountry(
     double latitude,
     double longitude,
   ) async {
