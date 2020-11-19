@@ -89,9 +89,10 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
           newRestaurant.id,
         );
         //update restaurant to trip data
-          List<Restaurant> restaurants =
-              Provider.of<Restaurant>(context, listen: false).restaurants;
-          trips[tripIndex].countries[countryIndex].cities[cityIndex].restaurants = restaurants;
+        List<Restaurant> restaurants =
+            Provider.of<Restaurant>(context, listen: false).restaurants;
+        trips[tripIndex].countries[countryIndex].cities[cityIndex].restaurants =
+            restaurants;
       } else {
         await Provider.of<Restaurant>(context, listen: false).addRestaurant(
           loadedTrip.id,
@@ -271,6 +272,18 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
             : const Text(
                 'Add Restaurant',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -307,7 +320,7 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -319,13 +332,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Name',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.name,
@@ -340,13 +361,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.phoneNumber,
@@ -361,13 +390,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.website,
@@ -382,13 +419,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.address,
@@ -403,13 +448,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.reservationID,
@@ -485,7 +538,7 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

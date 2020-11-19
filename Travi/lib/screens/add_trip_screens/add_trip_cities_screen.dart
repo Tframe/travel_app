@@ -156,6 +156,18 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
           onPressed: _backPage,
@@ -182,7 +194,6 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       fontSize: 20,
                     ),
                   ),
-
                   Container(
                     height: screenHeight * 0.50,
                     margin: EdgeInsets.only(
@@ -202,7 +213,9 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                               tripValues.countries[_countryIndex].country,
                               newCity.length <= index
                                   ? null
-                                  : (newCity[index].city == '' ? null : newCity[index].city ),
+                                  : (newCity[index].city == ''
+                                      ? null
+                                      : newCity[index].city),
                             ),
                             trailing: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -235,7 +248,6 @@ class _AddTripCitiesScreenState extends State<AddTripCitiesScreen> {
                       },
                     ),
                   ),
-
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,

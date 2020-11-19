@@ -80,9 +80,9 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
       tempLodging.chosen = !_suggestion;
 
       //get current list of trips to update
-        List<TripProvider> trips =
-            Provider.of<TripsProvider>(context, listen: false).trips;
-        var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+      List<TripProvider> trips =
+          Provider.of<TripsProvider>(context, listen: false).trips;
+      var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
 
       if (edit) {
         await Provider.of<Lodging>(context, listen: false).editLodging(
@@ -94,9 +94,10 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
           tempLodging.id,
         );
         //update lodging to trip data
-          List<Lodging> lodgings =
-              Provider.of<Lodging>(context, listen: false).lodgings;
-          trips[tripIndex].countries[countryIndex].cities[cityIndex].lodgings = lodgings;
+        List<Lodging> lodgings =
+            Provider.of<Lodging>(context, listen: false).lodgings;
+        trips[tripIndex].countries[countryIndex].cities[cityIndex].lodgings =
+            lodgings;
       } else {
         await Provider.of<Lodging>(context, listen: false).addLodging(
           loadedTrip.id,
@@ -325,6 +326,18 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
             : const Text(
                 'Add Lodging',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -352,7 +365,7 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                               _suggestion = newValue;
                             });
                           },
-                          activeColor: Theme.of(context).primaryColor,
+                          activeColor: Colors.grey[600],
                         ),
                         Text(
                           'Suggestion',
@@ -373,13 +386,21 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Colors.grey[600],
                             decoration: InputDecoration(
                               labelText: 'Name',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: tempLodging.name,
@@ -394,13 +415,21 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Colors.grey[600],
                             decoration: InputDecoration(
                               labelText: 'Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: tempLodging.phoneNumber,
@@ -415,13 +444,21 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Colors.grey[600],
                             decoration: InputDecoration(
                               labelText: 'Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: tempLodging.website,
@@ -436,13 +473,21 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Colors.grey[600],
                             decoration: InputDecoration(
                               labelText: 'Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: tempLodging.address,
@@ -457,13 +502,21 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Colors.grey[600],
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: tempLodging.reservationID,
@@ -577,7 +630,7 @@ class _AddOrEditLodgingScreenState extends State<AddOrEditLodgingScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

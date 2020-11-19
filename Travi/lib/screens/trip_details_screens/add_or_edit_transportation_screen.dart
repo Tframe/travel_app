@@ -419,6 +419,18 @@ class _AddOrEditTransportationScreenState
             : const Text(
                 'Add Transportation',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -455,7 +467,7 @@ class _AddOrEditTransportationScreenState
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -469,10 +481,18 @@ class _AddOrEditTransportationScreenState
                           DropdownButtonFormField(
                             decoration: InputDecoration(
                               labelText: 'Transportation Type',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             items: transportationType,
@@ -493,13 +513,21 @@ class _AddOrEditTransportationScreenState
                             focusNode: _transportationTypeFocusNode,
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Company',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newTransportation.company,
@@ -514,13 +542,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Starting Location Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -535,13 +571,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Ending Location Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue:
@@ -557,13 +601,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.done,
@@ -680,7 +732,7 @@ class _AddOrEditTransportationScreenState
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

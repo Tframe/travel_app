@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Icon(
                     Icons.lightbulb_outline,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).buttonColor,
                     size: screenHeight * 0.075,
                   ),
                   SizedBox(
@@ -115,13 +115,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             TextFormField(
-                              cursorColor: Theme.of(context).primaryColor,
+                              cursorColor: Theme.of(context).buttonColor,
                               decoration: InputDecoration(
                                 labelText: 'E-Mail',
+                                labelStyle: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                      color: Theme.of(context)
-                                          .secondaryHeaderColor),
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
+                                  ),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
                                 ),
                               ),
                               textInputAction: TextInputAction.next,
@@ -142,13 +151,22 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                             TextFormField(
-                              cursorColor: Theme.of(context).primaryColor,
+                              cursorColor: Theme.of(context).buttonColor,
                               decoration: InputDecoration(
                                 labelText: 'Password',
+                                labelStyle: TextStyle(
+                                  color: Colors.grey[600],
+                                ),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(
-                                      color: Theme.of(context)
-                                          .secondaryHeaderColor),
+                                    color:
+                                        Theme.of(context).secondaryHeaderColor,
+                                  ),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
                                 ),
                               ),
                               obscureText: true,
@@ -192,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 30.0, vertical: 8.0),
-                                      color: Theme.of(context).primaryColor,
+                                      color: Theme.of(context).buttonColor,
                                     ),
                                   ),
                                   SizedBox(

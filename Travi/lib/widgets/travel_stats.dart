@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../providers/user_provider.dart';
+import './travel_stat_card.dart';
 
-class AboutSection extends StatelessWidget {
-  final UserProvider _loadedUser;
-
-  AboutSection(this._loadedUser);
-
+class TravelStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -21,7 +17,7 @@ class AboutSection extends StatelessWidget {
           child: Row(
             children: [
               const Text(
-                'About',
+                'Travel Stats',
                 style: TextStyle(
                   fontSize: 17,
                 ),
@@ -34,13 +30,13 @@ class AboutSection extends StatelessWidget {
             left: 18.0,
             bottom: 18.0,
           ),
-          child: Text(
-            _loadedUser.about != null
-                ? _loadedUser.about
-                : 'Add some information about yourself',
-            style: TextStyle(
-              fontSize: 15,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TravelStatCard('Countries Traveled', 10),
+              TravelStatCard('Experiences', 37),
+              TravelStatCard('Vacations Taken', 5),
+            ],
           ),
         ),
       ],

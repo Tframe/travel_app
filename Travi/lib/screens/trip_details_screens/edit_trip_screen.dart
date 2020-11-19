@@ -41,7 +41,6 @@ class _EditTripScreenState extends State<EditTripScreen> {
     group: [],
   );
 
-
   var _isLoading = false;
 
   // @override
@@ -150,6 +149,18 @@ class _EditTripScreenState extends State<EditTripScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Trip'),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: _isLoading
           ? Center(
@@ -162,8 +173,24 @@ class _EditTripScreenState extends State<EditTripScreen> {
                 child: ListView(
                   children: <Widget>[
                     TextFormField(
+                      cursorColor: Theme.of(context).buttonColor,
                       initialValue: _editedTrip.title,
-                      decoration: InputDecoration(labelText: 'Title'),
+                      decoration: InputDecoration(
+                        labelText: 'Title',
+                        labelStyle: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).secondaryHeaderColor,
+                          ),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).buttonColor,
+                          ),
+                        ),
+                      ),
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) {
                         FocusScope.of(context).requestFocus(_titleFocusNode);
@@ -257,7 +284,23 @@ class _EditTripScreenState extends State<EditTripScreen> {
                     ),
                     TextFormField(
                       initialValue: _editedTrip.description,
-                      decoration: InputDecoration(labelText: 'Description'),
+                      cursorColor: Theme.of(context).buttonColor,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        labelStyle: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).secondaryHeaderColor,
+                          ),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).buttonColor,
+                          ),
+                        ),
+                      ),
                       textInputAction: TextInputAction.done,
                       keyboardType: TextInputType.multiline,
                       focusNode: _descriptionFocusNode,
@@ -296,7 +339,7 @@ class _EditTripScreenState extends State<EditTripScreen> {
                         ),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 30.0, vertical: 8.0),
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).buttonColor,
                       ),
                     ),
                   ],

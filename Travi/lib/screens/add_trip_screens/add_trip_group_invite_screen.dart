@@ -265,6 +265,18 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
           onPressed: _backPage,
@@ -322,6 +334,9 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                   labelText: _searchUserEmail[index]
                                       ? 'Email'
                                       : 'Moible #',
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: Theme.of(context).buttonColor,

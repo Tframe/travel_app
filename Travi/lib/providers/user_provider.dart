@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 11/18/2020
+ * Description: User provider creats the UserProvider object
+ * used to store user data on firestore and in state.
+ */
+
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +17,8 @@ class UserProvider extends ChangeNotifier {
   String firstName;
   String lastName;
   String location;
+  double locationLatitude;
+  double locationLongitude;
   String profilePicUrl;
   String about;
   List<String> sites;
@@ -26,6 +34,8 @@ class UserProvider extends ChangeNotifier {
     this.firstName,
     this.lastName,
     this.location,
+    this.locationLatitude,
+    this.locationLongitude,
     this.profilePicUrl,
     this.about,
     this.sites,
@@ -93,6 +103,8 @@ class UserProvider extends ChangeNotifier {
                   firstName: doc.data()['firstName'],
                   lastName: doc.data()['lastName'],
                   location: doc.data()['location'],
+                  locationLatitude: doc.data()['locationLatitude'],
+                  locationLongitude: doc.data()['locationLongitude'],
                   email: doc.data()['email'],
                   phone: doc.data()['phone'],
                   profilePicUrl: doc.data()['profilePicUrl'],

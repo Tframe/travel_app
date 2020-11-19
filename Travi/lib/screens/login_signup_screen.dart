@@ -14,7 +14,7 @@ class LoginSignupScreen extends StatelessWidget {
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).buttonColor,
             ),
           ),
           SingleChildScrollView(
@@ -102,7 +102,7 @@ class LoginSignupScreen extends StatelessWidget {
                         'SIGN IN',
                         style: TextStyle(
                           fontSize: 20,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).buttonColor,
                         ),
                       ),
                     ),

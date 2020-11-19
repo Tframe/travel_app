@@ -1,3 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 11/18/2020
+ * Description: Screen for adding a post comment to a 
+ * trip or an event on a trip. User can add photos/videos
+ * and location.
+ */
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,7 +16,8 @@ import '../../providers/tag_provider.dart';
 import '../../providers/post_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../widgets/pickers/image_video.dart';
-import '../../widgets/location_helper.dart';
+import '../../helpers/location_helper.dart';
+import '../../helpers/parse_strings.dart';
 
 class PostCommentScreen extends StatefulWidget {
   static const routeName = '/post-comment';
@@ -23,11 +31,15 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   String message = '';
   List<String> tags = [];
   bool _video = false;
+  bool _uploaded = false;
   TripProvider currentTrip;
 
   PostProvider newPost = PostProvider(
     id: null,
     authorId: null,
+    authorFirstName: null,
+    authorImageURL: null,
+    authorLastName: null,
     message: null,
     tripId: null,
     flightId: null,
@@ -35,6 +47,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     activityId: null,
     transportationId: null,
     restaurantId: null,
+    eventName: null,
     location: null,
     locationLatitude: null,
     locationLongitude: null,
@@ -259,6 +272,9 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
           Provider.of<UserProvider>(context, listen: false).loggedInUser;
     });
     newPost.authorId = loggedInUser.id;
+    newPost.authorFirstName = loggedInUser.firstName;
+    newPost.authorLastName = loggedInUser.lastName;
+    newPost.authorImageURL = loggedInUser.profilePicUrl;
   }
 
   Widget appBar() {
@@ -300,57 +316,54 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     );
   }
 
-  //Parses message looking for any '#' for adding word as a tag.
-  void parseMessage() {
-    List<String> parsedMessage = message.split(' ');
-    const hashTag = '#';
-
-    //Go through array of words in message and search for
-    //words that start with '#' to add to list of tags
-    for (int i = 0; i < parsedMessage.length; i++) {
-      if (parsedMessage[i].startsWith(hashTag)) {
-        // parsedMessage[i] =
-        //     parsedMessage[i].substring(1, parsedMessage[i].length);
-        parsedMessage[i] =
-            parsedMessage[i].replaceAll(new RegExp(r"[^\s\w]"), '');
-        tags.add(parsedMessage[i]);
-      }
-    }
-
-    newPost.message = message;
-  }
-
   //Set tripId to currentTrips' id;
   //Set the id for selected event; ie activityId,
   //lodgingId, etc.
   void getPostLocation() {
     newPost.tripId = currentTrip.id;
-
+    newPost.eventName = currentTrip.title;
+    //this indicates event type is for trip
+    if (eventIndicies.isEmpty) {
+      return;
+    }
     int countryIndex =
         eventIndicies[_selectedSpecifiedEventType]['countryIndex'];
     int cityIndex = eventIndicies[_selectedSpecifiedEventType]['cityIndex'];
+
     int eventIndex = eventIndicies[_selectedSpecifiedEventType]['eventIndex'];
 
     //If event type is flight get flight id
     if (_selectedEventType == 1) {
       newPost.flightId =
           currentTrip.countries[countryIndex].flights[eventIndex].id;
+      newPost.eventName = currentTrip
+              .countries[countryIndex].flights[eventIndex].airline +
+          ' ' +
+          currentTrip.countries[countryIndex].flights[eventIndex].flightNumber;
       //If event type is lodging get lodging id
     } else if (_selectedEventType == 2) {
       newPost.lodgingId = currentTrip
           .countries[countryIndex].cities[cityIndex].lodgings[eventIndex].id;
+      newPost.eventName = currentTrip
+          .countries[countryIndex].cities[cityIndex].lodgings[eventIndex].name;
       //If event type is activity get activity id
     } else if (_selectedEventType == 3) {
       newPost.activityId = currentTrip
           .countries[countryIndex].cities[cityIndex].activities[eventIndex].id;
+      newPost.eventName = currentTrip.countries[countryIndex].cities[cityIndex]
+          .activities[eventIndex].title;
       //If event type is restaurant get restaurant id
     } else if (_selectedEventType == 4) {
       newPost.restaurantId = currentTrip
           .countries[countryIndex].cities[cityIndex].restaurants[eventIndex].id;
+      newPost.eventName = currentTrip.countries[countryIndex].cities[cityIndex]
+          .restaurants[eventIndex].name;
       //If event type is transportation get transportation id
     } else if (_selectedEventType == 5) {
       newPost.transportationId = currentTrip.countries[countryIndex]
           .cities[cityIndex].transportations[eventIndex].id;
+      newPost.eventName = currentTrip.countries[countryIndex].cities[cityIndex]
+          .transportations[eventIndex].company;
     }
   }
 
@@ -365,12 +378,16 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
           id: newPost.id,
           dateTime: newPost.dateTime,
           authorId: authorId,
+          authorFirstName: newPost.authorFirstName,
+          authorLastName: newPost.authorLastName,
+          authorImageURL: newPost.authorImageURL,
           tripId: newPost.tripId,
           flightId: newPost.flightId,
           lodgingId: newPost.lodgingId,
           activityId: newPost.activityId,
           restaurantId: newPost.restaurantId,
           transportationId: newPost.transportationId,
+          eventName: newPost.eventName,
           message: newPost.message,
           photosURL: newPost.photosURL,
           videosURL: newPost.videosURL,
@@ -395,8 +412,8 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
         tagId = await Provider.of<TagProvider>(context, listen: false)
             .addNewTag(tag);
       }
-      await Provider.of<PostProvider>(context, listen: false)
-          .updateTagId(loggedInUser.id, currentTrip.id, newPost.id, tagId);
+      await Provider.of<PostProvider>(context, listen: false).updateTagId(
+          currentTrip.organizerId, currentTrip.id, newPost.id, tagId);
     }
   }
 
@@ -413,7 +430,13 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
       _formKey.currentState.save();
       try {
         newPost.dateTime = DateTime.now();
-        parseMessage();
+        //get list of tags
+        tags = ParseStrings().parseMessageForTags(message);
+        //remove tags from message
+        message = ParseStrings().removeTagsFromMessage(message);
+        
+        newPost.message = message;
+
         getPostLocation();
         //add post to trip
         await Provider.of<PostProvider>(context, listen: false)
@@ -421,17 +444,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
         newPost.id =
             Provider.of<PostProvider>(context, listen: false).currentPost.id;
         //store photo and set url
-        if (!_video) {
-          await storePhotoAndSetUrl();
-          //update photo url into post and tag
-          await Provider.of<PostProvider>(context, listen: false)
-              .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
-        }
-        if (_video) {
-          await storeVideoAndSetUrl();
-          //update photo url into post and tag
-          await Provider.of<PostProvider>(context, listen: false)
-              .addVideoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+        if (_uploaded) {
+          if (!_video) {
+            await storePhotoAndSetUrl();
+            //update photo url into post and tag
+            await Provider.of<PostProvider>(context, listen: false)
+                .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+          }
+          if (_video) {
+            await storeVideoAndSetUrl();
+            //update photo url into post and tag
+            await Provider.of<PostProvider>(context, listen: false)
+                .addVideoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+          }
         }
         //create or update tag
         await checkThenAddTags(context);
@@ -447,14 +472,16 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     setState(() {
       _imageFile = image;
       _video = false;
+      _uploaded = true;
     });
   }
 
-  //set current photo to store
+  //set current video to store
   void setVideo(File image) async {
     setState(() {
       _videoFile = image;
       _video = true;
+      _uploaded = true;
     });
   }
 

@@ -27,7 +27,7 @@ import './screens/add_trip_screens/add_trip_title_screen.dart';
 import './screens/add_trip_screens/add_trip_countries_screen.dart';
 import './screens/add_trip_screens/add_trip_cities_screen.dart';
 import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
-import './screens/account_info_screens/account_profile_screen.dart';
+import './screens/account_info_screens/edit_account_profile_screen.dart';
 import './screens/account_info_screens/edit_personal_info_screen.dart';
 import './screens/account_info_screens/edit_contact_info_screen.dart';
 import './screens/account_info_screens/edit_about_screen.dart';
@@ -45,6 +45,8 @@ import './screens/trip_details_screens/edit_restaurants_screen.dart';
 import './screens/trip_details_screens/add_or_edit_restaurant_screen.dart';
 import './screens/timeline_screens/timeline_screen.dart';
 import './screens/post_comments_screens/post_comment_screen.dart';
+import './screens/post_comments_screens/sub_comments_screen.dart';
+import './screens/account_profile_screens/account_profile_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trip_provider.dart';
@@ -181,7 +183,6 @@ class MyApp extends StatelessWidget {
           fontFamily: 'OpenSans',
           floatingActionButtonTheme: FloatingActionButtonThemeData(
             backgroundColor: sandyBrown,
-            
           ),
           buttonTheme: ButtonTheme.of(context).copyWith(
             buttonColor: sandyBrown,
@@ -224,7 +225,8 @@ class MyApp extends StatelessWidget {
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
           AddTripGroupInviteScreen.routeName: (ctx) =>
               AddTripGroupInviteScreen(),
-          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
+          EditAccountProfileScreen.routeName: (ctx) =>
+              EditAccountProfileScreen(),
           EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
           EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
           EditAboutScreen.routeName: (ctx) => EditAboutScreen(),
@@ -245,6 +247,8 @@ class MyApp extends StatelessWidget {
               AddOrEditRestaurantScreen(),
           TimelineScreen.routeName: (ctx) => TimelineScreen(),
           PostCommentScreen.routeName: (ctx) => PostCommentScreen(),
+          SubCommentsScreen.routeName: (ctx) => SubCommentsScreen(),
+          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
         },
       ),
     );

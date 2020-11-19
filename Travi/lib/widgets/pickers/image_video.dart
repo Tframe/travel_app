@@ -22,7 +22,7 @@ class ImageVideo {
       includeAudio: true,
     );
     if (info != null) {
-      File pickedVideoFile = File(pickedVideo.path);
+      File pickedVideoFile = File(info.path);
       return pickedVideoFile;
     } else {
       return null;

@@ -99,6 +99,18 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -131,12 +143,21 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         ),
                       ),
                       TextFormField(
-                        cursorColor: Theme.of(context).primaryColor,
+                        cursorColor: Theme.of(context).buttonColor,
                         decoration: InputDecoration(
                           labelText: 'Trip Title',
+                          labelStyle: TextStyle(
+                            color: Colors.grey[600],
+                          ),
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
-                                color: Theme.of(context).secondaryHeaderColor),
+                              color: Theme.of(context).secondaryHeaderColor,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).buttonColor,
+                            ),
                           ),
                         ),
                         textInputAction: TextInputAction.next,
@@ -166,14 +187,22 @@ class _AddTripTitleScreenState extends State<AddTripTitleScreen> {
                         ),
                       ),
                       TextFormField(
-                        cursorColor: Theme.of(context).primaryColor,
+                        cursorColor: Theme.of(context).buttonColor,
                         maxLines: 7,
                         minLines: 3,
                         decoration: InputDecoration(
                           labelText: 'Trip Description',
+                          labelStyle: TextStyle(
+                            color: Colors.grey[600],
+                          ),
                           enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
                               color: Theme.of(context).secondaryHeaderColor,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ),

@@ -39,9 +39,18 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
       appBar: AppBar(
         title: Text(
           'Mobile Number',
-          style: TextStyle(
-            color: Colors.black,
+        ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
           ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
         ),
       ),
       body: Stack(
@@ -92,13 +101,21 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Mobile number',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             keyboardType: TextInputType.phone,
@@ -128,7 +145,7 @@ class _SignUpPhoneScreenState extends State<SignUpPhoneScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                           SizedBox(

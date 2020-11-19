@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import 'package:location/location.dart';
 import '../../providers/user_provider.dart';
+import '../../helpers/location_helper.dart';
 import './signup_phone_screen.dart';
 
 class SignUpLocationScreen extends StatefulWidget {
@@ -11,7 +13,6 @@ class SignUpLocationScreen extends StatefulWidget {
 
 class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-
   var userValues = UserProvider(
     id: null,
     firstName: '',
@@ -19,7 +20,50 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
     email: '',
     phone: '',
     location: '',
+    locationLatitude: 0,
+    locationLongitude: 0,
   );
+
+  //get Coordinates of current user location and the string location
+  Future<void> getCurrentUserLocation() async {
+    Location location = new Location();
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    final locData = await location.getLocation();
+    userValues.locationLatitude = locData.latitude;
+    userValues.locationLongitude = locData.longitude;
+
+    String currentLocation = await LocationHelper()
+        .getCityStateCountry(locData.latitude, locData.longitude);
+    print('current location is $currentLocation');
+    //rome italy test
+    // String currentLocation =
+    //     await LocationHelper().getCityStateCountry(41.902782, 12.496366);
+
+    //Provider.of<UserProvider>(context, listen: false).setUserLocation(currentLocation);
+
+    setState(() {
+      userValues.location = currentLocation;
+      print('userValues.location is ${userValues.location}');
+    });
+  }
 
   void _saveLocation() {
     if (!_formKey.currentState.validate()) {
@@ -35,14 +79,25 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    userValues = ModalRoute.of(context).settings.arguments;
+    setState(() {
+      userValues = ModalRoute.of(context).settings.arguments;
+    });
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Home Base Location',
-          style: TextStyle(
-            color: Colors.black,
+        ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
           ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
         ),
       ),
       body: Stack(
@@ -92,25 +147,48 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              labelText: 'Location',
-                              enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  cursorColor: Theme.of(context).buttonColor,
+                                  decoration: InputDecoration(
+                                    labelText: 'Location',
+                                    labelStyle: TextStyle(
+                                      color: Colors.grey[600],
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .secondaryHeaderColor,
+                                      ),
+                                    ),
+                                    focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Theme.of(context).buttonColor,
+                                      ),
+                                    ),
+                                  ),
+                                  key: Key(userValues.location.toString()),
+                                  initialValue: userValues.location,
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Please enter a location!';
+                                    }
+                                    return null;
+                                  },
+                                  onSaved: (value) {
+                                    userValues.location = value;
+                                  },
+                                ),
                               ),
-                            ),
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'Please enter a location!';
-                              }
-                              return null;
-                            },
-                            onSaved: (value) {
-                              userValues.location = value;
-                            },
+                              IconButton(
+                                icon: Icon(Icons.location_searching),
+                                color: Theme.of(context).buttonColor,
+                                onPressed: getCurrentUserLocation,
+                              ),
+                            ],
                           ),
                           Container(
                             padding: EdgeInsets.only(top: 40),
@@ -128,7 +206,7 @@ class _SignUpLocationScreenState extends State<SignUpLocationScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                           SizedBox(

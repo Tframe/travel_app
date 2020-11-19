@@ -59,13 +59,16 @@ class _PostCommentState extends State<PostComment> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 18.0),
+            padding: const EdgeInsets.only(
+              top: 12.0,
+              bottom: 12.0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 loggedInUser.profilePicUrl == null
                     ? CircleAvatar(
-                        radius: 30,
+                        radius: 20,
                         child: Icon(
                           Icons.person,
                         ),
@@ -74,8 +77,8 @@ class _PostCommentState extends State<PostComment> {
                         child: Image.network(
                           loggedInUser.profilePicUrl,
                           fit: BoxFit.cover,
-                          height: 60,
-                          width: 60,
+                          height: 40,
+                          width: 40,
                         ),
                       ),
                 Container(

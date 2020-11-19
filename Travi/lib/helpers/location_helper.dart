@@ -1,9 +1,17 @@
+/* Author: Trevor Frame
+ * Date: 11/17/2020
+ * Description: Helper functions that can be used
+ * to get locations using latitude and longitude using
+ * Google places API
+ */
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 
 class LocationHelper {
+  //returns a string of a formatted address that wil display cit, state, country, and zip code
   Future<String> getCityStateCountry(
     double latitude,
     double longitude,

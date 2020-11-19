@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../providers/user_provider.dart';
 
 class PersonalInfo extends StatelessWidget {
   final UserProvider _loadedUser;
-  final User user;
-  PersonalInfo(this._loadedUser, this.user);
+
+  PersonalInfo(this._loadedUser);
 
   //padding for text widgets
   Widget _paddingText(
@@ -58,9 +57,10 @@ class PersonalInfo extends StatelessWidget {
             ),
             FlatButton(
               onPressed: () {},
-              child: Text('More'),
+              child: Text('Timeline'),
               color: Colors.blue,
             ),
+            
           ],
         ),
       ],

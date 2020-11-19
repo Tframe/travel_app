@@ -323,6 +323,18 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
             : const Text(
                 'Add Activity',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -359,7 +371,7 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -371,13 +383,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Title',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.title,
@@ -392,13 +412,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.phoneNumber,
@@ -413,13 +441,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.website,
@@ -434,13 +470,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.address,
@@ -455,13 +499,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.reservationID,
@@ -575,7 +627,7 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

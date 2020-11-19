@@ -102,9 +102,12 @@ class _PlacesState extends State<Places> {
                 labelText: widget.countryPicker
                     ? 'Country'
                     : (widget.cityPicker ? 'City' : 'Place'),
+                labelStyle: TextStyle(
+                  color: Theme.of(context).buttonColor,
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).buttonColor,
                     width: 1.5,
                   ),
                 ),
@@ -280,16 +283,16 @@ class _PlacesState extends State<Places> {
         images = [];
       });
       //number of photos we want from google
-    //   int numPhotos = 1;
-    //   if (details.result.photos != null) {
-    //     for (var photo in details.result.photos) {
-    //       if(numPhotos == 0){
-    //         return;
-    //       }
-    //       await getPhoto(photo.photoReference);
-    //       numPhotos--;
-    //     }
-    //   }
+      //   int numPhotos = 1;
+      //   if (details.result.photos != null) {
+      //     for (var photo in details.result.photos) {
+      //       if(numPhotos == 0){
+      //         return;
+      //       }
+      //       await getPhoto(photo.photoReference);
+      //       numPhotos--;
+      //     }
+      //   }
     }
   }
 
@@ -301,7 +304,5 @@ class _PlacesState extends State<Places> {
   //     });
   //   }
   // }
-
-
 
 }

@@ -203,6 +203,18 @@ class _TimelineScreenState extends State<TimelineScreen> {
         title: Text(
           'Timeline',
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Center(
         child: Column(
@@ -276,13 +288,13 @@ class _TimelineScreenState extends State<TimelineScreen> {
                                                 : event == 'Activity'
                                                     ? Icons.local_activity
                                                     : Icons.place),
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           beforeLineStyle: LineStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           afterLineStyle: LineStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           startChild: Container(
                             alignment: Alignment.center,

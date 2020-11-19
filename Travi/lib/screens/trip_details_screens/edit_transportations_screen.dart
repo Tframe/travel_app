@@ -43,6 +43,18 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Transportations'),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: loadedTrip.countries[countryIndex].cities[cityIndex]
                       .transportations ==

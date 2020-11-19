@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../screens/current_trips_screen.dart';
-import '../screens/account_info_screens/account_profile_screen.dart';
+import '../screens/account_info_screens/edit_account_profile_screen.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -10,21 +10,25 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           AppBar(
             title: Text(
               'MENU',
-              style: TextStyle(
-                color: Colors.white,
-              ),
+            ),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            iconTheme: new IconThemeData(
+              color: Theme.of(context).secondaryHeaderColor,
             ),
             automaticallyImplyLeading: false,
-            iconTheme: new IconThemeData(
-              color: Colors.white,
-            ),
             actions: [
               Container(),
             ],
+          ),
+          Divider(
+            color: Colors.grey[400],
+            thickness: 1,
           ),
           ListTile(
             leading: Icon(
@@ -39,8 +43,7 @@ class AppDrawer extends StatelessWidget {
             ),
             //NAVIGATION TO NEW SCREEN
             onTap: () {
-              Navigator.of(context)
-                  .pushNamed(AccountProfileScreen.routeName);
+              Navigator.of(context).pushNamed(EditAccountProfileScreen.routeName);
             },
           ),
           Divider(

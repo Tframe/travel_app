@@ -325,6 +325,18 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
             : const Text(
                 'Add Flight',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -361,7 +373,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -373,13 +385,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Airline',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.airline,
@@ -400,13 +420,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Airline Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.airlinePhoneNumber,
@@ -421,13 +449,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Airline Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.airlineWebsite,
@@ -442,13 +478,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Flight #',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.flightNumber,
@@ -471,13 +515,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Confirmation # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -505,13 +557,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Departure Airport',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.done,
@@ -532,13 +592,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Departure Terminal (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.departureTerminal,
@@ -553,13 +621,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Departure Gate (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.departureGate,
@@ -622,13 +698,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Arrival Airport',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -649,13 +733,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Arrival Terminal (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.arrivalTerminal,
@@ -670,13 +762,21 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Arrival Gate (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newFlight.arrivalGate,
@@ -756,7 +856,7 @@ class _AddOrEditFlightScreenState extends State<AddOrEditFlightScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

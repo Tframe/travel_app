@@ -42,6 +42,7 @@ dependencies:
   map_launcher: ^0.12.2
   location: ^3.0.2
   video_compress: ^2.1.0
+  flutter_linkify: ^4.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

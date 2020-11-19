@@ -113,16 +113,14 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() async {
-    await Provider.of<Country>(context, listen: false)
-        .removeAllCountries();
+    await Provider.of<Country>(context, listen: false).removeAllCountries();
     Navigator.of(context)
         .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //Pop back a page and clear out provider
   void _backPage() async {
-    await Provider.of<Country>(context, listen: false)
-        .removeAllCountries();
+    await Provider.of<Country>(context, listen: false).removeAllCountries();
     Navigator.of(context).pop();
   }
 
@@ -141,6 +139,18 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
           style: TextStyle(
             color: Colors.black,
           ),
+        ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
         ),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
@@ -175,7 +185,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                     ),
                   ),
-
                   Container(
                     height: screenHeight * 0.50,
                     margin: EdgeInsets.only(
@@ -194,7 +203,9 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                               _cityPicker,
                               newCountry.length <= index
                                   ? null
-                                  : (newCountry[index].country == '' ? null : newCountry[index].country ),
+                                  : (newCountry[index].country == ''
+                                      ? null
+                                      : newCountry[index].country),
                               null,
                             ),
                             trailing: Row(
@@ -229,7 +240,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       },
                     ),
                   ),
-
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
