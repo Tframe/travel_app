@@ -6,14 +6,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import './screens/discover_screen.dart';
-import './screens/current_trips_screen.dart';
-import './screens/past_trips_screen.dart';
+import './screens/discover_screens/discover_screen.dart';
+import './screens/current_trip_screens/current_trips_screen.dart';
+import './screens/past_trips_screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
 import './screens/trip_details_screens/edit_trip_screen.dart';
-import './screens/login_signup_screen.dart';
+import './screens/authentication_screens/login_signup_screen.dart';
 import './screens/trip_details_screens/trip_detail_screen.dart';
-import './screens/login_screen.dart';
+import './screens/authentication_screens/login_screen.dart';
 
 import './screens/signup_screens/signup_intro_screen.dart';
 import './screens/signup_screens/signup_name_screen.dart';
@@ -27,7 +27,7 @@ import './screens/add_trip_screens/add_trip_title_screen.dart';
 import './screens/add_trip_screens/add_trip_countries_screen.dart';
 import './screens/add_trip_screens/add_trip_cities_screen.dart';
 import './screens/add_trip_screens/add_trip_group_invite_screen.dart';
-import './screens/account_info_screens/account_profile_screen.dart';
+import './screens/account_info_screens/edit_account_profile_screen.dart';
 import './screens/account_info_screens/edit_personal_info_screen.dart';
 import './screens/account_info_screens/edit_contact_info_screen.dart';
 import './screens/account_info_screens/edit_about_screen.dart';
@@ -44,13 +44,25 @@ import './screens/trip_details_screens/add_or_edit_activity_screen.dart';
 import './screens/trip_details_screens/edit_restaurants_screen.dart';
 import './screens/trip_details_screens/add_or_edit_restaurant_screen.dart';
 import './screens/timeline_screens/timeline_screen.dart';
+import './screens/post_comments_screens/post_comment_screen.dart';
+import './screens/post_comments_screens/sub_comments_screen.dart';
+import './screens/account_profile_screens/account_profile_screen.dart';
+import './screens/account_profile_screens/account_profile_post_comment_screen.dart';
 
 import './providers/user_provider.dart';
-import './providers/trips_provider.dart';
-import './providers/countries_provider.dart';
-import './providers/cities_provider.dart';
-import './providers/notification_provider.dart';
+import './providers/trip_provider.dart';
 
+import './providers/trips_provider.dart';
+import './providers/country_provider.dart';
+import './providers/city_provider.dart';
+import './providers/notification_provider.dart';
+import './providers/flight_provider.dart';
+import './providers/activity_provider.dart';
+import './providers/lodging_provider.dart';
+import './providers/transportation_provider.dart';
+import './providers/restaurant_provider.dart';
+import './providers/post_provider.dart';
+import './providers/tag_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -122,29 +134,57 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (ctx) => TripProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (ctx) => TripsProvider(),
         ),
         ChangeNotifierProvider(
           create: (ctx) => UserProvider(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => Countries(),
+          create: (ctx) => Country(),
         ),
         ChangeNotifierProvider(
-          create: (ctx) => Cities(),
+          create: (ctx) => City(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Flight(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Lodging(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Activity(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Restaurant(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => Transportation(),
         ),
         ChangeNotifierProvider(
           create: (ctx) => NotificationProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => PostProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (ctx) => TagProvider(),
         ),
       ],
       child: MaterialApp(
         theme: ThemeData(
           //scaffoldBackgroundColor: lemonMeringue,
+          primaryColor: Colors.white,
           primarySwatch: sandyBrown,
           secondaryHeaderColor: indigoDye,
-          accentColor: lemonMeringue,
-          buttonColor: lemonMeringue,
+          accentColor: lemonMeringue, //lemonMeringue,
+          buttonColor: sandyBrown,
           fontFamily: 'OpenSans',
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: sandyBrown,
+          ),
           buttonTheme: ButtonTheme.of(context).copyWith(
             buttonColor: sandyBrown,
             textTheme: ButtonTextTheme.primary,
@@ -186,7 +226,8 @@ class MyApp extends StatelessWidget {
           AddTripCitiesScreen.routeName: (ctx) => AddTripCitiesScreen(),
           AddTripGroupInviteScreen.routeName: (ctx) =>
               AddTripGroupInviteScreen(),
-          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
+          EditAccountProfileScreen.routeName: (ctx) =>
+              EditAccountProfileScreen(),
           EditPersonalInfoScreen.routeName: (ctx) => EditPersonalInfoScreen(),
           EditContactInfoScreen.routeName: (ctx) => EditContactInfoScreen(),
           EditAboutScreen.routeName: (ctx) => EditAboutScreen(),
@@ -206,6 +247,10 @@ class MyApp extends StatelessWidget {
           AddOrEditRestaurantScreen.routeName: (ctx) =>
               AddOrEditRestaurantScreen(),
           TimelineScreen.routeName: (ctx) => TimelineScreen(),
+          PostCommentScreen.routeName: (ctx) => PostCommentScreen(),
+          SubCommentsScreen.routeName: (ctx) => SubCommentsScreen(),
+          AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
+          AccountProfilePostCommentScreen.routeName: (ctx) => AccountProfilePostCommentScreen(),
         },
       ),
     );

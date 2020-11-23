@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
+import '../../providers/trip_provider.dart';
+import '../../providers/transportation_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_transportation_screen.dart';
 
@@ -16,6 +17,8 @@ class EditTransportationsScreen extends StatefulWidget {
 
 class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
   TripProvider loadedTrip;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   void addOrEditTransportation(int editIndex) async {
     Navigator.of(context).pushNamed(
@@ -40,8 +43,25 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Transportations'),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
-      body: loadedTrip.transportations == null || loadedTrip.transportations.length == 0
+      body: loadedTrip.countries[countryIndex].cities[cityIndex]
+                      .transportations ==
+                  null ||
+              loadedTrip.countries[countryIndex].cities[cityIndex]
+                      .transportations.length ==
+                  0
           ? Center(
               child: Text('No Transportations Added'),
             )
@@ -52,17 +72,22 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.transportations == null ? 0 : loadedTrip.transportations.length,
+                        itemCount: loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].transportations ==
+                                null
+                            ? 0
+                            : loadedTrip.countries[countryIndex]
+                                .cities[cityIndex].transportations.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.transportations),
+                              key: ValueKey(loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].transportations),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -70,15 +95,18 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
                                     Icons.hotel,
                                   ),
                                 ),
-                                title: Text(
-                                    loadedTrip.transportations[index].company),
+                                title: Text(loadedTrip
+                                    .countries[countryIndex]
+                                    .cities[cityIndex]
+                                    .transportations[index]
+                                    .company),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        '${loadedTrip.transportations[index].transportationType}'),
+                                        '${loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].transportationType}'),
                                     Text(
-                                      '${DateFormat.yMd().format(loadedTrip.transportations[index].startingDateTime)} - ${DateFormat.yMd().format(loadedTrip.transportations[index].endingDateTime)}',
+                                      '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].startingDateTime)} - ${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].endingDateTime)}',
                                     ),
                                   ],
                                 ),
@@ -103,19 +131,52 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.transportations[index].company}?',
+                                      'Are you sure you want to delete ${loadedTrip.countries[countryIndex].cities[cityIndex].transportations[index].company}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
                                         child: const Text('Yes'),
                                         onPressed: () {
                                           setState(() {
-                                            Provider.of<TripsProvider>(context,
+                                            Provider.of<Transportation>(context,
                                                     listen: false)
                                                 .removeTransportation(
-                                                    loadedTrip,
-                                                    user.uid,
-                                                    index);
+                                              loadedTrip.id,
+                                              user.uid,
+                                              loadedTrip
+                                                  .countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex]
+                                                  .cities[cityIndex].id,
+                                              loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .transportations[index]
+                                                  .id,
+                                            );
+                                            loadedTrip
+                                                .countries[countryIndex]
+                                                .cities[cityIndex]
+                                                .transportations
+                                                .removeAt(index);
+                                            List<TripProvider> trips =
+                                                Provider.of<TripsProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .trips;
+                                            var tripIndex = trips.indexWhere(
+                                                (trip) =>
+                                                    trip.id == loadedTrip.id);
+                                            trips[tripIndex]
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .transportations =
+                                                loadedTrip
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .transportations;
+                                            Provider.of<TripsProvider>(context,
+                                                    listen: false)
+                                                .setTripsList(trips);
                                           });
                                           Navigator.of(context).pop();
                                         },

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
@@ -140,27 +139,32 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
         Icons.group,
       );
     }
-    if (notifications[index].notificationType == 'edit-flight' || notifications[index].notificationType == 'add-flight') {
+    if (notifications[index].notificationType == 'edit-flight' ||
+        notifications[index].notificationType == 'add-flight') {
       return Icon(
         Icons.flight,
       );
     }
-    if (notifications[index].notificationType == 'edit-lodging' || notifications[index].notificationType == 'add-lodging') {
+    if (notifications[index].notificationType == 'edit-lodging' ||
+        notifications[index].notificationType == 'add-lodging') {
       return Icon(
         Icons.hotel,
       );
     }
-    if (notifications[index].notificationType == 'edit-activity' || notifications[index].notificationType == 'add-activity') {
+    if (notifications[index].notificationType == 'edit-activity' ||
+        notifications[index].notificationType == 'add-activity') {
       return Icon(
         Icons.local_activity,
       );
     }
-    if (notifications[index].notificationType == 'edit-restaurant' || notifications[index].notificationType == 'add-restaurant') {
+    if (notifications[index].notificationType == 'edit-restaurant' ||
+        notifications[index].notificationType == 'add-restaurant') {
       return Icon(
         Icons.restaurant,
       );
     }
-    if (notifications[index].notificationType == 'edit-transportation' || notifications[index].notificationType == 'add-transportation') {
+    if (notifications[index].notificationType == 'edit-transportation' ||
+        notifications[index].notificationType == 'add-transportation') {
       return Icon(
         Icons.directions_car,
       );
@@ -180,22 +184,25 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             AppBar(
               title: Text(
                 'Notifications',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              iconTheme: new IconThemeData(
+                color: Theme.of(context).secondaryHeaderColor,
               ),
               toolbarHeight: screenHeight * 0.075,
               automaticallyImplyLeading: false,
-              iconTheme: new IconThemeData(
-                color: Colors.white,
-              ),
               actions: [
                 SizedBox(),
               ],
             ),
+            Divider(
+              thickness: 1,
+              color: Colors.grey[400],
+            ),
             SingleChildScrollView(
               child: Container(
-                height: screenHeight * 0.89,
+                height: screenHeight * 0.87,
                 child: ListView.builder(
                   itemCount: notifications.length,
                   itemBuilder: (BuildContext ctx, int index) {

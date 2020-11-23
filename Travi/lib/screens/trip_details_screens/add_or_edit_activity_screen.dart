@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/activity_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/notification_provider.dart';
 import './widgets/group_avatars.dart';
@@ -31,6 +30,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   Activity newActivity = Activity(
     chosen: false,
@@ -79,15 +80,43 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
           Provider.of<UserProvider>(context, listen: false).getParticipants;
       newActivity.chosen = !_suggestion;
 
-      //add or edit activity
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditActivity(
-        loadedTrip,
-        loadedTrip.organizerId,
-        newActivity,
-        edit ? editIndex : -1,
-      );
+      //get current list of trips to update
+      List<TripProvider> trips =
+          Provider.of<TripsProvider>(context, listen: false).trips;
+      var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
 
+      if (edit) {
+        //edit activity
+        await Provider.of<Activity>(context, listen: false).editActivity(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newActivity,
+          newActivity.id,
+        );
+        //update activity to trip data
+        List<Activity> activities =
+            Provider.of<Activity>(context, listen: false).activities;
+        trips[tripIndex].countries[countryIndex].cities[cityIndex].activities =
+            activities;
+      } else {
+        //add activity
+        await Provider.of<Activity>(context, listen: false).addActivity(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newActivity,
+        );
+        //add activity to trip data
+        trips[tripIndex]
+            .countries[countryIndex]
+            .cities[cityIndex]
+            .activities
+            .add(newActivity);
+      }
+      Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
         //if not the user that is logged in, send notification
@@ -281,7 +310,8 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newActivity = loadedTrip.activities[editIndex];
+        newActivity = loadedTrip
+            .countries[countryIndex].cities[cityIndex].activities[editIndex];
       });
     }
     return Scaffold(
@@ -293,6 +323,18 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
             : const Text(
                 'Add Activity',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -329,7 +371,7 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -341,13 +383,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Title',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.title,
@@ -362,13 +412,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.phoneNumber,
@@ -383,13 +441,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.website,
@@ -404,13 +470,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.address,
@@ -425,13 +499,21 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newActivity.reservationID,
@@ -519,7 +601,11 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                             'Group',
                             .65,
                             GroupAvatars(
-                                loadedTrip, editIndex, loadedTrip.activities),
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].activities,
+                            ),
                             context,
                           ),
                           Container(
@@ -541,7 +627,7 @@ class _AddOrEditActivityScreenState extends State<AddOrEditActivityScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

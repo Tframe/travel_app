@@ -74,6 +74,18 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Personal Information'),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -98,14 +110,22 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             initialValue: userValues.firstName,
                             decoration: InputDecoration(
                               labelText: 'First Name',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -125,14 +145,22 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             initialValue: userValues.lastName,
                             decoration: InputDecoration(
                               labelText: 'Last Name',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -152,14 +180,22 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             initialValue: userValues.location,
                             decoration: InputDecoration(
                               labelText: 'Location',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
                                     color:
                                         Theme.of(context).secondaryHeaderColor),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.done,
@@ -190,7 +226,7 @@ class _EditPersonalInfoScreenState extends State<EditPersonalInfoScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

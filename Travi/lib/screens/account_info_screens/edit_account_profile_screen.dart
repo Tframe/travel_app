@@ -11,14 +11,17 @@ import './widgets/about_section.dart';
 import './widgets/contact_info.dart';
 import './edit_personal_info_screen.dart';
 import '../../screens/tab_bar_screen.dart';
+import './edit_about_screen.dart';
+import './edit_contact_info_screen.dart';
 
-class AccountProfileScreen extends StatefulWidget {
-  static const routeName = '/account-profile-screen';
+class EditAccountProfileScreen extends StatefulWidget {
+  static const routeName = '/edit-account-profile-screen';
   @override
-  _AccountProfileScreenState createState() => _AccountProfileScreenState();
+  _EditAccountProfileScreenState createState() =>
+      _EditAccountProfileScreenState();
 }
 
-class _AccountProfileScreenState extends State<AccountProfileScreen> {
+class _EditAccountProfileScreenState extends State<EditAccountProfileScreen> {
   // ignore: unused_field
   File _userImageFile;
   User user;
@@ -62,6 +65,22 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
     });
   }
 
+  void _editAbout(BuildContext context) {
+    Navigator.of(context).pushNamed(
+      EditAboutScreen.routeName,
+      arguments: {'loadedUser': _loadedUser, 'user': user},
+    );
+  }
+
+  //routes to edit contact info screen, sends the loadeduser current info
+  //and user info for firestore
+  void _editContactInfo(BuildContext context) {
+    Navigator.of(context).pushNamed(
+      EditContactInfoScreen.routeName,
+      arguments: {'loadedUser': _loadedUser},
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -69,18 +88,28 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
     return Scaffold(
       appBar: AppBar(
           title: Text(
-            'Account Profile',
+            'Edit Account Profile',
             style: TextStyle(
               color: Theme.of(context).secondaryHeaderColor,
             ),
           ),
+          bottom: PreferredSize(
+            child: Container(
+              color: Colors.grey[400],
+              height: 1,
+            ),
+            preferredSize: Size.fromHeight(1.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
           iconTheme: new IconThemeData(
             color: Theme.of(context).secondaryHeaderColor,
           ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed(TabBarScreen.routeName);
+              Navigator.of(context)
+                  .pushReplacementNamed(TabBarScreen.routeName);
             },
           )),
       body: FutureBuilder(
@@ -105,13 +134,19 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                         children: [
                           Padding(
                             padding: EdgeInsets.only(
-                                left: screenWidth * (0.5 - 0.17),
-                                bottom: screenHeight * 0.0125),
+                              left: screenWidth * (0.5 - 0.17),
+                              bottom: screenHeight * 0.0125,
+                            ),
                             child: UserImagePicker(
-                                _pickedImage, user, _loadedUser),
+                              _pickedImage,
+                              user,
+                              _loadedUser,
+                            ),
                           ),
                           Padding(
-                            padding: EdgeInsets.only(top: screenHeight * 0.18),
+                            padding: EdgeInsets.only(
+                              top: screenHeight * 0.18,
+                            ),
                             child: IconButton(
                               icon: Icon(Icons.edit),
                               onPressed: _editPersonalInfo,
@@ -121,15 +156,33 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                       ),
                     ],
                   ),
-                  PersonalInfo(_loadedUser, user),
+                  PersonalInfo(_loadedUser),
                   Divider(
                     thickness: 8,
                   ),
-                  AboutSection(_loadedUser, user),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      AboutSection(_loadedUser),
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () => _editAbout(context),
+                      ),
+                    ],
+                  ),
                   Divider(
                     thickness: 8,
                   ),
-                  ContactInfo(_loadedUser, user),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ContactInfo(_loadedUser),
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () => _editContactInfo(context),
+                      ),
+                    ],
+                  ),
                   Divider(
                     thickness: 8,
                   ),

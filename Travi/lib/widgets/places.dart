@@ -7,9 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_place/google_place.dart';
 
 import '../providers/country_provider.dart';
-import '../providers/countries_provider.dart';
 import '../providers/city_provider.dart';
-import '../providers/cities_provider.dart';
 
 class Places extends StatefulWidget {
   final countryPicker;
@@ -104,9 +102,12 @@ class _PlacesState extends State<Places> {
                 labelText: widget.countryPicker
                     ? 'Country'
                     : (widget.cityPicker ? 'City' : 'Place'),
+                labelStyle: TextStyle(
+                  color: Theme.of(context).buttonColor,
+                ),
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).buttonColor,
                     width: 1.5,
                   ),
                 ),
@@ -245,7 +246,7 @@ class _PlacesState extends State<Places> {
 
     country = tempCountry;
 
-    await Provider.of<Countries>(context, listen: false).addCountry(country);
+    await Provider.of<Country>(context, listen: false).addCountry(country);
 
     setState(() {
       predictions = [];
@@ -265,7 +266,7 @@ class _PlacesState extends State<Places> {
     );
 
     city = tempCity;
-    await Provider.of<Cities>(context, listen: false).addCity(city);
+    await Provider.of<City>(context, listen: false).addCity(city);
 
     setState(() {
       _cityController.text = detailsResult.formattedAddress;
@@ -282,16 +283,16 @@ class _PlacesState extends State<Places> {
         images = [];
       });
       //number of photos we want from google
-    //   int numPhotos = 1;
-    //   if (details.result.photos != null) {
-    //     for (var photo in details.result.photos) {
-    //       if(numPhotos == 0){
-    //         return;
-    //       }
-    //       await getPhoto(photo.photoReference);
-    //       numPhotos--;
-    //     }
-    //   }
+      //   int numPhotos = 1;
+      //   if (details.result.photos != null) {
+      //     for (var photo in details.result.photos) {
+      //       if(numPhotos == 0){
+      //         return;
+      //       }
+      //       await getPhoto(photo.photoReference);
+      //       numPhotos--;
+      //     }
+      //   }
     }
   }
 
@@ -303,4 +304,5 @@ class _PlacesState extends State<Places> {
   //     });
   //   }
   // }
+
 }

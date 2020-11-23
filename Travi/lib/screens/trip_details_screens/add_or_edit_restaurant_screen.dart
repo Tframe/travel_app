@@ -30,6 +30,8 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   Restaurant newRestaurant = Restaurant(
     id: null,
@@ -66,18 +68,47 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     try {
       String userId = await Provider.of<UserProvider>(context, listen: false)
           .getCurrentUserId();
-      UserProvider loggedInUser = Provider.of<UserProvider>(context, listen: false).loggedInUser;
+      UserProvider loggedInUser =
+          Provider.of<UserProvider>(context, listen: false).loggedInUser;
       newRestaurant.organizerId = userId;
       newRestaurant.participants =
           Provider.of<UserProvider>(context, listen: false).getParticipants;
-      await Provider.of<TripsProvider>(context, listen: false)
-          .addOrEditRestaurant(
-        loadedTrip,
-        loadedTrip.organizerId,
-        newRestaurant,
-        edit ? editIndex : -1,
-      );
 
+      //get current list of trips to update
+      List<TripProvider> trips =
+          Provider.of<TripsProvider>(context, listen: false).trips;
+      var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
+      if (edit) {
+        await Provider.of<Restaurant>(context, listen: false).editRestaurant(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newRestaurant,
+          newRestaurant.id,
+        );
+        //update restaurant to trip data
+        List<Restaurant> restaurants =
+            Provider.of<Restaurant>(context, listen: false).restaurants;
+        trips[tripIndex].countries[countryIndex].cities[cityIndex].restaurants =
+            restaurants;
+      } else {
+        await Provider.of<Restaurant>(context, listen: false).addRestaurant(
+          loadedTrip.id,
+          loadedTrip.organizerId,
+          loadedTrip.countries[countryIndex].id,
+          loadedTrip.countries[countryIndex].cities[cityIndex].id,
+          newRestaurant,
+        );
+        //add activity to trip data
+        trips[tripIndex]
+            .countries[countryIndex]
+            .cities[cityIndex]
+            .restaurants
+            .add(newRestaurant);
+      }
+      Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
       //create notification to be sent to other companions
       for (int i = 0; i < loadedTrip.group.length; i++) {
         //if not the user that is logged in, send notification
@@ -228,7 +259,8 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newRestaurant = loadedTrip.restaurants[editIndex];
+        newRestaurant = loadedTrip
+            .countries[countryIndex].cities[cityIndex].restaurants[editIndex];
       });
     }
     return Scaffold(
@@ -240,6 +272,18 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
             : const Text(
                 'Add Restaurant',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -276,7 +320,7 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -288,13 +332,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             ),
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Name',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.name,
@@ -309,13 +361,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Phone # (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.phoneNumber,
@@ -330,13 +390,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Website (Optional)',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.website,
@@ -351,13 +419,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.address,
@@ -372,13 +448,21 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newRestaurant.reservationID,
@@ -428,7 +512,11 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                             'Group',
                             .65,
                             GroupAvatars(
-                                loadedTrip, editIndex, loadedTrip.restaurants),
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].restaurants,
+                            ),
                             context,
                           ),
                           Container(
@@ -450,7 +538,7 @@ class _AddOrEditRestaurantScreenState extends State<AddOrEditRestaurantScreen> {
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

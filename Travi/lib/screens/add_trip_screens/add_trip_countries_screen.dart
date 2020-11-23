@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../../widgets/places.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/countries_provider.dart';
 import './add_trip_cities_screen.dart';
 import './add_trip_group_invite_screen.dart';
 
@@ -41,7 +40,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
   );
 
   Future<void> _addCountry() async {
-    final newCountry = Provider.of<Countries>(context, listen: false).countries;
+    final newCountry = Provider.of<Country>(context, listen: false).countries;
     tripValues.countries = newCountry;
     if (newCountry.length != _placesIndex || newCountry.length == 0) {
       return showDialog<void>(
@@ -114,16 +113,14 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
 
   //Skip button feature if user doesn't know any cities to stop.
   void _skipButton() async {
-    await Provider.of<Countries>(context, listen: false)
-        .removeAllCountries();
+    await Provider.of<Country>(context, listen: false).removeAllCountries();
     Navigator.of(context)
         .pushNamed(AddTripGroupInviteScreen.routeName, arguments: tripValues);
   }
 
   //Pop back a page and clear out provider
   void _backPage() async {
-    await Provider.of<Countries>(context, listen: false)
-        .removeAllCountries();
+    await Provider.of<Country>(context, listen: false).removeAllCountries();
     Navigator.of(context).pop();
   }
 
@@ -134,7 +131,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     tripValues = ModalRoute.of(context).settings.arguments;
-    final newCountry = Provider.of<Countries>(context, listen: false).countries;
+    final newCountry = Provider.of<Country>(context, listen: false).countries;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -142,6 +139,18 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
           style: TextStyle(
             color: Colors.black,
           ),
+        ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
         ),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
@@ -176,10 +185,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     height: screenHeight * 0.50,
                     margin: EdgeInsets.only(
@@ -198,7 +203,9 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                               _cityPicker,
                               newCountry.length <= index
                                   ? null
-                                  : (newCountry[index].country == '' ? null : newCountry[index].country ),
+                                  : (newCountry[index].country == ''
+                                      ? null
+                                      : newCountry[index].country),
                               null,
                             ),
                             trailing: Row(
@@ -233,10 +240,6 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       },
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
@@ -253,7 +256,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -273,7 +276,7 @@ class _AddTripCountriesScreenState extends State<AddTripCountriesScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

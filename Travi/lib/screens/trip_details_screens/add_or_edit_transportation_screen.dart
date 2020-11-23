@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
+import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/transportation_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/notification_provider.dart';
 import './widgets/group_avatars.dart';
@@ -32,6 +31,8 @@ class _AddOrEditTransportationScreenState
   bool edit = false;
   int editIndex = -1;
   bool _suggestion = false;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   List<DropdownMenuItem<int>> transportationType = [];
   int _selectedTransportationType = 0;
@@ -234,50 +235,95 @@ class _AddOrEditTransportationScreenState
         newTransportation.organizerId = userId;
         newTransportation.participants =
             Provider.of<UserProvider>(context, listen: false).getParticipants;
-        await Provider.of<TripsProvider>(context, listen: false)
-            .addOrEditTransportation(
-          loadedTrip,
-          loadedTrip.organizerId,
-          newTransportation,
-          edit ? editIndex : -1,
-        );
+        newTransportation.chosen = !_suggestion;
 
-        //create notification to be sent to other companions
-      for (int i = 0; i < loadedTrip.group.length; i++) {
-        //if not the user that is logged in, send notification
-        if (loggedInUser.id != loadedTrip.group[i].id) {
-          NotificationProvider newNotification;
-          //create the add activity notification
-          if (!edit) {
-            newNotification =
-                Provider.of<NotificationProvider>(context, listen: false)
-                    .createAddEventNotification(
-              loggedInUser.id,
-              loggedInUser.firstName,
-              loggedInUser.lastName,
-              loadedTrip.id,
-              loadedTrip.title,
-              'transportation',
-            );
-          } else {
-            newNotification =
-                Provider.of<NotificationProvider>(context, listen: false)
-                    .createEditEventNotification(
-              loggedInUser.id,
-              loggedInUser.firstName,
-              loggedInUser.lastName,
-              loadedTrip.id,
-              loadedTrip.title,
-              newTransportation.company,
-              'transportation',
-            );
+        //get current list of trips to update
+        List<TripProvider> trips =
+            Provider.of<TripsProvider>(context, listen: false).trips;
+        var tripIndex = trips.indexWhere((trip) => trip.id == loadedTrip.id);
+
+        if (edit) {
+          await Provider.of<Transportation>(context, listen: false)
+              .editTransportation(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            loadedTrip.countries[countryIndex].cities[cityIndex].id,
+            newTransportation,
+            newTransportation.id,
+          );
+          //update transportation to trip data
+          List<Transportation> transportations =
+              Provider.of<Transportation>(context, listen: false)
+                  .transportations;
+          trips[tripIndex]
+              .countries[countryIndex]
+              .cities[cityIndex]
+              .transportations = transportations;
+        } else {
+          await Provider.of<Transportation>(context, listen: false)
+              .addTransportation(
+            loadedTrip.id,
+            loadedTrip.organizerId,
+            loadedTrip.countries[countryIndex].id,
+            loadedTrip.countries[countryIndex].cities[cityIndex].id,
+            newTransportation,
+          );
+
+          if (trips[tripIndex]
+                  .countries[countryIndex]
+                  .cities[cityIndex]
+                  .transportations ==
+              null) {
+            trips[tripIndex]
+                .countries[countryIndex]
+                .cities[cityIndex]
+                .transportations = [];
           }
-
-          //add notification to each companion added
-          await Provider.of<NotificationProvider>(context, listen: false)
-              .addNotification(loadedTrip.group[i].id, newNotification);
+          //add activity to trip data
+          trips[tripIndex]
+              .countries[countryIndex]
+              .cities[cityIndex]
+              .transportations
+              .add(newTransportation);
         }
-      }
+        Provider.of<TripsProvider>(context, listen: false).setTripsList(trips);
+        //create notification to be sent to other companions
+        for (int i = 0; i < loadedTrip.group.length; i++) {
+          //if not the user that is logged in, send notification
+          if (loggedInUser.id != loadedTrip.group[i].id) {
+            NotificationProvider newNotification;
+            //create the add activity notification
+            if (!edit) {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createAddEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                'transportation',
+              );
+            } else {
+              newNotification =
+                  Provider.of<NotificationProvider>(context, listen: false)
+                      .createEditEventNotification(
+                loggedInUser.id,
+                loggedInUser.firstName,
+                loggedInUser.lastName,
+                loadedTrip.id,
+                loadedTrip.title,
+                newTransportation.company,
+                'transportation',
+              );
+            }
+
+            //add notification to each companion added
+            await Provider.of<NotificationProvider>(context, listen: false)
+                .addNotification(loadedTrip.group[i].id, newNotification);
+          }
+        }
 
         Provider.of<UserProvider>(context, listen: false)
             .resetParticipantsList();
@@ -361,7 +407,8 @@ class _AddOrEditTransportationScreenState
     if (editIndex > -1) {
       setState(() {
         edit = true;
-        newTransportation = loadedTrip.transportations[editIndex];
+        newTransportation = loadedTrip.countries[countryIndex].cities[cityIndex]
+            .transportations[editIndex];
         setEditType();
       });
     }
@@ -372,6 +419,18 @@ class _AddOrEditTransportationScreenState
             : const Text(
                 'Add Transportation',
               ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
@@ -408,7 +467,7 @@ class _AddOrEditTransportationScreenState
                                       _suggestion = newValue;
                                     });
                                   },
-                                  activeColor: Theme.of(context).primaryColor,
+                                  activeColor: Theme.of(context).buttonColor,
                                 ),
                                 Text(
                                   'Suggestion',
@@ -422,10 +481,18 @@ class _AddOrEditTransportationScreenState
                           DropdownButtonFormField(
                             decoration: InputDecoration(
                               labelText: 'Transportation Type',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             items: transportationType,
@@ -446,13 +513,21 @@ class _AddOrEditTransportationScreenState
                             focusNode: _transportationTypeFocusNode,
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Company',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue: newTransportation.company,
@@ -467,13 +542,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Starting Location Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.next,
@@ -488,13 +571,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Ending Location Address',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             initialValue:
@@ -510,13 +601,21 @@ class _AddOrEditTransportationScreenState
                             },
                           ),
                           TextFormField(
-                            cursorColor: Theme.of(context).primaryColor,
+                            cursorColor: Theme.of(context).buttonColor,
                             decoration: InputDecoration(
                               labelText: 'Reservation ID',
+                              labelStyle: TextStyle(
+                                color: Colors.grey[600],
+                              ),
                               enabledBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color:
-                                        Theme.of(context).secondaryHeaderColor),
+                                  color: Theme.of(context).secondaryHeaderColor,
+                                ),
+                              ),
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).buttonColor,
+                                ),
                               ),
                             ),
                             textInputAction: TextInputAction.done,
@@ -606,8 +705,12 @@ class _AddOrEditTransportationScreenState
                           cardScroller(
                             'Group',
                             .65,
-                            GroupAvatars(loadedTrip, editIndex,
-                                loadedTrip.transportations),
+                            GroupAvatars(
+                              loadedTrip,
+                              editIndex,
+                              loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].transportations,
+                            ),
                             context,
                           ),
                           Container(
@@ -629,7 +732,7 @@ class _AddOrEditTransportationScreenState
                               ),
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30.0, vertical: 8.0),
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).buttonColor,
                             ),
                           ),
                         ],

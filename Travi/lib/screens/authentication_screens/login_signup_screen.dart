@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 
-import 'signup_screens/signup_intro_screen.dart';
+import '../signup_screens/signup_intro_screen.dart';
 import './login_screen.dart';
 
 class LoginSignupScreen extends StatelessWidget {
@@ -14,7 +14,7 @@ class LoginSignupScreen extends StatelessWidget {
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).buttonColor,
             ),
           ),
           SingleChildScrollView(
@@ -102,7 +102,7 @@ class LoginSignupScreen extends StatelessWidget {
                         'SIGN IN',
                         style: TextStyle(
                           fontSize: 20,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).buttonColor,
                         ),
                       ),
                     ),

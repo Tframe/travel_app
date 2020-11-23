@@ -42,16 +42,22 @@ class _TimelineScreenState extends State<TimelineScreen> {
   var _totalRestaurants = 0;
 
   void getTotals() {
-    _totalLodges = loadedTrip.lodgings.length;
-    _totalTransportation = loadedTrip.transportations.length;
-    _totalActivities = loadedTrip.activities.length;
-    _totalFlights = loadedTrip.flights.length;
-    _totalRestaurants = loadedTrip.restaurants.length;
-    _totalEvents = _totalLodges +
-        _totalTransportation +
-        _totalActivities +
-        _totalFlights +
-        _totalRestaurants;
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        _totalLodges = loadedTrip.countries[i].cities[j].lodgings.length;
+        _totalTransportation =
+            loadedTrip.countries[i].cities[j].transportations.length;
+        _totalActivities = loadedTrip.countries[i].cities[j].activities.length;
+        _totalFlights = loadedTrip.countries[i].flights.length;
+        _totalRestaurants =
+            loadedTrip.countries[i].cities[j].restaurants.length;
+        _totalEvents = _totalLodges +
+            _totalTransportation +
+            _totalActivities +
+            _totalFlights +
+            _totalRestaurants;
+      }
+    }
   }
 
   //Returns a string to indicate which event should be displayed next
@@ -60,49 +66,61 @@ class _TimelineScreenState extends State<TimelineScreen> {
     DateTime earliestDate = loadedTrip.endDate.add(Duration(days: 1));
     String eventTracker = '';
 
-    if (loadedTrip.flights.isNotEmpty) {
-      if (loadedTrip.flights.length > flightTrackerIndex) {
-        earliestDate = loadedTrip.flights[flightTrackerIndex].departureDateTime;
-        eventTracker = 'Flight';
-      }
-    }
-    if (loadedTrip.lodgings.isNotEmpty) {
-      if (loadedTrip.lodgings.length > lodgingTrackerIndex) {
-        if (earliestDate.isAfter(
-            loadedTrip.lodgings[lodgingTrackerIndex].checkInDateTime)) {
-          earliestDate =
-              loadedTrip.lodgings[lodgingTrackerIndex].checkInDateTime;
-          eventTracker = 'Lodging';
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        if (loadedTrip.countries[i].flights.isNotEmpty) {
+          if (loadedTrip.countries[i].flights.length > flightTrackerIndex) {
+            earliestDate = loadedTrip
+                .countries[i].flights[flightTrackerIndex].departureDateTime;
+            eventTracker = 'Flight';
+          }
         }
-      }
-    }
-    if (loadedTrip.transportations.isNotEmpty) {
-      if (loadedTrip.transportations.length > transportationTrackerIndex) {
-        if (earliestDate.isAfter(loadedTrip
-            .transportations[transportationTrackerIndex].startingDateTime)) {
-          earliestDate = loadedTrip
-              .transportations[transportationTrackerIndex].startingDateTime;
-          eventTracker = 'Transportation';
+        if (loadedTrip.countries[i].cities[j].lodgings.isNotEmpty) {
+          if (loadedTrip.countries[i].cities[j].lodgings.length >
+              lodgingTrackerIndex) {
+            if (earliestDate.isAfter(loadedTrip.countries[i].cities[j]
+                .lodgings[lodgingTrackerIndex].checkInDateTime)) {
+              earliestDate = loadedTrip.countries[i].cities[j]
+                  .lodgings[lodgingTrackerIndex].checkInDateTime;
+              eventTracker = 'Lodging';
+            }
+          }
         }
-      }
-    }
-    if (loadedTrip.activities.isNotEmpty) {
-      if (loadedTrip.activities.length > activitiesTrackerIndex) {
-        if (earliestDate.isAfter(
-            loadedTrip.activities[activitiesTrackerIndex].startingDateTime)) {
-          earliestDate =
-              loadedTrip.activities[activitiesTrackerIndex].startingDateTime;
-          eventTracker = 'Activity';
+        if (loadedTrip.countries[i].cities[j].transportations.isNotEmpty) {
+          if (loadedTrip.countries[i].cities[j].transportations.length >
+              transportationTrackerIndex) {
+            if (earliestDate.isAfter(loadedTrip
+                .countries[i]
+                .cities[j]
+                .transportations[transportationTrackerIndex]
+                .startingDateTime)) {
+              earliestDate = loadedTrip.countries[i].cities[j]
+                  .transportations[transportationTrackerIndex].startingDateTime;
+              eventTracker = 'Transportation';
+            }
+          }
         }
-      }
-    }
-    if (loadedTrip.restaurants.isNotEmpty) {
-      if (loadedTrip.restaurants.length > restaruantsTrackerIndex) {
-        if (earliestDate.isAfter(
-            loadedTrip.restaurants[restaruantsTrackerIndex].startingDateTime)) {
-          earliestDate =
-              loadedTrip.restaurants[restaruantsTrackerIndex].startingDateTime;
-          eventTracker = 'Restaurant';
+        if (loadedTrip.countries[i].cities[j].activities.isNotEmpty) {
+          if (loadedTrip.countries[i].cities[j].activities.length >
+              activitiesTrackerIndex) {
+            if (earliestDate.isAfter(loadedTrip.countries[i].cities[j]
+                .activities[activitiesTrackerIndex].startingDateTime)) {
+              earliestDate = loadedTrip.countries[i].cities[j]
+                  .activities[activitiesTrackerIndex].startingDateTime;
+              eventTracker = 'Activity';
+            }
+          }
+        }
+        if (loadedTrip.countries[i].cities[j].restaurants.isNotEmpty) {
+          if (loadedTrip.countries[i].cities[j].restaurants.length >
+              restaruantsTrackerIndex) {
+            if (earliestDate.isAfter(loadedTrip.countries[i].cities[j]
+                .restaurants[restaruantsTrackerIndex].startingDateTime)) {
+              earliestDate = loadedTrip.countries[i].cities[j]
+                  .restaurants[restaruantsTrackerIndex].startingDateTime;
+              eventTracker = 'Restaurant';
+            }
+          }
         }
       }
     }
@@ -128,36 +146,48 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   void setStartChildDate(String eventTracker) {
     tempChildDate = startChildDate;
-    if (eventTracker == 'Flight') {
-      startChildDate =
-          loadedTrip.flights[flightTrackerIndex - 1].departureDateTime;
-    } else if (eventTracker == 'Transportation') {
-      startChildDate = loadedTrip
-          .transportations[transportationTrackerIndex - 1].startingDateTime;
-    } else if (eventTracker == 'Lodging') {
-      startChildDate =
-          loadedTrip.lodgings[lodgingTrackerIndex - 1].checkInDateTime;
-    } else if (eventTracker == 'Activity') {
-      startChildDate =
-          loadedTrip.activities[activitiesTrackerIndex - 1].startingDateTime;
-    } else if (eventTracker == 'Restaurant') {
-      startChildDate =
-          loadedTrip.restaurants[restaruantsTrackerIndex - 1].startingDateTime;
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        if (eventTracker == 'Flight') {
+          startChildDate = loadedTrip
+              .countries[i].flights[flightTrackerIndex - 1].departureDateTime;
+        } else if (eventTracker == 'Transportation') {
+          startChildDate = loadedTrip.countries[i].cities[j]
+              .transportations[transportationTrackerIndex - 1].startingDateTime;
+        } else if (eventTracker == 'Lodging') {
+          startChildDate = loadedTrip.countries[i].cities[j]
+              .lodgings[lodgingTrackerIndex - 1].checkInDateTime;
+        } else if (eventTracker == 'Activity') {
+          startChildDate = loadedTrip.countries[i].cities[j]
+              .activities[activitiesTrackerIndex - 1].startingDateTime;
+        } else if (eventTracker == 'Restaurant') {
+          startChildDate = loadedTrip.countries[i].cities[j]
+              .restaurants[restaruantsTrackerIndex - 1].startingDateTime;
+        }
+      }
     }
   }
 
   void setEndChildText(String eventTracker) {
-    if (eventTracker == 'Flight') {
-      endChildText = loadedTrip.flights[flightTrackerIndex - 1].airline;
-    } else if (eventTracker == 'Transportation') {
-      endChildText =
-          loadedTrip.transportations[transportationTrackerIndex - 1].company;
-    } else if (eventTracker == 'Lodging') {
-      endChildText = loadedTrip.lodgings[lodgingTrackerIndex - 1].name;
-    } else if (eventTracker == 'Activity') {
-      endChildText = loadedTrip.activities[activitiesTrackerIndex - 1].title;
-    } else if (eventTracker == 'Restaurant') {
-      endChildText = loadedTrip.restaurants[restaruantsTrackerIndex - 1].name;
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
+        if (eventTracker == 'Flight') {
+          endChildText =
+              loadedTrip.countries[i].flights[flightTrackerIndex - 1].airline;
+        } else if (eventTracker == 'Transportation') {
+          endChildText = loadedTrip.countries[i].cities[j]
+              .transportations[transportationTrackerIndex - 1].company;
+        } else if (eventTracker == 'Lodging') {
+          endChildText = loadedTrip
+              .countries[i].cities[j].lodgings[lodgingTrackerIndex - 1].name;
+        } else if (eventTracker == 'Activity') {
+          endChildText = loadedTrip.countries[i].cities[j]
+              .activities[activitiesTrackerIndex - 1].title;
+        } else if (eventTracker == 'Restaurant') {
+          endChildText = loadedTrip.countries[i].cities[j]
+              .restaurants[restaruantsTrackerIndex - 1].name;
+        }
+      }
     }
   }
 
@@ -172,6 +202,18 @@ class _TimelineScreenState extends State<TimelineScreen> {
       appBar: AppBar(
         title: Text(
           'Timeline',
+        ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
         ),
       ),
       body: Center(
@@ -246,21 +288,20 @@ class _TimelineScreenState extends State<TimelineScreen> {
                                                 : event == 'Activity'
                                                     ? Icons.local_activity
                                                     : Icons.place),
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           beforeLineStyle: LineStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           afterLineStyle: LineStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme.of(context).buttonColor,
                           ),
                           startChild: Container(
                             alignment: Alignment.center,
                             child: tempChildDate.day == startChildDate.day &&
                                     tempChildDate.month ==
                                         startChildDate.month &&
-                                    tempChildDate.year ==
-                                        startChildDate.year &&
+                                    tempChildDate.year == startChildDate.year &&
                                     (tempChildDate.hour !=
                                             startChildDate.hour ||
                                         tempChildDate.minute !=
@@ -287,7 +328,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
           ],
         ),
       ),
-      
     );
   }
 }

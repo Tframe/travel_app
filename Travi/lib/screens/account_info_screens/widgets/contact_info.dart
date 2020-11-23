@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-
-
 import '../../../providers/user_provider.dart';
-import '../edit_contact_info_screen.dart';
 
 class ContactInfo extends StatelessWidget {
   final UserProvider _loadedUser;
-  final User user;
-  ContactInfo(this._loadedUser, this.user);
+  ContactInfo(this._loadedUser);
 
-  //routes to edit contact info screen, sends the loadeduser current info 
-  //and user info for firestore
-  void _editContactInfo(BuildContext context) {
-    Navigator.of(context).pushNamed(
-      EditContactInfoScreen.routeName,
-      arguments: {'loadedUser': _loadedUser, 'user': user},
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +16,7 @@ class ContactInfo extends StatelessWidget {
           padding: const EdgeInsets.only(
             top: 15.0,
             left: 18.0,
+            bottom: 15.0,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -38,10 +26,6 @@ class ContactInfo extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 17,
                 ),
-              ),
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () => _editContactInfo(context),
               ),
             ],
           ),

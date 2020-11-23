@@ -35,22 +35,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     title: null,
     startDate: null,
     endDate: null,
-    countries: [
-      Country(
-        id: null,
-        country: null,
-        latitude: null,
-        longitude: null,
-        cities: [
-          City(
-            id: null,
-            city: null,
-            longitude: null,
-            latitude: null,
-          ),
-        ],
-      ),
-    ],
     group: [
       UserProvider(
         id: null,
@@ -187,7 +171,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).buttonColor,
                 width: 1.5,
               ),
             ),
@@ -224,14 +208,14 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
               icon: Icon(Icons.email),
               onPressed: () => _switchSeachBy(index),
               color: _searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
             IconButton(
               icon: Icon(Icons.phone_android),
               onPressed: () => _switchSeachBy(index),
               color: !_searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
           ],
@@ -281,6 +265,18 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
         leading: new IconButton(
           icon: new Icon(Icons.arrow_back),
           onPressed: _backPage,
@@ -317,10 +313,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     height: screenHeight * 0.50,
                     width: screenWidth,
@@ -342,9 +334,12 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                   labelText: _searchUserEmail[index]
                                       ? 'Email'
                                       : 'Moible #',
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
+                                      color: Theme.of(context).buttonColor,
                                       width: 1.5,
                                     ),
                                   ),
@@ -389,14 +384,14 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                                     icon: Icon(Icons.email),
                                     onPressed: () => _switchSeachBy(index),
                                     color: _searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.phone_android),
                                     onPressed: () => _switchSeachBy(index),
                                     color: !_searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   Transform.rotate(
@@ -430,10 +425,6 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                     ),
                   ),
-                  Divider(
-                    thickness: 5,
-                    color: Theme.of(context).primaryColor,
-                  ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
                     width: screenWidth * 0.85,
@@ -450,7 +441,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -469,7 +460,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

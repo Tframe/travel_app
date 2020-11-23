@@ -17,13 +17,25 @@ class AddTripIntroScreen extends StatelessWidget {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         children: <Widget>[
           Container(
             decoration: BoxDecoration(
-              // color: Theme.of(context).accentColor,
-            ),
+                // color: Theme.of(context).accentColor,
+                ),
             child: Container(
               width: screenWidth,
               child: Column(
@@ -69,8 +81,9 @@ class AddTripIntroScreen extends StatelessWidget {
                   Container(
                     width: screenWidth * 0.8,
                     child: FlatButton(
-                      onPressed: () => Navigator.of(context).pushNamed(AddTripTitleScreen.routeName),
-                      color: Theme.of(context).primaryColor,
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(AddTripTitleScreen.routeName),
+                      color: Theme.of(context).buttonColor,
                       child: Text(
                         'Next',
                         style: TextStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-import '../widgets/app_drawer.dart';
+import '../../widgets/app_drawer.dart';
 
 class ContactUsScreen extends StatelessWidget {
   @override

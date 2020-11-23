@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:groupy/providers/activity_provider.dart';
+import 'package:groupy/providers/trips_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../providers/trip_provider.dart';
-import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
 import './add_or_edit_activity_screen.dart';
 
@@ -15,6 +16,8 @@ class EditActivitiesScreen extends StatefulWidget {
 
 class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
   TripProvider loadedTrip;
+  int countryIndex = 0;
+  int cityIndex = 0;
 
   void addOrEditActivity(int editIndex) async {
     Navigator.of(context).pushNamed(
@@ -42,29 +45,50 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Activities'),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
-      body: loadedTrip.activities == null || loadedTrip.activities.length == 0
+      body: loadedTrip.countries[countryIndex].cities[cityIndex].activities ==
+                  null ||
+              loadedTrip.countries[countryIndex].cities[cityIndex].activities
+                      .length ==
+                  0
           ? Center(
               child: Text('No Activities Added'),
             )
           : SingleChildScrollView(
               child: Container(
-                width: screenWidth * 0.9,
+                width: screenWidth,
                 child: Column(
                   children: [
                     Container(
                       height: screenHeight * 0.8,
-                      width: screenWidth * 0.9,
                       padding: const EdgeInsets.only(
                         top: 35,
                       ),
                       child: ListView.builder(
-                        itemCount: loadedTrip.activities == null ? 0 : loadedTrip.activities.length,
+                        itemCount: loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].activities ==
+                                null
+                            ? 0
+                            : loadedTrip.countries[countryIndex]
+                                .cities[cityIndex].activities.length,
                         itemBuilder: (BuildContext ctx, int index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 18.0),
                             child: Dismissible(
-                              key: ValueKey(loadedTrip.activities),
+                              key: ValueKey(loadedTrip.countries[countryIndex]
+                                  .cities[cityIndex].activities),
                               child: ListTile(
                                 leading: Padding(
                                   padding: const EdgeInsets.only(right: 28.0),
@@ -72,14 +96,15 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
                                     Icons.hotel,
                                   ),
                                 ),
-                                title: Text(loadedTrip.activities[index].title),
+                                title: Text(loadedTrip.countries[countryIndex]
+                                    .cities[cityIndex].activities[index].title),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                        '${loadedTrip.activities[index].title}'),
+                                        '${loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].title}'),
                                     Text(
-                                      '${DateFormat.yMd().format(loadedTrip.activities[index].startingDateTime)} - ${DateFormat.yMd().format(loadedTrip.activities[index].endingDateTime)}',
+                                      '${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].startingDateTime)} - ${DateFormat.yMd().format(loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].endingDateTime)}',
                                     ),
                                   ],
                                 ),
@@ -105,17 +130,50 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to delete ${loadedTrip.activities[index].title}?',
+                                      'Are you sure you want to delete ${loadedTrip.countries[countryIndex].cities[cityIndex].activities[index].title}?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
                                         child: const Text('Yes'),
                                         onPressed: () {
                                           setState(() {
+                                            Provider.of<Activity>(context,
+                                                    listen: false)
+                                                .removeActivity(
+                                              loadedTrip.id,
+                                              user.uid,
+                                              loadedTrip
+                                                  .countries[countryIndex].id,
+                                              loadedTrip.countries[countryIndex]
+                                                  .cities[cityIndex].id,
+                                              loadedTrip
+                                                  .countries[countryIndex]
+                                                  .cities[cityIndex]
+                                                  .activities[index]
+                                                  .id,
+                                            );
+                                            loadedTrip.countries[countryIndex]
+                                                .cities[cityIndex].activities
+                                                .removeAt(index);
+                                            List<TripProvider> trips =
+                                                Provider.of<TripsProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .trips;
+                                            var tripIndex = trips.indexWhere(
+                                                (trip) =>
+                                                    trip.id == loadedTrip.id);
+                                            trips[tripIndex]
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .activities =
+                                                loadedTrip
+                                                    .countries[countryIndex]
+                                                    .cities[cityIndex]
+                                                    .activities;
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
-                                                .removeActivity(loadedTrip,
-                                                    user.uid, index);
+                                                .setTripsList(trips);
                                           });
                                           Navigator.of(context).pop();
                                         },

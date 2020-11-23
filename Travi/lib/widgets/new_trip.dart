@@ -36,14 +36,6 @@ class _NewTripState extends State<NewTrip> {
     title: '',
     startDate: null,
     endDate: null,
-    countries: [
-      // Destination(
-      //   id: null,
-      //   country: '',
-      //   state: '',
-      //   city: '',
-      // ),
-    ],
     description: '',
   );
 
@@ -201,7 +193,6 @@ class _NewTripState extends State<NewTrip> {
                   tripValues = TripProvider(
                     id: null,
                     title: value,
-                    countries: tripValues.countries,
                     startDate: tripValues.startDate,
                     endDate: tripValues.endDate,
                     description: tripValues.description,
