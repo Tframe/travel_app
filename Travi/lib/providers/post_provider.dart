@@ -64,6 +64,8 @@ class PostProvider extends ChangeNotifier {
     return _currentPost;
   }
 
+  //***************  Posts to trip ********************
+
   Future<void> addPostToTrip(
     String organizerId,
     String tripId,
@@ -317,8 +319,7 @@ class PostProvider extends ChangeNotifier {
           .collection('posts')
           .doc('$postId')
           .collection('comments')
-          .add({})
-          .then((value) => print('comment added to post'));
+          .add({}).then((value) => print('comment added to post'));
     } catch (error) {
       throw error;
     }
@@ -341,6 +342,269 @@ class PostProvider extends ChangeNotifier {
           .doc('$postId')
           .collection('comments')
           .doc(commentId)
+          .delete()
+          .then((value) => print('comment deleted from post'));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //***************  Posts to user profile ********************
+  Future<void> addPostToUser(
+    String userId,
+    PostProvider post,
+    UserProvider currentUser,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('posts')
+          .add({
+        'authorId': post.authorId,
+        'authorFirstName': post.authorFirstName,
+        'authorLastName': post.authorLastName,
+        'authorImageURL': post.authorImageURL,
+        'message': post.message,
+        'dateTime': post.dateTime,
+        'locationLatitude': post.locationLatitude,
+        'locationLongitude': post.locationLatitude,
+        'location': post.location,
+        'photosURL': post.photosURL,
+        'videosURL': post.videosURL,
+        'likes': 0,
+        'userLikes': [],
+        'tagIds': [],
+      }).then((docRef) {
+        post.id = docRef.id;
+        print('Added post to user');
+      });
+    } catch (error) {
+      throw error;
+    }
+    _currentPost = post;
+    notifyListeners();
+  }
+
+  Future<void> addPhotoUrlToPostUser(
+    String userId,
+    PostProvider post,
+  ) async {
+    print(userId);
+    print(post.id);
+    print(post.photosURL);
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('posts')
+          .doc('${post.id}')
+          .update({
+        'photosURL': post.photosURL,
+      }).then((value) {
+        print('Added photo url to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> addVideoUrlToPostUser(
+    String userId,
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('posts')
+          .doc('${post.id}')
+          .update({
+        'videosURL': post.videosURL,
+      }).then((value) {
+        print('Added video url to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> updateTagIdToPostUser(
+    String userId,
+    String postId,
+    String tagId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('posts')
+          .doc('$postId')
+          .update({
+        'tagIds': FieldValue.arrayUnion([tagId]),
+      }).then((docRef) {
+        print('Added tag ids to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //Returns true if user liked the post already.
+  Future<bool> checkIfLikedForPostUser(
+    String userId,
+    String postId,
+    String userLikeId,
+  ) async {
+    bool liked = false;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('posts')
+          .doc('$postId')
+          .collection('usersLike')
+          .doc('$userLikeId')
+          .get()
+          .then((DocumentSnapshot documentSnapshot) {
+        if (documentSnapshot.exists) {
+          liked = true;
+        } else {
+          liked = false;
+        }
+        return liked;
+      });
+    } catch (error) {
+      throw error;
+    }
+    return liked;
+  }
+
+  //Adds a document with user information to post that shows like
+  Future<void> incrementLikePostUser(
+    String organizerId,
+    String postId,
+    UserProvider user,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .update({
+        'likes': FieldValue.increment(1),
+      }).then((docRef) {
+        print('Incremented likes');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+//Adds a document with user information to post that shows like
+  Future<void> likePostUser(
+    String organizerId,
+    String postId,
+    UserProvider user,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .collection('usersLike')
+          .doc('${user.id}')
+          .set({
+        'firstName': user.firstName,
+        'lastName': user.lastName,
+      }).then((docRef) {
+        print('Added like to post');
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
+  }
+
+  Future<void> decrementLikePostUser(
+    String organizerId,
+    String postId,
+    String userId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .update({
+        'likes': FieldValue.increment(-1),
+      }).then((docRef) {
+        print('decremented likes');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //Adds a document with user information to post that shows like
+  Future<void> removeLikePostUser(
+    String organizerId,
+    String postId,
+    String userId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .collection('usersLike')
+          .doc('$userId')
+          .delete()
+          .then((docRef) {
+        print('Removed like from post');
+        notifyListeners();
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //add comments to post
+  Future<void> addCommentPostUser(
+    String organizerId,
+    String postId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .collection('comments')
+          .add({}).then((value) => print('comment added to post'));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //remove comments from post
+  Future<void> removeCommentPostUser(
+    String organizerId,
+    String postId,
+    String commentId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('posts')
+          .doc('$postId')
+          .collection('comments')
+          .doc('$commentId')
           .delete()
           .then((value) => print('comment deleted from post'));
     } catch (error) {

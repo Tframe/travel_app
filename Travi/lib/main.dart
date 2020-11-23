@@ -6,14 +6,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import './screens/discover_screen.dart';
-import './screens/current_trips_screen.dart';
-import './screens/past_trips_screen.dart';
+import './screens/discover_screens/discover_screen.dart';
+import './screens/current_trip_screens/current_trips_screen.dart';
+import './screens/past_trips_screens/past_trips_screen.dart';
 import './screens/tab_bar_screen.dart';
 import './screens/trip_details_screens/edit_trip_screen.dart';
-import './screens/login_signup_screen.dart';
+import './screens/authentication_screens/login_signup_screen.dart';
 import './screens/trip_details_screens/trip_detail_screen.dart';
-import './screens/login_screen.dart';
+import './screens/authentication_screens/login_screen.dart';
 
 import './screens/signup_screens/signup_intro_screen.dart';
 import './screens/signup_screens/signup_name_screen.dart';
@@ -47,6 +47,7 @@ import './screens/timeline_screens/timeline_screen.dart';
 import './screens/post_comments_screens/post_comment_screen.dart';
 import './screens/post_comments_screens/sub_comments_screen.dart';
 import './screens/account_profile_screens/account_profile_screen.dart';
+import './screens/account_profile_screens/account_profile_post_comment_screen.dart';
 
 import './providers/user_provider.dart';
 import './providers/trip_provider.dart';
@@ -249,6 +250,7 @@ class MyApp extends StatelessWidget {
           PostCommentScreen.routeName: (ctx) => PostCommentScreen(),
           SubCommentsScreen.routeName: (ctx) => SubCommentsScreen(),
           AccountProfileScreen.routeName: (ctx) => AccountProfileScreen(),
+          AccountProfilePostCommentScreen.routeName: (ctx) => AccountProfilePostCommentScreen(),
         },
       ),
     );

@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/current_trip_card_list.dart';
-import '../providers/trips_provider.dart';
-import '../providers/user_provider.dart';
-import '../screens/add_trip_screens/add_trip_intro_screen.dart';
+import '../../widgets/current_trip_card_list.dart';
+import '../../providers/trips_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../screens/add_trip_screens/add_trip_intro_screen.dart';
 
 class CurrentTripsScreen extends StatefulWidget {
   static const routeName = '/current-trips';

@@ -10,8 +10,9 @@ import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../account_info_screens/widgets/personal_info.dart';
 import '../account_info_screens/widgets/about_section.dart';
-import '../../widgets/post_comment.dart';
+import './widgets/post_comment_profile.dart';
 import '../../widgets/travel_stats.dart';
+import './widgets/display_account_profile_posts.dart';
 
 class AccountProfileScreen extends StatefulWidget {
   static const routeName = '/account-profile-screen';
@@ -116,10 +117,11 @@ class _AccountProfileScreenState extends State<AccountProfileScreen> {
                       thickness: 10,
                     ),
                     TravelStats(),
-                    PostComment(),
+                    PostCommentProfile(userId),
                     Divider(
                       thickness: 10,
                     ),
+                    DisplayAccountProfilePosts(userId),
                   ],
                 ),
               ];

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-import '../widgets/past_trip_card_list.dart';
+import '../../widgets/past_trip_card_list.dart';
 
 class PastTripsScreen extends StatefulWidget {
   static const routeName = '/past-trips';

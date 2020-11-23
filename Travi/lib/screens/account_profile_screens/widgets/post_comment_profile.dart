@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/user_provider.dart';
-import '../screens/post_comments_screens/post_comment_screen.dart';
+import '../../../providers/user_provider.dart';
+import '../account_profile_post_comment_screen.dart';
 
-class PostComment extends StatelessWidget {
+class PostCommentProfile extends StatelessWidget {
+  String userId;
+  PostCommentProfile(this.userId);
   @override
   Widget build(BuildContext context) {
-
     double screenWidth = MediaQuery.of(context).size.width;
     UserProvider loggedInUser;
 
     Future<void> getUserInfo() async {
-        loggedInUser =
-            Provider.of<UserProvider>(context, listen: false).loggedInUser;
+      loggedInUser =
+          Provider.of<UserProvider>(context, listen: false).loggedInUser;
     }
 
     getUserInfo();
@@ -78,8 +79,12 @@ class PostComment extends StatelessWidget {
                         labelText: 'Share your thoughts...',
                       ),
                       onTap: () {
-                        Navigator.of(context)
-                            .pushNamed(PostCommentScreen.routeName);
+                        Navigator.of(context).pushNamed(
+                          AccountProfilePostCommentScreen.routeName,
+                          arguments: {
+                            'userId': userId,
+                          },
+                        );
                         FocusScope.of(context).unfocus();
                       },
                       showCursor: false,

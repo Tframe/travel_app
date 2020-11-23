@@ -4,65 +4,75 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../providers/post_provider.dart';
-import '../providers/trip_provider.dart';
-import '../providers/user_provider.dart';
-import '../screens/post_comments_screens/sub_comments_screen.dart';
-import '../screens/account_profile_screens/account_profile_screen.dart';
+import '../../../providers/post_provider.dart';
+import '../../../providers/user_provider.dart';
+import '../../../screens/post_comments_screens/sub_comments_screen.dart';
+import '../../../screens/account_profile_screens/account_profile_screen.dart';
 
-class DisplayPosts extends StatelessWidget {
+class DisplayAccountProfilePosts extends StatefulWidget {
+  final String userId;
+
+  DisplayAccountProfilePosts(this.userId);
+
+  @override
+  _DisplayAccountProfilePostsState createState() =>
+      _DisplayAccountProfilePostsState();
+}
+
+class _DisplayAccountProfilePostsState
+    extends State<DisplayAccountProfilePosts> {
+  List<bool> checked = [];
+  UserProvider currentLoggedInUser;
+
+//returns true if already likes post, false if not.
+  Future<bool> checkIfLiked(dynamic documents) async {
+    print('in check');
+    for (int j = 0; j < documents.length; j++) {
+      await Provider.of<PostProvider>(context, listen: false)
+          .checkIfLikedForPostUser(
+              widget.userId, documents[j].id, currentLoggedInUser.id)
+          .then((value) {
+        checked[j] = value;
+        print(checked[j]);
+      });
+    }
+    return true;
+  }
+
+  //Adds a like to the post
+  Future<void> likePost(String postId, index) async {
+    if (checked[index]) {
+      await Provider.of<PostProvider>(context, listen: false)
+          .removeLikePostUser(widget.userId, postId, currentLoggedInUser.id)
+          .then((value) {
+        print('unliked');
+      });
+      await Provider.of<PostProvider>(context, listen: false)
+          .decrementLikePostUser(widget.userId, postId, currentLoggedInUser.id);
+    } else {
+      await Provider.of<PostProvider>(context, listen: false)
+          .likePostUser(widget.userId, postId, currentLoggedInUser)
+          .then((value) {
+        print('liked');
+      });
+      await Provider.of<PostProvider>(context, listen: false).incrementLikePostUser(widget.userId, postId, currentLoggedInUser);
+    }
+  }
+
+  Future<void> commentPost(String postId) async {
+    Navigator.of(context).pushNamed(SubCommentsScreen.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth;
-    String organizerId;
-    String tripId;
-    UserProvider currentLoggedInUser;
-    List<bool> checked = [];
-
-    //returns true if already likes post, false if not.
-    Future<void> checkIfLiked(dynamic documents) async {
-      for (int j = 0; j < documents.length; j++) {
-        bool tempBool = await Provider.of<PostProvider>(context, listen: false)
-            .checkIfLiked(
-                organizerId, tripId, documents[j].id, currentLoggedInUser.id);
-        checked[j] = tempBool;
-      }
-    }
-
-    //Adds a like to the post
-    Future<void> likePost(String postId, index) async {
-      bool tempBool = false;
-      //if already liked, remove like, otherwise add the like
-      if (await Provider.of<PostProvider>(context, listen: false)
-          .checkIfLiked(organizerId, tripId, postId, currentLoggedInUser.id)) {
-        await Provider.of<PostProvider>(context, listen: false)
-            .removeLikePost(organizerId, tripId, postId, currentLoggedInUser);
-        tempBool = false;
-      } else {
-        await Provider.of<PostProvider>(context, listen: false)
-            .likePost(organizerId, tripId, postId, currentLoggedInUser);
-        tempBool = true;
-      }
-      checked[index] = tempBool;
-    }
-
-    Future<void> commentPost(String postId) async {
-      Navigator.of(context).pushNamed(SubCommentsScreen.routeName);
-    }
-
     screenWidth = MediaQuery.of(context).size.width;
-    organizerId = Provider.of<TripProvider>(context, listen: false)
-        .currentTrip
-        .organizerId;
-    tripId = Provider.of<TripProvider>(context, listen: false).currentTrip.id;
     currentLoggedInUser =
         Provider.of<UserProvider>(context, listen: false).loggedInUser;
     return StreamBuilder(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc('$organizerId')
-          .collection('trips')
-          .doc('$tripId')
+          .doc('${widget.userId}')
           .collection('posts')
           .orderBy('dateTime', descending: true)
           .snapshots(),
@@ -73,11 +83,14 @@ class DisplayPosts extends StatelessWidget {
           );
         }
         final documents = streamSnapshot.data.documents;
+        checked = [];
         for (int i = 0; i < documents.length; i++) {
           checked.add(false);
         }
         return FutureBuilder(
-          future: checkIfLiked(documents),
+          future: checkIfLiked(documents).then((value) {
+            print('Finished future');
+          }),
           builder: (context, snapShot) {
             if (snapShot.connectionState == ConnectionState.none) {
               return Container();
@@ -88,7 +101,6 @@ class DisplayPosts extends StatelessWidget {
               itemCount: documents.length,
               itemBuilder: (ctx, index) {
                 //Add list of postId's
-
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -149,19 +161,6 @@ class DisplayPosts extends StatelessWidget {
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: Container(
-                                        child: Text(
-                                          ' on ${documents[index].data()['eventName']}',
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                          softWrap: false,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
                                       ),
                                     ),
                                   ],
@@ -240,14 +239,15 @@ class DisplayPosts extends StatelessWidget {
                         Row(
                           children: [
                             IconButton(
-                              icon: Icon(
-                                Icons.thumb_up,
-                                color:
-                                    checked[index] ? Colors.blue : Colors.grey,
-                              ),
-                              onPressed: () async =>
-                                  await likePost(documents[index].id, index),
-                            ),
+                                icon: Icon(
+                                  Icons.thumb_up,
+                                  color: checked[index]
+                                      ? Colors.blue
+                                      : Colors.grey,
+                                ),
+                                onPressed: () async {
+                                  await likePost(documents[index].id, index);
+                                }),
                             IconButton(
                               icon: Icon(
                                 Icons.chat_bubble,

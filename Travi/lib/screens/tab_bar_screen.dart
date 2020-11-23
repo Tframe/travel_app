@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../screens/current_trips_screen.dart';
-import '../screens/discover_screen.dart';
-import '../screens/past_trips_screen.dart';
+import './current_trip_screens/current_trips_screen.dart';
+import '../screens/discover_screens/discover_screen.dart';
+import '../screens/past_trips_screens/past_trips_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/notification_end_drawer.dart';
 import '../providers/user_provider.dart';
