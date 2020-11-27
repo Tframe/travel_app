@@ -35,13 +35,23 @@ class DisplayPosts extends StatelessWidget {
       //if already liked, remove like, otherwise add the like
       if (await Provider.of<PostProvider>(context, listen: false)
           .checkIfLiked(organizerId, tripId, postId, currentLoggedInUser.id)) {
+        //remove the user information that likes the post
         await Provider.of<PostProvider>(context, listen: false)
-            .removeLikePost(organizerId, tripId, postId, currentLoggedInUser);
-        tempBool = false;
+            .removeLikePost(organizerId, tripId, postId, currentLoggedInUser)
+            .then((value) => print('removed like'));
+        //decrments number of likes
+        await Provider.of<PostProvider>(context, listen: false)
+            .decrementLikePost(
+                organizerId, tripId, postId, currentLoggedInUser);
       } else {
+        //add user information to likes of post
         await Provider.of<PostProvider>(context, listen: false)
-            .likePost(organizerId, tripId, postId, currentLoggedInUser);
-        tempBool = true;
+            .likePost(organizerId, tripId, postId, currentLoggedInUser)
+            .then((value) => print('liked post'));
+        //increment number of likes for a post
+        await Provider.of<PostProvider>(context, listen: false)
+            .incrementLikePost(
+                organizerId, tripId, postId, currentLoggedInUser);
       }
       checked[index] = tempBool;
     }

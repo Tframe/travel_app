@@ -5,7 +5,7 @@ import '../../../providers/user_provider.dart';
 import '../account_profile_post_comment_screen.dart';
 
 class PostCommentProfile extends StatelessWidget {
-  String userId;
+  final String userId;
   PostCommentProfile(this.userId);
   @override
   Widget build(BuildContext context) {

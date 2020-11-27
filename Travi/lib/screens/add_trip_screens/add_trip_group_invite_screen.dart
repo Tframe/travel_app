@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
-import '../../providers/country_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/city_provider.dart';
 import '../../screens/tab_bar_screen.dart';
 
 class AddTripGroupInviteScreen extends StatefulWidget {

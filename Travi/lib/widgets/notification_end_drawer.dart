@@ -175,7 +175,6 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
     return Drawer(
       child: Center(
         child: Column(

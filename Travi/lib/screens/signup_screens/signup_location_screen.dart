@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:location/location.dart';
 import '../../providers/user_provider.dart';
 import '../../helpers/location_helper.dart';

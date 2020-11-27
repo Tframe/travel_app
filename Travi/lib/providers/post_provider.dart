@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:groupy/providers/user_provider.dart';
-import './comment_provider.dart';
+// import './comment_provider.dart';
 
 class PostProvider extends ChangeNotifier {
   String id;
@@ -111,6 +111,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //add tagId to post's array of tagIds
   Future<void> updateTagId(
     String organizerId,
     String tripId,
@@ -135,6 +136,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //add url of photo to post
   Future<void> addPhotoUrl(
     String organizerId,
     String tripId,
@@ -158,6 +160,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //add url of video to post
   Future<void> addVideoUrl(
     String organizerId,
     String tripId,
@@ -213,8 +216,8 @@ class PostProvider extends ChangeNotifier {
     return liked;
   }
 
-  //Adds a document with user information to post that shows like
-  Future<void> likePost(
+  //Increments likes for a post
+  Future<void> incrementLikePost(
     String organizerId,
     String tripId,
     String postId,
@@ -236,7 +239,16 @@ class PostProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    notifyListeners();
+  }
 
+  //Adds a document with user information to post that shows like
+  Future<void> likePost(
+    String organizerId,
+    String tripId,
+    String postId,
+    UserProvider user,
+  ) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -256,12 +268,11 @@ class PostProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
-
     notifyListeners();
   }
 
-  //Adds a document with user information to post that shows like
-  Future<void> removeLikePost(
+  //Decrements number of likes on post
+  Future<void> decrementLikePost(
     String organizerId,
     String tripId,
     String postId,
@@ -283,7 +294,16 @@ class PostProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    notifyListeners();
+  }
 
+  //Adds a document with user information to post that shows like
+  Future<void> removeLikePost(
+    String organizerId,
+    String tripId,
+    String postId,
+    UserProvider user,
+  ) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -500,6 +520,7 @@ class PostProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    notifyListeners();
   }
 
 //Adds a document with user information to post that shows like
@@ -547,6 +568,7 @@ class PostProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+    notifyListeners();
   }
 
   //Adds a document with user information to post that shows like

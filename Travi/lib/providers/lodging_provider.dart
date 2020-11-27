@@ -8,7 +8,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './user_provider.dart';
-import './trips_provider.dart';
 
 class Lodging extends ChangeNotifier {
   String id;
