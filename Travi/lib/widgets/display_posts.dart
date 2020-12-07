@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying posts for a trip
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';

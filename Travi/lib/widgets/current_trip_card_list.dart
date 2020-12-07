@@ -1,6 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying list of
+ * current trips cards
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/trips_provider.dart';
 import 'current_trip_item.dart';
 

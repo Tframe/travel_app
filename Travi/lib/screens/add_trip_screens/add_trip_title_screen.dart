@@ -1,6 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for adding trip title and details
+ * to the create trip process
+ */
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../../providers/trip_provider.dart';
 import 'add_trip_countries_screen.dart';
 

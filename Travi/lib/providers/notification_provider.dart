@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Add, update, and remove operations
+ * for storing notifications data into Firebase Firestore.
+ * Notifications will be a sub collections for users
+ */
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -36,6 +42,7 @@ class NotificationProvider extends ChangeNotifier {
     return _notifications;
   }
 
+  //clears current provider list of notifications
   void clearNotificationsList() {
     _notifications = [];
   }

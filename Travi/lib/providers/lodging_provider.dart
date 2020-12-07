@@ -166,6 +166,7 @@ class Lodging extends ChangeNotifier {
     _lodgings = lodgingList;
   }
 
+  //Retrieves list of lodgings from firestore
   Future<void> fetchAndSetLodging(
     String tripId,
     String userId,

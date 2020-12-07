@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying the
+ * post comment section used for an account profile
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

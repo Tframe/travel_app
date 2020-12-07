@@ -1,9 +1,13 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for picking either an image or video
+ */
 import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
 import 'package:video_compress/video_compress.dart';
 
 class ImageVideo {
+  //gets and returns file information for image
   Future<File> getImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedImage = await picker.getImage(source: source);
@@ -11,6 +15,7 @@ class ImageVideo {
     return pickedImageFile;
   }
 
+  //gets and returns the file information for video
   Future<File> getVideo(ImageSource source) async {
     final picker = ImagePicker();
     final pickedVideo = await picker.getVideo(source: source);

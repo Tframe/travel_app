@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile edit personal
+ * information screen
+ */
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

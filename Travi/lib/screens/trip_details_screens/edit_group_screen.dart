@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for editing group members
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile edit account profile screen.
+ */
+
 import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -54,6 +59,7 @@ class _EditAccountProfileScreenState extends State<EditAccountProfileScreen> {
     super.initState();
   }
 
+  //route to edit personal information screen
   void _editPersonalInfo() {
     Navigator.of(context).pushNamed(
       EditPersonalInfoScreen.routeName,
@@ -65,6 +71,7 @@ class _EditAccountProfileScreenState extends State<EditAccountProfileScreen> {
     });
   }
 
+  //route to edit about section screen
   void _editAbout(BuildContext context) {
     Navigator.of(context).pushNamed(
       EditAboutScreen.routeName,

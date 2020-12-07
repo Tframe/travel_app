@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Add, update, and remove operations
+ * for storing city data into Firebase Firestore.
+ * City is a collection under a specific trips country
+ */
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -97,6 +103,7 @@ class City extends ChangeNotifier {
     }
   }
 
+  //sets provider list of cities
   Future<void> setCityList(List<City> cityList) async {
     _cities = cityList;
   }

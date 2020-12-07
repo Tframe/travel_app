@@ -83,6 +83,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   File _imageFile;
   File _videoFile;
 
+  //creates the drop downs contents
   @override
   void initState() {
     getTripInfo();
@@ -150,6 +151,8 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     super.initState();
   }
 
+  //once the first dropdown (event type) is selected,
+  //update the specific event dropdown.
   void updateSpecificEventDropDown() {
     commentOnSpecifiedEvent = [];
     eventIndicies = [];

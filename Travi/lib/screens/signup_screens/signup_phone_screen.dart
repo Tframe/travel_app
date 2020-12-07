@@ -1,5 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - enter phone contact info
+ */
 import 'package:flutter/material.dart';
-
 import '../../providers/user_provider.dart';
 import './signup_email_screen.dart';
 

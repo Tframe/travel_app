@@ -3,7 +3,6 @@
  * Description: Post provider creats the PostProvider object,
  * and methods used for CRUD commands for updating firestore.
  */
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:groupy/providers/user_provider.dart';
@@ -66,6 +65,7 @@ class PostProvider extends ChangeNotifier {
 
   //***************  Posts to trip ********************
 
+  //adds a post to a trip
   Future<void> addPostToTrip(
     String organizerId,
     String tripId,
@@ -406,6 +406,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //adds photo url to user profile posts
   Future<void> addPhotoUrlToPostUser(
     String userId,
     PostProvider post,
@@ -429,6 +430,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //adds video url to user profile post
   Future<void> addVideoUrlToPostUser(
     String userId,
     PostProvider post,
@@ -449,6 +451,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //adds any tagids to the saved post
   Future<void> updateTagIdToPostUser(
     String userId,
     String postId,
@@ -549,6 +552,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //decrement the like count for a user profile post
   Future<void> decrementLikePostUser(
     String organizerId,
     String postId,

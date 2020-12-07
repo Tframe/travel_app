@@ -2,7 +2,8 @@
  * Date: 10/27/2020
  * Description: Add, update, and remove operations
  * for storing activity data into Firebase Firestore.
- * Activity is a collection under a specific trip
+ * Activity is a collection under a specific trips, country's,
+ * city.
  */
 
 import 'package:flutter/material.dart';
@@ -159,10 +160,12 @@ class Activity extends ChangeNotifier {
     notifyListeners();
   }
 
+  //sets current provider list of activities
   Future<void> setActivities(List<Activity> activityList) async {
     _activities = activityList;
   }
 
+  //gets the list of activities from firestore
   Future<void> fetchAndSetActivity(
     String tripId,
     String userId,

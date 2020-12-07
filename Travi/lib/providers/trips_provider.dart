@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Add, update, and remove operations
+ * for storing Trips data into Firebase Firestore.
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +22,7 @@ class TripsProvider extends ChangeNotifier {
     return [..._trips];
   }
 
+  //find trip by id
   TripProvider findById(String id) {
     return _trips.firstWhere((trip) => trip.id == id);
   }
@@ -347,6 +353,7 @@ class TripsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //removes a companion from the list of companion ids
   Future<void> removeFromCompanionsList(
     String currentTripId,
     String userId,

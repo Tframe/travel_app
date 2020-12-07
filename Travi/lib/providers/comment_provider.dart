@@ -1,3 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Add, update, and remove operations
+ * for storing comments data into Firebase Firestore.
+ * Comments will be 'replies' to posts and therefore
+ * be a sub collection of posts. 
+ */
 import 'package:flutter/material.dart';
 
 class CommentProvider extends ChangeNotifier {

@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for using google places api to retrieve
+ * place image. 
+ */
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

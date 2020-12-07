@@ -1,9 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for editing trip info
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:intl/intl.dart';
-
 import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 

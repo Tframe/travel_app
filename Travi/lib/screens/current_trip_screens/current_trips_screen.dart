@@ -1,12 +1,15 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for laying out the current trips
+ * list screen. uses widgets to display information
+ */
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/current_trip_card_list.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/country_provider.dart';
-import '../../providers/city_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../screens/add_trip_screens/add_trip_intro_screen.dart';
 
@@ -34,6 +37,7 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
     super.didChangeDependencies();
   }
 
+  //get current list of trips user created and is invited to
   Future<void> fetchTripsData() async {
     await Provider.of<TripsProvider>(context, listen: false)
         .fetchAndSetTrips(user);
@@ -46,10 +50,12 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
         );
       }
     }
+    //get list of countries for each of the trips
     await fetchTripsCountries();
     return null;
   }
 
+  //get list of countries for each of the trips in the lsit
   Future<void> fetchTripsCountries() async {
     List<TripProvider> tripsList = [];
     tripsList = Provider.of<TripsProvider>(context, listen: false).trips;

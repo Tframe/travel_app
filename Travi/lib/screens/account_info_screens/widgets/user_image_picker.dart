@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile user image widget.
+ * Allows user to tap image to upload new images and
+ * save as profile image.
+ */
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,14 +39,17 @@ class _UserImagePickerState extends State<UserImagePicker> {
     });
     widget.imagePickFn(pickedImageFile);
 
+    //stores image in firebase storage
     final ref = FirebaseStorage.instance
         .ref()
         .child('user_images')
         .child(widget.user.uid + '.jpg');
 
+    //gets the newly stored image's url
     await ref.putFile(_pickedImage).onComplete;
     final url = await ref.getDownloadURL();
 
+    //saves/updates new profile picture url
     await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.user.uid)

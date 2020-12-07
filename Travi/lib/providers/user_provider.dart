@@ -421,4 +421,5 @@ class UserProvider extends ChangeNotifier {
         _participants.indexWhere((participant) => participant.id == userId);
     _participants.removeAt(participantIndex);
   }
+  
 }

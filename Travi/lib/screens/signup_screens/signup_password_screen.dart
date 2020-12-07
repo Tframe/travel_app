@@ -1,9 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - enter passwords
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../providers/user_provider.dart';
 import '../../screens/tab_bar_screen.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 

@@ -1,7 +1,12 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Add, update, and remove operations
+ * for storing public searchable tags data into Firebase Firestore.
+ * Tags will be it's own collection of tag words people have chosen.
+ * Tags will have a list of different posts that use them.
+ */
 import 'package:flutter/material.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import './post_provider.dart';
 
 class TagProvider extends ChangeNotifier {
@@ -86,6 +91,7 @@ class TagProvider extends ChangeNotifier {
     }
   }
 
+  //adds post information to an existing tag
   Future<void> addToExistingTag(
     TagProvider tag,
     String tagId,

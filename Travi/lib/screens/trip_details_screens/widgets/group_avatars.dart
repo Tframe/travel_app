@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Widget for displaying the group
+ * member's profile picture avatar.
+ */
 import 'package:flutter/material.dart';
 import 'package:groupy/providers/trip_provider.dart';
 import 'package:provider/provider.dart';
@@ -114,7 +119,7 @@ class _GroupAvatarsState extends State<GroupAvatars> {
                       ),
                 Spacer(),
                 Text(
-                    '${widget.loadedTrip.group[index].firstName} ${widget.loadedTrip.group[index].lastName[0]}.'),
+                    '${widget.loadedTrip.group[index].firstName} ${widget.loadedTrip.group[index].lastName}.'),
               ],
             ),
           ),

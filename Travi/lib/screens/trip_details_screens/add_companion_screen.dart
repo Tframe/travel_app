@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for adding companion
+ * to a trip
+ */
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';

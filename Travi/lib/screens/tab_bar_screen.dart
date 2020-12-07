@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Layout used for seeing the different
+ * tabs used for navigating between the discover, current trips, and
+ * past trips screens.
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './current_trip_screens/current_trips_screen.dart';

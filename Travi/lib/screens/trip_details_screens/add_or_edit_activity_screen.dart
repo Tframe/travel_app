@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for displaying trip activites.
+ * user can choose to add new activity, select activity to
+ * edit, or remove the activity.
+ */
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

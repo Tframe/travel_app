@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying notifications for
+ * logged in user. Stream started with firestore
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -86,8 +91,6 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
     String inviteId;
     for(int i = 0; i < widget.currentLoggedInUser.tripInvites.length; i++){
       if(widget.currentLoggedInUser.tripInvites[i].tripId == tripId){
-        print(widget.currentLoggedInUser.tripInvites[i].tripId);
-        print(widget.currentLoggedInUser.tripInvites[i].invitationId);
         inviteId = widget.currentLoggedInUser.tripInvites[i].invitationId;
       }
     }

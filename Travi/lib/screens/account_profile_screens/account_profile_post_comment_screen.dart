@@ -111,6 +111,7 @@ class _AccountProfilePostCommentScreenState
     newPost.authorImageURL = loggedInUser.profilePicUrl;
   }
 
+  //App bar widget
   Widget appBar() {
     return AppBar(
       title: const Text('Add Post'),

@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying travel stats
+ * on account profile page. 
+ */
 import 'package:flutter/material.dart';
-
 import './travel_stat_card.dart';
 
 class TravelStats extends StatelessWidget {

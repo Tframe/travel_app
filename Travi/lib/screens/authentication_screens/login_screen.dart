@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for adding logging in
+ * using firebase authentication with email. 
+ */
 import 'package:flutter/material.dart';
-
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
@@ -226,25 +230,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Container(
-                        width: screenWidth * 0.75,
-                        child: FacebookSignInButton(
-                          //TODO
-                          onPressed: () {},
-                        ),
-                      ),
-                      Container(
-                        width: screenWidth * 0.75,
-                        child: GoogleSignInButton(
-                          //TODO
-                          onPressed: () {},
-                        ),
-                      ),
-                    ],
-                  ),
+                  //facebook and google signin buttons, not implemented yet
+                  // Column(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //   children: <Widget>[
+                  //     Container(
+                  //       width: screenWidth * 0.75,
+                  //       child: FacebookSignInButton(
+                  //         //TODO
+                  //         onPressed: () {},
+                  //       ),
+                  //     ),
+                  //     Container(
+                  //       width: screenWidth * 0.75,
+                  //       child: GoogleSignInButton(
+                  //         //TODO
+                  //         onPressed: () {},
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

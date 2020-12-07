@@ -1,10 +1,13 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying each current trip item
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/user_provider.dart';
 import '../providers/trip_provider.dart';
 import '../providers/country_provider.dart';
-import '../providers/city_provider.dart';
 import '../screens/trip_details_screens/trip_detail_screen.dart';
 
 class CurrentTripItem extends StatefulWidget {
@@ -21,36 +24,6 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
   
   List<Country> countryList;
   bool _isInit = true;
-  bool _isLoading = false;
-
-  // Future<void> getCitiesData() async {
-  //   //for each country get list of cities
-  //   for (int i = 0; i < countryList.length; i++) {
-  //     await Provider.of<City>(context, listen: false).fetchAndSetCities(
-  //       widget.foundTrip.organizerId,
-  //       widget.foundTrip.id,
-  //       countryList[i].id,
-  //     );
-  //     List<City> cityList = Provider.of<City>(context, listen: false).cities;
-  //     setState(() {
-  //       countryList[i].cities = cityList;
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
-
-  // Future<void> getCountryData() async {
-  //   await Provider.of<Country>(context, listen: false).fetchAndSetCountries(
-  //     widget.foundTrip.organizerId,
-  //     widget.foundTrip.id,
-  //   );
-
-  //   countryList = Provider.of<Country>(context, listen: false).getCountryListByTripId(widget.foundTrip.id);
-  //   await getCitiesData();
-  //   setState(() {
-  //     widget.foundTrip.countries = countryList;
-  //   });
-  //}
 
   @override
   void initState() {

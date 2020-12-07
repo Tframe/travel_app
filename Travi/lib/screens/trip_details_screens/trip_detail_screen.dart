@@ -1,12 +1,16 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for displaying a trip's information.
+ * Display posts and comments for the trip. Able to navigate to edit
+ * trip details, events, and look at group members profile pages. 
+ */
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:groupy/widgets/display_posts.dart';
-
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/user_provider.dart';
@@ -17,7 +21,6 @@ import '../../providers/transportation_provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/city_provider.dart';
-
 import './edit_trip_screen.dart';
 import './edit_lodgings_screen.dart';
 import './add_or_edit_lodging_screen.dart';
@@ -163,6 +166,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     await getRestaurants();
   }
 
+  //get list of flights for trip
   Future<void> getFlights() async {
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       //get flights from firebase
@@ -180,6 +184,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     }
   }
 
+  //get list of lodgings for trip
   Future<void> getLodgings() async {
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
@@ -199,6 +204,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     }
   }
 
+  //get list of activities for trip
   Future<void> getActivities() async {
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
@@ -218,6 +224,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     }
   }
 
+  //get list of transportations for trip
   Future<void> getTransportations() async {
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
@@ -240,6 +247,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
     }
   }
 
+  //get list of restaurants for trip
   Future<void> getRestaurants() async {
     for (int i = 0; i < loadedTrip.countries.length; i++) {
       for (int j = 0; j < loadedTrip.countries[i].cities.length; j++) {
