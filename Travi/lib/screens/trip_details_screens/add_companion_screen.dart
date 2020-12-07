@@ -35,6 +35,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
     UserProvider currentLoggedInUser =
         Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
     final List<UserProvider> tempCompanion = [];
+    final List<String> tempCompanionIds = [];
     final isValid = _formKey.currentState.validate();
     bool _invited = false;
     if (!isValid) {
@@ -72,6 +73,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
           );
           return;
         }
+        //remove duplicates
         for (int k = 0; k < tempCompanion.length; k++) {
           if (j != k) {
             if (tempCompanion[j].id == tempCompanion[k].id) {
@@ -80,7 +82,8 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
             }
           }
         }
-        for (int l = 0; l < loadedTrip.group.length; l++) {
+        //Check is person already invited, if so, give alert
+        for (int l = 1; l < loadedTrip.group.length; l++) {
           if (tempCompanion[j].id == loadedTrip.group[l].id) {
             await showDialog<Null>(
               context: context,
@@ -103,6 +106,12 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
             );
             return;
           }
+        }
+      }
+      //add list of companionstrings
+      for (int j = 0; j < tempCompanion.length; j++) {
+        if (tempCompanion[j].id != user.uid) {
+          tempCompanionIds.add(tempCompanion[j].id);
         }
       }
     } catch (error) {
@@ -129,11 +138,12 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
       );
     }
     loadedTrip.group.addAll(tempCompanion);
+    loadedTrip.companionsId.addAll(tempCompanionIds);
 
     //add companions to trip
     await Provider.of<TripsProvider>(context, listen: false).updateCompanions(
         loadedTrip,
-        user.uid,
+        loadedTrip.organizerId,
         currentLoggedInUser.firstName,
         currentLoggedInUser.lastName,
         loadedTrip.group);
@@ -143,7 +153,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
       //add notification and to trip invite list.
       _invited = await Provider.of<TripsProvider>(context, listen: false)
           .checkIfInvited(tempCompanion[i].id, loadedTrip.id);
-      if (!_invited) {
+      if (!_invited && tempCompanion[i].id != currentLoggedInUser.id) {
         //add trip info to new companion
         await Provider.of<TripsProvider>(context, listen: false)
             .addTripToCompanion(
@@ -191,7 +201,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
             labelText: _searchUserEmail[index] ? 'Email' : 'Moible #',
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).buttonColor,
                 width: 1.5,
               ),
             ),
@@ -228,14 +238,14 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
               icon: Icon(Icons.email),
               onPressed: () => _switchSeachBy(index),
               color: _searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
             IconButton(
               icon: Icon(Icons.phone_android),
               onPressed: () => _switchSeachBy(index),
               color: !_searchUserEmail[index]
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).buttonColor
                   : Colors.black,
             ),
           ],
@@ -279,6 +289,18 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
             color: Colors.black,
           ),
         ),
+        bottom: PreferredSize(
+          child: Container(
+            color: Colors.grey[400],
+            height: 1,
+          ),
+          preferredSize: Size.fromHeight(1.0),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: new IconThemeData(
+          color: Theme.of(context).secondaryHeaderColor,
+        ),
       ),
       body: Stack(
         alignment: Alignment.center,
@@ -310,7 +332,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                   ),
                   Divider(
                     thickness: 5,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).buttonColor,
                   ),
                   Container(
                     height: screenHeight * 0.50,
@@ -333,9 +355,12 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                                   labelText: _searchUserEmail[index]
                                       ? 'Email'
                                       : 'Moible #',
+                                  labelStyle: TextStyle(
+                                    color: Theme.of(context).buttonColor,
+                                  ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor,
+                                      color: Theme.of(context).buttonColor,
                                       width: 1.5,
                                     ),
                                   ),
@@ -380,14 +405,14 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                                     icon: Icon(Icons.email),
                                     onPressed: () => _switchSeachBy(index),
                                     color: _searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.phone_android),
                                     onPressed: () => _switchSeachBy(index),
                                     color: !_searchUserEmail[index]
-                                        ? Theme.of(context).primaryColor
+                                        ? Theme.of(context).buttonColor
                                         : Colors.black,
                                   ),
                                   Transform.rotate(
@@ -423,7 +448,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                   ),
                   Divider(
                     thickness: 5,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).buttonColor,
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 5),
@@ -441,7 +466,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                   Container(
@@ -460,7 +485,7 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
                       ),
                       padding:
                           EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).buttonColor,
                     ),
                   ),
                 ],

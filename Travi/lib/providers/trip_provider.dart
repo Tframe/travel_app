@@ -13,6 +13,7 @@ class TripProvider extends ChangeNotifier {
   List<Country> countries;
   String tripImageUrl;
   String description;
+  List<String> companionsId;
   List<UserProvider> group;
   bool isPrivate;
   bool destinationsComplete;
@@ -29,6 +30,7 @@ class TripProvider extends ChangeNotifier {
     this.countries,
     this.tripImageUrl,
     this.description,
+    this.companionsId,
     this.group,
     this.isPrivate,
     this.destinationsComplete,

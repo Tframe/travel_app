@@ -570,7 +570,7 @@ class _AccountProfilePostCommentScreenState
                                                       selectedValue;
                                                 });
                                               },
-                                              focusNode: _thoughtsFocusNode,
+                                              focusNode: _audienceFocusNode,
                                             ),
                                           ),
                                         ],

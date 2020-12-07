@@ -58,6 +58,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final _eventFocusNode = FocusNode();
   final _eventTypeFocusNode = FocusNode();
+  final _audienceFocusNode = FocusNode();
 
   int _selectedEventType = 0;
   int _selectedSpecifiedEventType = 0;
@@ -73,6 +74,9 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   List<DropdownMenuItem<int>> commentOnEventType = [];
   //List of actual events for the specified event type
   List<DropdownMenuItem<int>> commentOnSpecifiedEvent = [];
+
+  List<DropdownMenuItem<int>> audience = [];
+  int _selectdAudience = 0;
 
   UserProvider loggedInUser;
 
@@ -116,6 +120,30 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
       new DropdownMenuItem(
         child: new Text('Transportation'),
         value: 5,
+      ),
+    );
+    audience.add(
+      new DropdownMenuItem(
+        child: new Text('Public'),
+        value: 0,
+      ),
+    );
+    audience.add(
+      new DropdownMenuItem(
+        child: new Text('Friends'),
+        value: 1,
+      ),
+    );
+    audience.add(
+      new DropdownMenuItem(
+        child: new Text('Close Friends and Family'),
+        value: 2,
+      ),
+    );
+    audience.add(
+      new DropdownMenuItem(
+        child: new Text('Private'),
+        value: 3,
       ),
     );
     getUserInfo();
@@ -263,6 +291,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
   void dispose() {
     _eventTypeFocusNode.dispose();
     _eventFocusNode.dispose();
+    _audienceFocusNode.dispose();
     super.dispose();
   }
 
@@ -434,7 +463,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
         tags = ParseStrings().parseMessageForTags(message);
         //remove tags from message
         message = ParseStrings().removeTagsFromMessage(message);
-        
+
         newPost.message = message;
 
         getPostLocation();
@@ -458,6 +487,19 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                 .addVideoUrl(currentTrip.organizerId, currentTrip.id, newPost);
           }
         }
+        //Make post public
+        if (_selectdAudience == 0) {
+          print('public');
+        } else if (_selectdAudience == 1) {
+          print('friends');
+        } else if (_selectdAudience == 2) {
+          print('close friends and family');
+        } else if (_selectdAudience == 3) {
+          print('private');
+        }
+        //If post is public, create the public post
+        //await Provider.of<PostProvider>(context, listen: false).
+
         //create or update tag
         await checkThenAddTags(context);
       } catch (error) {
@@ -701,7 +743,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                         children: [
                           Flexible(
                             fit: FlexFit.tight,
-                            flex: newPost.location != null ? 3 : 2,
+                            flex: newPost.location != null ? 5 : 4,
                             child: Container(
                               child: Column(
                                 children: [
@@ -838,6 +880,41 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
                                                   ),
                                                 ),
                                               ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.only(
+                                              top: 22.0,
+                                              left: 20.0,
+                                            ),
+                                            width: screenWidth * 0.7,
+                                            alignment: Alignment.center,
+                                            child: DropdownButtonFormField(
+                                              isExpanded: true,
+                                              decoration: InputDecoration(
+                                                contentPadding:
+                                                    EdgeInsets.symmetric(
+                                                  horizontal: 5,
+                                                  vertical: 0,
+                                                ),
+                                                labelText: 'Audience',
+                                                enabledBorder:
+                                                    OutlineInputBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                    10,
+                                                  ),
+                                                ),
+                                              ),
+                                              items: audience,
+                                              value: _selectdAudience,
+                                              onChanged: (selectedValue) {
+                                                setState(() {
+                                                  _selectdAudience =
+                                                      selectedValue;
+                                                });
+                                              },
+                                              focusNode: _audienceFocusNode,
                                             ),
                                           ),
                                           Divider(

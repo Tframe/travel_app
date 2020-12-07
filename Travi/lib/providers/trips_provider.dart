@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import './trip_provider.dart';
 import './user_provider.dart';
-
+import './country_provider.dart';
 
 class TripsProvider extends ChangeNotifier {
   List<TripProvider> _trips = [];
@@ -38,6 +38,7 @@ class TripsProvider extends ChangeNotifier {
         'activitiesComplete': false,
         'tripImageUrl': '',
         'description': tripValues.description,
+        'companionsId': tripValues.companionsId,
         'group': tripValues.group != null
             ? tripValues.group
                 .map((group) => {
@@ -89,18 +90,6 @@ class TripsProvider extends ChangeNotifier {
       );
       _trips.add(newTrip);
 
-      //Add trip and user id's to new companion's list of trip invitations
-      for (int i = 1; i < newTrip.group.length; i++) {
-        addTripToCompanion(
-          newTrip.group[i].id,
-          userId,
-          newTrip.group[0].firstName,
-          newTrip.group[0].lastName,
-          newTrip.id,
-          newTrip.title,
-        );
-      }
-
       notifyListeners();
     } catch (error) {
       throw error;
@@ -110,7 +99,6 @@ class TripsProvider extends ChangeNotifier {
   //used to set trips once trips are loaded from firebase
   Future<void> setTripsList(List<TripProvider> loadedTrip) async {
     _trips = loadedTrip;
-    notifyListeners();
   }
 
   //Get trips list of specific user from Firebase Firestore
@@ -118,7 +106,7 @@ class TripsProvider extends ChangeNotifier {
     final List<TripProvider> loadedTrips = [];
     TripProvider tempTrip;
     List<UserProvider> loadedUsers = [];
-
+    List<String> companions = [];
     _trips = [];
     try {
       await FirebaseFirestore.instance
@@ -161,10 +149,11 @@ class TripsProvider extends ChangeNotifier {
                       })
                     : [],
                 isPrivate: trip.docs[index].data()['isPrivate'],
-                
               );
               loadedTrips.add(tempTrip);
               loadedTrips[index].group = loadedUsers;
+              loadedTrips[index].companionsId = companions;
+              companions = [];
               loadedUsers = [];
             },
           );
@@ -175,12 +164,12 @@ class TripsProvider extends ChangeNotifier {
         print('Failed to find Trip');
         throw onError;
       });
-      await setTripsList(loadedTrips);
 
-      notifyListeners();
+      await setTripsList(loadedTrips);
     } catch (error) {
       throw error;
     }
+    notifyListeners();
   }
 
   //Fetch and add invited trips to trips list
@@ -188,6 +177,7 @@ class TripsProvider extends ChangeNotifier {
     final List<TripProvider> loadedTrips = [..._trips];
     TripProvider tempTrip;
     List<UserProvider> loadedUsers = [];
+    List<String> companions = [];
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -225,20 +215,35 @@ class TripsProvider extends ChangeNotifier {
           );
           loadedTrips.add(tempTrip);
           loadedTrips[loadedTrips.length - 1].group = loadedUsers;
+          loadedTrips[loadedTrips.length - 1].companionsId = companions;
+          companions = [];
           loadedUsers = [];
         },
-      ).then((value) {
+      ).then((value) async {
         print('Trip found');
       }).catchError((onError) {
         print('Failed to find Trip');
         throw onError;
       });
-      await setTripsList(loadedTrips);
-
-      notifyListeners();
     } catch (error) {
       throw error;
     }
+    await setTripsList(loadedTrips);
+    notifyListeners();
+  }
+
+  //take in list of countries with their cities and their cities' activities, lodgings,
+  //transportations, flights, and restaurants.
+  void setCountriesCities(String tripId, List<Country> countryList) {
+    final tripIndex = _trips.indexWhere((trip) => trip.id == tripId);
+    _trips[tripIndex].countries = countryList;
+    notifyListeners();
+  }
+
+  //receiving new list of trips with their countries list
+  Future<void> setCountriesToTrip(List<TripProvider> trips){
+    _trips = trips;
+    return null;
   }
 
   //Update user specified trip in Firebase Firestore
@@ -298,7 +303,6 @@ class TripsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  
   //Updates the companions list for trip
   Future<void> updateCompanions(
     TripProvider currentTrip,
@@ -343,19 +347,48 @@ class TripsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> removeFromCompanionsList(
+    String currentTripId,
+    String userId,
+    int tripIndex,
+    int companionsIndex,
+  ) async {
+    _trips[tripIndex].companionsId.removeAt(companionsIndex);
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$userId')
+          .collection('trips')
+          .doc('$currentTripId')
+          .update({
+        'companionsId': _trips[tripIndex].companionsId,
+      }).then((value) {
+        print('removed from companionslist');
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
+  }
+
   //Removes chosen companion
   Future<void> removeCompanion(
     TripProvider currentTrip,
-    String userId,
     int groupIndex,
   ) async {
     final tripIndex = _trips.indexWhere((trip) => trip.id == currentTrip.id);
+
+    print(_trips[tripIndex].group[groupIndex].id);
+
+    final companionsIndex = _trips[tripIndex].companionsId.indexWhere(
+        (companion) => companion == _trips[tripIndex].group[groupIndex].id);
     _trips[tripIndex].group.removeAt(groupIndex);
+
     if (tripIndex >= 0) {
       try {
         await FirebaseFirestore.instance
             .collection('users')
-            .doc('$userId')
+            .doc('${currentTrip.organizerId}')
             .collection('trips')
             .doc('${currentTrip.id}')
             .update({
@@ -365,6 +398,7 @@ class TripsProvider extends ChangeNotifier {
                     'id': companion.id,
                     'firstName': companion.firstName,
                     'lastName': companion.lastName,
+                    'invitationStatus': companion.invitationStatus,
                     'location': companion.location,
                     'about': companion.about,
                     'email': companion.email,
@@ -381,6 +415,8 @@ class TripsProvider extends ChangeNotifier {
         throw error;
       }
     }
+    await removeFromCompanionsList(
+        currentTrip.id, currentTrip.organizerId, tripIndex, companionsIndex);
     notifyListeners();
   }
 
@@ -440,5 +476,4 @@ class TripsProvider extends ChangeNotifier {
       throw error;
     }
   }
-
 }

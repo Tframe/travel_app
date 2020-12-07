@@ -196,6 +196,12 @@ class Flight extends ChangeNotifier {
   ) async {
     List<Flight> flightList = [];
     List<UserProvider> participantsList = [];
+
+
+    print(userId);
+    print(tripId);
+    print(countryId);
+
     try {
       await FirebaseFirestore.instance
           .collection('users')

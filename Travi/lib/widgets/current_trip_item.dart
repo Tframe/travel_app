@@ -8,6 +8,9 @@ import '../providers/city_provider.dart';
 import '../screens/trip_details_screens/trip_detail_screen.dart';
 
 class CurrentTripItem extends StatefulWidget {
+  final TripProvider foundTrip;
+  CurrentTripItem(this.foundTrip);
+  
   @override
   _CurrentTripItemState createState() => _CurrentTripItemState();
 }
@@ -15,39 +18,39 @@ class CurrentTripItem extends StatefulWidget {
 class _CurrentTripItemState extends State<CurrentTripItem> {
   UserProvider user;
   String userId;
-  TripProvider foundTrip;
+  
   List<Country> countryList;
   bool _isInit = true;
   bool _isLoading = false;
 
-  Future<void> getCitiesData() async {
-    //for each country get list of cities
-    for (int i = 0; i < countryList.length; i++) {
-      await Provider.of<City>(context, listen: false).fetchAndSetCities(
-        foundTrip.organizerId,
-        foundTrip.id,
-        countryList[i].id,
-      );
-      List<City> cityList = Provider.of<City>(context, listen: false).cities;
-      setState(() {
-        countryList[i].cities = cityList;
-        _isLoading = false;
-      });
-    }
-  }
+  // Future<void> getCitiesData() async {
+  //   //for each country get list of cities
+  //   for (int i = 0; i < countryList.length; i++) {
+  //     await Provider.of<City>(context, listen: false).fetchAndSetCities(
+  //       widget.foundTrip.organizerId,
+  //       widget.foundTrip.id,
+  //       countryList[i].id,
+  //     );
+  //     List<City> cityList = Provider.of<City>(context, listen: false).cities;
+  //     setState(() {
+  //       countryList[i].cities = cityList;
+  //       _isLoading = false;
+  //     });
+  //   }
+  // }
 
-  Future<void> getCountryData() async {
-    await Provider.of<Country>(context, listen: false).fetchAndSetCountries(
-      foundTrip.organizerId,
-      foundTrip.id,
-    );
+  // Future<void> getCountryData() async {
+  //   await Provider.of<Country>(context, listen: false).fetchAndSetCountries(
+  //     widget.foundTrip.organizerId,
+  //     widget.foundTrip.id,
+  //   );
 
-    countryList = Provider.of<Country>(context, listen: false).countries;
-    await getCitiesData();
-    setState(() {
-      foundTrip.countries = countryList;
-    });
-  }
+  //   countryList = Provider.of<Country>(context, listen: false).getCountryListByTripId(widget.foundTrip.id);
+  //   await getCitiesData();
+  //   setState(() {
+  //     widget.foundTrip.countries = countryList;
+  //   });
+  //}
 
   @override
   void initState() {
@@ -56,14 +59,10 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
 
   @override
   void didChangeDependencies() {
-    setState(() {
-      _isLoading = true;
-    });
     if (_isInit) {
       user = Provider.of<UserProvider>(context, listen: false).loggedInUser;
       userId = user.id;
-      foundTrip = Provider.of<TripProvider>(context, listen: false);
-      getCountryData();
+      //getCountryData();
     }
     _isInit = false;
 
@@ -78,16 +77,16 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
     void selectTrip(BuildContext ctx) {
       Navigator.of(ctx).pushNamed(
         TripDetailsScreen.routeName,
-        arguments: foundTrip.id,
+        arguments: widget.foundTrip.id,
       );
     }
 
     List<Widget> listCountries() {
       List<Widget> textList = [];
-      for (int i = 0; i < foundTrip.countries.length; i++) {
+      for (int i = 0; i < widget.foundTrip.countries.length; i++) {
         textList.add(
           Text(
-            '${foundTrip.countries[i].country}${foundTrip.countries.length > 1 && foundTrip.countries.length != i + 1 ? ', ' : ''}',
+            '${widget.foundTrip.countries[i].country}${widget.foundTrip.countries.length > 1 && widget.foundTrip.countries.length != i + 1 ? ', ' : ''}',
             textAlign: TextAlign.left,
             style: TextStyle(
               color: Theme.of(context).secondaryHeaderColor,
@@ -99,9 +98,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
       return textList;
     }
 
-    return _isLoading
-        ? CircularProgressIndicator()
-        : Column(
+    return Column(
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
@@ -121,41 +118,28 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                       onTap: () => selectTrip(context),
                       child: Column(
                         children: <Widget>[
+                          //If no picture is laoded, do not display anything, else 
+                          //display picture above trip info. 
+                          
                           Container(
-                            height: screenHeight * 0.22,
+                            height: widget.foundTrip.tripImageUrl == null ||
+                                    widget.foundTrip.tripImageUrl == ''
+                                ? 0 : screenHeight * 0.22,
                             width: double.infinity,
                             alignment: Alignment.center,
-                            child: foundTrip.tripImageUrl == null ||
-                                    foundTrip.tripImageUrl == ''
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8.0),
-                                      topRight: Radius.circular(8.0),
-                                    ),
-
-                                    child: Container(
-                                      color: Colors.grey,
-                                      child: IconButton(
-                                        icon: Icon(Icons.photo_camera),
-                                        //TODO
-                                        onPressed: () {},
-                                      ),
-                                      height: double.infinity,
-                                      width: double.infinity,
-                                    ),
-                                    //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-                                    //PlacesImages(foundTrip.countries[0].id),
-                                  )
-                                : (foundTrip.countries[0].id != ''
+                            child: widget.foundTrip.tripImageUrl == null ||
+                                    widget.foundTrip.tripImageUrl == ''
+                                ? Container()
+                                : (widget.foundTrip.countries[0].id != ''
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.only(
                                           topLeft: Radius.circular(8.0),
                                           topRight: Radius.circular(8.0),
                                         ),
                                         child: Hero(
-                                          tag: foundTrip.id,
+                                          tag: widget.foundTrip.id,
                                           child: Image.network(
-                                            foundTrip.tripImageUrl,
+                                            widget.foundTrip.tripImageUrl,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -190,7 +174,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                         padding: EdgeInsets.only(bottom: 5),
                                         width: screenWidth * 0.85,
                                         child: Text(
-                                          '${foundTrip.title}',
+                                          '${widget.foundTrip.title}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 18,
@@ -211,7 +195,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                         padding: EdgeInsets.only(bottom: 2.5),
                                         width: screenWidth * 0.85,
                                         child: Text(
-                                          '${DateFormat.yMMMd().format(foundTrip.startDate)} - ${' ' + DateFormat.yMMMd().format(foundTrip.endDate)}',
+                                          '${DateFormat.yMMMd().format(widget.foundTrip.startDate)} - ${' ' + DateFormat.yMMMd().format(widget.foundTrip.endDate)}',
                                           textAlign: TextAlign.left,
                                           style: TextStyle(
                                             color: Theme.of(context)
@@ -227,7 +211,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                                 .secondaryHeaderColor,
                                           ),
                                           Text(
-                                            'Days Left: ${foundTrip.startDate.difference(DateTime.now()).inDays + 1}',
+                                            'Days Left: ${widget.foundTrip.startDate.difference(DateTime.now()).inDays + 1}',
                                             textAlign: TextAlign.left,
                                             style: TextStyle(
                                               color: Theme.of(context)
@@ -259,7 +243,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                   child: Column(
                                     children: <Widget>[
                                       Icon(
-                                        foundTrip.transportationsComplete
+                                        widget.foundTrip.transportationsComplete
                                             ? Icons.check_circle
                                             : Icons.check_circle_outline,
                                         color: Theme.of(context)
@@ -280,7 +264,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                   child: Column(
                                     children: <Widget>[
                                       Icon(
-                                        foundTrip.lodgingsComplete
+                                        widget.foundTrip.lodgingsComplete
                                             ? Icons.check_circle
                                             : Icons.check_circle_outline,
                                         color: Theme.of(context)
@@ -304,7 +288,7 @@ class _CurrentTripItemState extends State<CurrentTripItem> {
                                   child: Column(
                                     children: <Widget>[
                                       Icon(
-                                        foundTrip.activitiesComplete
+                                        widget.foundTrip.activitiesComplete
                                             ? Icons.check_circle
                                             : Icons.check_circle_outline,
                                         color: Theme.of(context)

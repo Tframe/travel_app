@@ -6,7 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/trips_provider.dart';
+import '../../providers/country_provider.dart';
+import '../../providers/city_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../screens/tab_bar_screen.dart';
 
 class AddTripGroupInviteScreen extends StatefulWidget {
@@ -33,6 +36,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     title: null,
     startDate: null,
     endDate: null,
+    companionsId: [],
     group: [
       UserProvider(
         id: null,
@@ -52,7 +56,10 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
   //Function to add companions to trip values.
   Future<void> _addCompanions() async {
     User user = FirebaseAuth.instance.currentUser;
+    UserProvider loggedInUser =
+        Provider.of<UserProvider>(context, listen: false).loggedInUser;
     final List<UserProvider> tempCompanion = [];
+    final List<String> tempCompanionIds = [];
     final isValid = _formKey.currentState.validate();
     if (!isValid) {
       return;
@@ -61,6 +68,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     try {
       tempCompanion
           .add(Provider.of<UserProvider>(context, listen: false).loggedInUser);
+      //for each email or phone, try finding user
       for (int i = 0; i < tempGroup.length; i++) {
         //Verify email or phone # is in firestore
         await Provider.of<UserProvider>(context, listen: false)
@@ -69,7 +77,9 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         tempCompanion
             .add(Provider.of<UserProvider>(context, listen: false).users[0]);
       }
+      //validation
       for (int j = 1; j < tempCompanion.length; j++) {
+        //invited self to trip
         if (tempCompanion[j].id == user.uid) {
           await showDialog<Null>(
             context: context,
@@ -92,6 +102,7 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
           );
           return;
         }
+        //delete any duplicates
         for (int k = 0; k < tempCompanion.length; k++) {
           if (j != k) {
             if (tempCompanion[j].id == tempCompanion[k].id) {
@@ -99,6 +110,12 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
               break;
             }
           }
+        }
+      }
+      //add list of companionstrings
+      for (int j = 0; j < tempCompanion.length; j++) {
+        if (tempCompanion[j].id != user.uid) {
+          tempCompanionIds.add(tempCompanion[j].id);
         }
       }
     } catch (error) {
@@ -126,11 +143,30 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
     }
 
     tripValues.group = tempCompanion;
-
+    tripValues.companionsId = tempCompanionIds;
     //Adds data to firestore
     try {
+      //Add trip details to trip
       await Provider.of<TripsProvider>(context, listen: false)
           .addTrip(tripValues, user.uid);
+      //add countries details
+      for (int z = 0; z < tripValues.countries.length; z++) {
+        await Provider.of<Country>(context, listen: false).addCountry(
+          user.uid,
+          tripValues.id,
+          tripValues.countries[z],
+        );
+        //for each country, add the city details
+        for (int y = 0; y < tripValues.countries[z].cities.length; y++) {
+          await Provider.of<City>(context, listen: false).addCity(
+            user.uid,
+            tripValues.id,
+            tripValues.countries[z].id,
+            tripValues.countries[z].cities[y],
+          );
+        }
+      }
+
       Navigator.of(context).pushNamed(TabBarScreen.routeName);
     } catch (error) {
       await showDialog<Null>(
@@ -148,6 +184,40 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
           ],
         ),
       );
+    }
+
+    for (int i = 0; i < tempCompanion.length; i++) {
+      //check if user not already invited, if not invited, then
+      //add notification and to trip invite list.
+      bool _invited = await Provider.of<TripsProvider>(context, listen: false)
+          .checkIfInvited(tempCompanion[i].id, tripValues.id);
+      if (!_invited && tempCompanion[i].id != loggedInUser.id) {
+        //add trip info to new companion
+        await Provider.of<TripsProvider>(context, listen: false)
+            .addTripToCompanion(
+          tempCompanion[i].id,
+          loggedInUser.id,
+          loggedInUser.firstName,
+          loggedInUser.lastName,
+          tripValues.id,
+          tripValues.title,
+        );
+
+        //create the add trip notification
+        NotificationProvider newNotification =
+            Provider.of<NotificationProvider>(context, listen: false)
+                .createTripInviteNotification(
+          loggedInUser.id,
+          loggedInUser.firstName,
+          loggedInUser.lastName,
+          tripValues.id,
+          tripValues.title,
+        );
+
+        //add notification to each companion added
+        await Provider.of<NotificationProvider>(context, listen: false)
+            .addNotification(tempCompanion[i].id, newNotification);
+      }
     }
 
     Navigator.of(context).pushNamed(TabBarScreen.routeName);
@@ -285,12 +355,8 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
         children: <Widget>[
           Container(
             alignment: Alignment.center,
-            // margin: EdgeInsets.symmetric(
-            //   horizontal: screenWidth * 0.05,
-            // ),
             width: screenWidth,
             decoration: BoxDecoration(
-                // color: Theme.of(context).accentColor,
                 ),
             child: SingleChildScrollView(
               child: Column(

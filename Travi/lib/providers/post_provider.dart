@@ -633,4 +633,21 @@ class PostProvider extends ChangeNotifier {
       throw error;
     }
   }
+
+  //***************  Create public post ********************
+  Future<void> addPublicPost(
+
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .add({
+
+          })
+          .then((value) => print('Post made public'));
+    } catch (error) {
+      throw error;
+    }
+  }
+
 }

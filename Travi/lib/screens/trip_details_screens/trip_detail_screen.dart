@@ -16,6 +16,7 @@ import '../../providers/flight_provider.dart';
 import '../../providers/transportation_provider.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/restaurant_provider.dart';
+import '../../providers/city_provider.dart';
 
 import './edit_trip_screen.dart';
 import './edit_lodgings_screen.dart';
@@ -133,18 +134,33 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
       _loadedTrip = true;
       loadedTrip = Provider.of<TripsProvider>(context).findById(tripId);
     }
-
+    getCities();
     getFlights();
-    getLodgings();
-    getActivities();
-    getTransportations();
-    getRestaurants();
+
     setTrip();
     super.didChangeDependencies();
   }
 
   Future<void> setTrip() async {
     await Provider.of<TripProvider>(context, listen: false).setTrip(loadedTrip);
+  }
+
+  //get list of cities for each country
+  Future<void> getCities() async {
+    //for each country get list of citiestripsList[tripIndex].countries
+    for (int i = 0; i < loadedTrip.countries.length; i++) {
+      await Provider.of<City>(context, listen: false).fetchAndSetCities(
+        loadedTrip.organizerId,
+        loadedTrip.id,
+        loadedTrip.countries[i].id,
+      );
+      List<City> cityList = Provider.of<City>(context, listen: false).cities;
+      loadedTrip.countries[i].cities = cityList;
+    }
+    await getLodgings();
+    await getActivities();
+    await getTransportations();
+    await getRestaurants();
   }
 
   Future<void> getFlights() async {
@@ -177,9 +193,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
         if (Provider.of<Lodging>(context, listen: false).assertLodgingList()) {
           loadedLodgings =
               Provider.of<Lodging>(context, listen: false).lodgings;
-          setState(() {
-            loadedTrip.countries[i].cities[j].lodgings = loadedLodgings;
-          });
+          loadedTrip.countries[i].cities[j].lodgings = loadedLodgings;
         }
       }
     }
@@ -198,9 +212,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             .assertActivityList()) {
           loadedActivities =
               Provider.of<Activity>(context, listen: false).activities;
-          setState(() {
-            loadedTrip.countries[i].cities[j].activities = loadedActivities;
-          });
+          loadedTrip.countries[i].cities[j].activities = loadedActivities;
         }
       }
     }
@@ -221,10 +233,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
           loadedTransportations =
               Provider.of<Transportation>(context, listen: false)
                   .transportations;
-          setState(() {
-            loadedTrip.countries[i].cities[j].transportations =
-                loadedTransportations;
-          });
+          loadedTrip.countries[i].cities[j].transportations =
+              loadedTransportations;
         }
       }
     }
@@ -244,9 +254,7 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             .assertRestaurantList()) {
           loadedRestaurants =
               Provider.of<Restaurant>(context, listen: false).restaurants;
-          setState(() {
-            loadedTrip.countries[i].cities[j].restaurants = loadedRestaurants;
-          });
+          loadedTrip.countries[i].cities[j].restaurants = loadedRestaurants;
         }
       }
     }
@@ -326,7 +334,8 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
             ),
             child: GestureDetector(
               onTap: () {
-                Navigator.of(context).pushNamed(AccountProfileScreen.routeName, 
+                Navigator.of(context).pushNamed(
+                  AccountProfileScreen.routeName,
                   arguments: {'userId': group[index].id},
                 );
               },
@@ -1731,344 +1740,366 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
               ),
             ],
           ),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                        height: loadedTrip.tripImageUrl != null &&
-                                loadedTrip.tripImageUrl != ''
-                            ? screenHeight * 0.25
-                            : 0,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                          top: screenHeight * 0.03,
-                          right: screenWidth * 0.03,
-                          left: screenWidth * 0.03,
-                        ),
-                        child: loadedTrip.tripImageUrl != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(8.0),
-                                  topRight: Radius.circular(8.0),
-                                ),
-                                child: Container(
-                                    // child: IconButton(
-                                    //   icon: Icon(Icons.photo_camera),
-                                    //   //TODO
-                                    //   onPressed: () {},
-                                    // ),
-                                    // color: Colors.grey,
-                                    // height: double.infinity,
-                                    // width: double.infinity,
-                                    ),
-                                //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
-                                //PlacesImages(loadedTrip.countries[0].id),
-                              )
-                            : Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8.0),
-                                      topRight: Radius.circular(8.0),
-                                    ),
-                                    child: Hero(
-                                      tag: loadedTrip.id,
-                                      child: Image.network(
-                                        'https://traveloregon.com/wp-content/uploads/2018/08/2018BendFall_oldmill.jpg',
-                                        fit: BoxFit.cover,
+          body: FutureBuilder(
+              future: getCities(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Container(
+                              height: loadedTrip.tripImageUrl != null &&
+                                      loadedTrip.tripImageUrl != ''
+                                  ? screenHeight * 0.25
+                                  : 0,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.only(
+                                top: screenHeight * 0.03,
+                                right: screenWidth * 0.03,
+                                left: screenWidth * 0.03,
+                              ),
+                              child: loadedTrip.tripImageUrl != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(8.0),
+                                        topRight: Radius.circular(8.0),
                                       ),
+                                      child: Container(
+                                          // child: IconButton(
+                                          //   icon: Icon(Icons.photo_camera),
+                                          //   //TODO
+                                          //   onPressed: () {},
+                                          // ),
+                                          // color: Colors.grey,
+                                          // height: double.infinity,
+                                          // width: double.infinity,
+                                          ),
+                                      //TODO THE BELOW IMAGE CHARGES... NEED TO FIX SLOW LOADING....
+                                      //PlacesImages(loadedTrip.countries[0].id),
+                                    )
+                                  : Stack(
+                                      alignment: Alignment.bottomRight,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(8.0),
+                                            topRight: Radius.circular(8.0),
+                                          ),
+                                          child: Hero(
+                                            tag: loadedTrip.id,
+                                            child: Image.network(
+                                              'https://traveloregon.com/wp-content/uploads/2018/08/2018BendFall_oldmill.jpg',
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: CircleAvatar(
+                                            backgroundColor: Colors.grey[300],
+                                            child: IconButton(
+                                              icon: Icon(Icons.photo_camera),
+                                              color: Colors.black,
+                                              //TODO
+                                              onPressed: () {},
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                            ),
+                            paddingText(
+                              loadedTrip.title,
+                              8,
+                              19,
+                              FontWeight.bold,
+                              TextAlign.center,
+                            ),
+                            paddingText(
+                              listCountries(),
+                              6.5,
+                              17,
+                              FontWeight.bold,
+                              TextAlign.center,
+                            ),
+                            paddingText(
+                              '${DateFormat.yMMMd().format(loadedTrip.startDate)} - ${DateFormat.yMMMd().format(loadedTrip.endDate)}',
+                              6.5,
+                              17,
+                              FontWeight.bold,
+                              TextAlign.center,
+                            ),
+                            Container(
+                              width: screenWidth * 0.9,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8,
+                              ),
+                              child: paddingText(
+                                loadedTrip.description == null
+                                    ? 'Enter a descritpion'
+                                    : '${loadedTrip.description}',
+                                6.5,
+                                15,
+                                FontWeight.normal,
+                                TextAlign.left,
+                              ),
+                            ),
+                            Container(
+                              width: screenWidth * 0.9,
+                              child: FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed(
+                                    EditTripScreen.routeName,
+                                    arguments: {
+                                      'trip': loadedTrip,
+                                      'user': user
+                                    },
+                                  );
+                                },
+                                child: Text(
+                                  'Edit Trip',
+                                  style: TextStyle(
+                                    color: Theme.of(context).accentColor,
+                                    fontSize: screenHeight * 0.023,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.grey[300],
-                                      child: IconButton(
-                                        icon: Icon(Icons.photo_camera),
-                                        color: Colors.black,
-                                        //TODO
-                                        onPressed: () {},
-                                      ),
+                                ),
+                                color: Theme.of(context).buttonColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: 8,
+                              ),
+                            ),
+                            Divider(
+                              thickness: 10,
+                            ),
+                            loadedTrip.group.length > 0
+                                ? cardScroller(
+                                    'Group',
+                                    .65,
+                                    groupAvatar(loadedTrip.group),
+                                    context,
+                                  )
+                                : Container(),
+                            loadedTrip.group.length > 0
+                                ? Divider(
+                                    thickness: 10,
+                                  )
+                                : Container(),
+                            Container(
+                              height: screenHeight * 0.065,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 7,
+                                horizontal: 7,
+                              ),
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: <Widget>[
+                                  flatButton(
+                                    Icon(
+                                      Icons.photo,
+                                      color: Colors.blue,
                                     ),
+                                    'Photos',
+                                    Colors.blue,
+                                    //TODO
+                                    () {},
+                                    context,
+                                  ),
+                                  flatButton(
+                                    Icon(
+                                      Icons.timeline,
+                                      color: Colors.green,
+                                    ),
+                                    'Timeline',
+                                    Colors.green,
+                                    //TODO
+                                    _timeLine,
+                                    context,
+                                  ),
+                                  flatButton(
+                                    Icon(
+                                      Icons.note,
+                                      color: Colors.indigo,
+                                    ),
+                                    'Notes',
+                                    Colors.indigo,
+                                    //TODO
+                                    () {},
+                                    context,
+                                  ),
+                                  flatButton(
+                                    Icon(
+                                      Icons.lightbulb_outline,
+                                      color: Colors.red,
+                                    ),
+                                    'Tips',
+                                    Colors.red,
+                                    //TODO
+                                    () {},
+                                    context,
                                   ),
                                 ],
                               ),
-                      ),
-                      paddingText(
-                        loadedTrip.title,
-                        8,
-                        19,
-                        FontWeight.bold,
-                        TextAlign.center,
-                      ),
-                      paddingText(
-                        listCountries(),
-                        6.5,
-                        17,
-                        FontWeight.bold,
-                        TextAlign.center,
-                      ),
-                      paddingText(
-                        '${DateFormat.yMMMd().format(loadedTrip.startDate)} - ${DateFormat.yMMMd().format(loadedTrip.endDate)}',
-                        6.5,
-                        17,
-                        FontWeight.bold,
-                        TextAlign.center,
-                      ),
-                      Container(
-                        width: screenWidth * 0.9,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 8,
-                        ),
-                        child: paddingText(
-                          loadedTrip.description == null
-                              ? 'Enter a descritpion'
-                              : '${loadedTrip.description}',
-                          6.5,
-                          15,
-                          FontWeight.normal,
-                          TextAlign.left,
-                        ),
-                      ),
-                      Container(
-                        width: screenWidth * 0.9,
-                        child: FlatButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed(
-                              EditTripScreen.routeName,
-                              arguments: {'trip': loadedTrip, 'user': user},
-                            );
-                          },
-                          child: Text(
-                            'Edit Trip',
-                            style: TextStyle(
-                              color: Theme.of(context).accentColor,
-                              fontSize: screenHeight * 0.023,
                             ),
-                          ),
-                          color: Theme.of(context).buttonColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: 8,
-                        ),
-                      ),
-                      Divider(
-                        thickness: 10,
-                      ),
-                      loadedTrip.group.length > 0
-                          ? cardScroller(
-                              'Group',
-                              .65,
-                              groupAvatar(loadedTrip.group),
-                              context,
-                            )
-                          : Container(),
-                      loadedTrip.group.length > 0
-                          ? Divider(
+                            loadedTrip.countries[countryIndex].flights != null
+                                ? loadedTrip.countries[countryIndex].flights
+                                            .length >
+                                        0
+                                    ? Column(
+                                        children: [
+                                          Divider(
+                                            thickness: 10,
+                                          ),
+                                          cardScroller(
+                                            'Flights',
+                                            1,
+                                            flightOrTransportationTile(
+                                              'Flight',
+                                            ),
+                                            context,
+                                          ),
+                                        ],
+                                      )
+                                    : Container()
+                                : Container(),
+                            loadedTrip.countries.length > 0
+                                ? Column(
+                                    children: [
+                                      Divider(
+                                        thickness: 10,
+                                      ),
+                                      cardScroller(
+                                        'Destinations',
+                                        1,
+                                        cardWidget('Destinations'),
+                                        context,
+                                      ),
+                                    ],
+                                  )
+                                : Container(),
+                            loadedTrip.countries[countryIndex].cities[cityIndex]
+                                        .lodgings !=
+                                    null
+                                ? loadedTrip.countries[countryIndex]
+                                            .cities[cityIndex].lodgings.length >
+                                        0
+                                    ? Column(
+                                        children: [
+                                          Divider(
+                                            thickness: 10,
+                                          ),
+                                          cardScroller(
+                                            'Lodging',
+                                            1,
+                                            cardWidget('Lodgings'),
+                                            context,
+                                          ),
+                                        ],
+                                      )
+                                    : Container()
+                                : Container(),
+                            loadedTrip.countries[countryIndex].cities[cityIndex]
+                                        .activities !=
+                                    null
+                                ? loadedTrip
+                                            .countries[countryIndex]
+                                            .cities[cityIndex]
+                                            .activities
+                                            .length >
+                                        0
+                                    ? Column(
+                                        children: [
+                                          Divider(
+                                            thickness: 10,
+                                          ),
+                                          cardScroller(
+                                            'Activities',
+                                            1,
+                                            cardWidget('Activities'),
+                                            context,
+                                          ),
+                                        ],
+                                      )
+                                    : Container()
+                                : Container(),
+                            loadedTrip.countries[countryIndex].cities[cityIndex]
+                                        .restaurants !=
+                                    null
+                                ? loadedTrip
+                                            .countries[countryIndex]
+                                            .cities[cityIndex]
+                                            .restaurants
+                                            .length >
+                                        0
+                                    ? Column(
+                                        children: [
+                                          Divider(
+                                            thickness: 10,
+                                          ),
+                                          cardScroller(
+                                            'Restaurants',
+                                            1,
+                                            cardWidget('Restaurants'),
+                                            context,
+                                          ),
+                                        ],
+                                      )
+                                    : Container()
+                                : Container(),
+                            loadedTrip.countries[countryIndex].cities[cityIndex]
+                                        .transportations !=
+                                    null
+                                ? loadedTrip
+                                            .countries[countryIndex]
+                                            .cities[cityIndex]
+                                            .transportations
+                                            .length >
+                                        0
+                                    ? Column(
+                                        children: [
+                                          Divider(
+                                            thickness: 10,
+                                          ),
+                                          cardScroller(
+                                            'Transportation',
+                                            1,
+                                            flightOrTransportationTile(
+                                              'Transportation',
+                                            ),
+                                            context,
+                                          ),
+                                        ],
+                                      )
+                                    : Container()
+                                : Container(),
+                            PostComment(),
+                            Divider(
                               thickness: 10,
-                            )
-                          : Container(),
-                      Container(
-                        height: screenHeight * 0.065,
-                        padding: EdgeInsets.symmetric(
-                          vertical: 7,
-                          horizontal: 7,
-                        ),
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: <Widget>[
-                            flatButton(
-                              Icon(
-                                Icons.photo,
-                                color: Colors.blue,
-                              ),
-                              'Photos',
-                              Colors.blue,
-                              //TODO
-                              () {},
-                              context,
                             ),
-                            flatButton(
-                              Icon(
-                                Icons.timeline,
-                                color: Colors.green,
-                              ),
-                              'Timeline',
-                              Colors.green,
-                              //TODO
-                              _timeLine,
-                              context,
-                            ),
-                            flatButton(
-                              Icon(
-                                Icons.note,
-                                color: Colors.indigo,
-                              ),
-                              'Notes',
-                              Colors.indigo,
-                              //TODO
-                              () {},
-                              context,
-                            ),
-                            flatButton(
-                              Icon(
-                                Icons.lightbulb_outline,
-                                color: Colors.red,
-                              ),
-                              'Tips',
-                              Colors.red,
-                              //TODO
-                              () {},
-                              context,
+                            DisplayPosts(),
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 100),
                             ),
                           ],
                         ),
                       ),
-                      loadedTrip.countries[countryIndex].flights != null
-                          ? loadedTrip.countries[countryIndex].flights.length >
-                                  0
-                              ? Column(
-                                  children: [
-                                    Divider(
-                                      thickness: 10,
-                                    ),
-                                    cardScroller(
-                                      'Flights',
-                                      1,
-                                      flightOrTransportationTile(
-                                        'Flight',
-                                      ),
-                                      context,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                          : Container(),
-                      loadedTrip.countries.length > 0
-                          ? Column(
-                              children: [
-                                Divider(
-                                  thickness: 10,
-                                ),
-                                cardScroller(
-                                  'Destinations',
-                                  1,
-                                  cardWidget('Destinations'),
-                                  context,
-                                ),
-                              ],
-                            )
-                          : Container(),
-                      loadedTrip.countries[countryIndex].cities[cityIndex]
-                                  .lodgings !=
-                              null
-                          ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                                      .lodgings.length >
-                                  0
-                              ? Column(
-                                  children: [
-                                    Divider(
-                                      thickness: 10,
-                                    ),
-                                    cardScroller(
-                                      'Lodging',
-                                      1,
-                                      cardWidget('Lodgings'),
-                                      context,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                          : Container(),
-                      loadedTrip.countries[countryIndex].cities[cityIndex]
-                                  .activities !=
-                              null
-                          ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                                      .activities.length >
-                                  0
-                              ? Column(
-                                  children: [
-                                    Divider(
-                                      thickness: 10,
-                                    ),
-                                    cardScroller(
-                                      'Activities',
-                                      1,
-                                      cardWidget('Activities'),
-                                      context,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                          : Container(),
-                      loadedTrip.countries[countryIndex].cities[cityIndex]
-                                  .restaurants !=
-                              null
-                          ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                                      .restaurants.length >
-                                  0
-                              ? Column(
-                                  children: [
-                                    Divider(
-                                      thickness: 10,
-                                    ),
-                                    cardScroller(
-                                      'Restaurants',
-                                      1,
-                                      cardWidget('Restaurants'),
-                                      context,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                          : Container(),
-                      loadedTrip.countries[countryIndex].cities[cityIndex]
-                                  .transportations !=
-                              null
-                          ? loadedTrip.countries[countryIndex].cities[cityIndex]
-                                      .transportations.length >
-                                  0
-                              ? Column(
-                                  children: [
-                                    Divider(
-                                      thickness: 10,
-                                    ),
-                                    cardScroller(
-                                      'Transportation',
-                                      1,
-                                      flightOrTransportationTile(
-                                        'Transportation',
-                                      ),
-                                      context,
-                                    ),
-                                  ],
-                                )
-                              : Container()
-                          : Container(),
-                      PostComment(),
-                      Divider(
-                        thickness: 10,
-                      ),
-                      DisplayPosts(),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 100),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                );
+              }),
           floatingActionButton: FloatingActionButton(
             child: Icon(
               Icons.add,

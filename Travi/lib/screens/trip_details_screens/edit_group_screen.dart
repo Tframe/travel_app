@@ -86,7 +86,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                         ),
                                       ),
                                 title: Text(
-                                  '${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName[0]}.',
+                                  '${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName}',
                                 ),
                                 //Display trip acception status
                                 trailing: loadedTrip.group[index].invitationStatus ==
@@ -121,7 +121,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                       'Confirm',
                                     ),
                                     content: Text(
-                                      'Are you sure you want to remove ${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName[0]}.?',
+                                      'Are you sure you want to remove ${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName}.?',
                                     ),
                                     actions: <Widget>[
                                       FlatButton(
@@ -131,7 +131,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
                                                 .removeCompanion(loadedTrip,
-                                                    user.uid, index);
+                                                    index);
                                           });
                                           Navigator.of(context).pop();
                                         },

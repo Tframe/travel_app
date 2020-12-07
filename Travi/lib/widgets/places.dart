@@ -246,7 +246,7 @@ class _PlacesState extends State<Places> {
 
     country = tempCountry;
 
-    await Provider.of<Country>(context, listen: false).addCountry(country);
+    //await Provider.of<Country>(context, listen: false).addCountry(country);
 
     setState(() {
       predictions = [];
@@ -266,7 +266,7 @@ class _PlacesState extends State<Places> {
     );
 
     city = tempCity;
-    await Provider.of<City>(context, listen: false).addCity(city);
+    //await Provider.of<City>(context, listen: false).addCity(city);
 
     setState(() {
       _cityController.text = detailsResult.formattedAddress;
