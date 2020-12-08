@@ -203,6 +203,9 @@ class _AddTripGroupInviteScreenState extends State<AddTripGroupInviteScreen> {
           loggedInUser.id,
           loggedInUser.firstName,
           loggedInUser.lastName,
+          loggedInUser.id,
+          loggedInUser.firstName,
+          loggedInUser.lastName,
           tripValues.id,
           tripValues.title,
         );

@@ -24,6 +24,7 @@ class TripsProvider extends ChangeNotifier {
 
   //find trip by id
   TripProvider findById(String id) {
+    print(id);
     return _trips.firstWhere((trip) => trip.id == id);
   }
 
@@ -247,7 +248,7 @@ class TripsProvider extends ChangeNotifier {
   }
 
   //receiving new list of trips with their countries list
-  Future<void> setCountriesToTrip(List<TripProvider> trips){
+  Future<void> setCountriesToTrip(List<TripProvider> trips) {
     _trips = trips;
     return null;
   }
@@ -389,6 +390,7 @@ class TripsProvider extends ChangeNotifier {
 
     final companionsIndex = _trips[tripIndex].companionsId.indexWhere(
         (companion) => companion == _trips[tripIndex].group[groupIndex].id);
+
     _trips[tripIndex].group.removeAt(groupIndex);
 
     if (tripIndex >= 0) {
@@ -422,8 +424,15 @@ class TripsProvider extends ChangeNotifier {
         throw error;
       }
     }
-    await removeFromCompanionsList(
-        currentTrip.id, currentTrip.organizerId, tripIndex, companionsIndex);
+    //If companions index is 0 or greater, means companion was found in list,
+    //so remove from list. Otherwise, skip it.
+    if (companionsIndex >= 0) {
+      print('found companion in list');
+      //remove fromo list of companions on trip collection
+      await removeFromCompanionsList(
+          currentTrip.id, currentTrip.organizerId, tripIndex, companionsIndex);
+    }
+
     notifyListeners();
   }
 
@@ -459,6 +468,9 @@ class TripsProvider extends ChangeNotifier {
     String organizerUserId,
     String organizerFirstName,
     String organizerLastName,
+    String inviterId,
+    String inviterFirstName,
+    String inviterLastName,
     String tripId,
     String tripTitle,
   ) async {
@@ -472,6 +484,9 @@ class TripsProvider extends ChangeNotifier {
         'organizerUserId': organizerUserId,
         'organizerFirstName': organizerFirstName,
         'organizerLastName': organizerLastName,
+        'inviterId': inviterId,
+        'inviterFirstName': inviterFirstName,
+        'inviterLastName': inviterLastName,
         'tripId': tripId,
         'tripTitle': tripTitle,
         'status': 'pending',
@@ -482,5 +497,61 @@ class TripsProvider extends ChangeNotifier {
     } catch (error) {
       throw error;
     }
+  }
+
+  //Update trip details group invitation status, if new status
+  //is 'Accepted', add current user id to companionsId list.
+  Future<void> updateGroupInvitationStatus(
+    String tripId,
+    String organizerId,
+    String userId,
+    List<UserProvider> users,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .update({
+        'group': users
+            .map((companion) => {
+                  'id': companion.id,
+                  'firstName': companion.firstName,
+                  'lastName': companion.lastName,
+                  'invitationStatus': companion.invitationStatus,
+                  'location': companion.location,
+                  'about': companion.about,
+                  'email': companion.email,
+                  'phone': companion.phone,
+                  'profilePicUrl': companion.profilePicUrl,
+                })
+            .toList()
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
+  }
+
+  //Update companionsIds list on trip when use accepts invitation
+  Future<void> addToCompanions(
+    String tripId,
+    String organizerId,
+    String userId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc('$organizerId')
+          .collection('trips')
+          .doc('$tripId')
+          .update({
+        'companionsId': FieldValue.arrayUnion([userId]),
+      });
+    } catch (error) {
+      throw error;
+    }
+    notifyListeners();
   }
 }

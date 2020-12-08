@@ -114,20 +114,20 @@ class LoginSignupScreen extends StatelessWidget {
                   SizedBox(
                     height: screenHeight * 0.025,
                   ),
-                  Container(
-                    width: screenWidth * 0.7,
-                    child: FacebookSignInButton(
-                      //TODO
-                      onPressed: () {},
-                    ),
-                  ),      
-                  Container(
-                    width: screenWidth * 0.7,
-                    child: GoogleSignInButton(
-                      //TODO
-                      onPressed: () {},
-                    ),
-                  ),
+                  // Container(
+                  //   width: screenWidth * 0.7,
+                  //   child: FacebookSignInButton(
+                  //     //TODO
+                  //     onPressed: () {},
+                  //   ),
+                  // ),      
+                  // Container(
+                  //   width: screenWidth * 0.7,
+                  //   child: GoogleSignInButton(
+                  //     //TODO
+                  //     onPressed: () {},
+                  //   ),
+                  // ),
                 ],
               ),
             ),

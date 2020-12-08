@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/user_provider.dart';
 import '../providers/notification_provider.dart';
+import '../providers/trips_provider.dart';
+import '../providers/trip_provider.dart';
 
 class NotificationEndDrawer extends StatefulWidget {
   final UserProvider currentLoggedInUser;
@@ -81,19 +83,22 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
     );
   }
 
+  //This processes notification responses if applicable
+  //i.e. trip invitations accept/declines
   Future<void> invitationResponse(
     BuildContext context,
     String tripId,
     String invitationStatusResponse,
     String notificationId,
   ) async {
-    
     String inviteId;
-    for(int i = 0; i < widget.currentLoggedInUser.tripInvites.length; i++){
-      if(widget.currentLoggedInUser.tripInvites[i].tripId == tripId){
+    //looks for trip id for notification response
+    for (int i = 0; i < widget.currentLoggedInUser.tripInvites.length; i++) {
+      if (widget.currentLoggedInUser.tripInvites[i].tripId == tripId) {
         inviteId = widget.currentLoggedInUser.tripInvites[i].invitationId;
       }
     }
+    //updates invitation status
     await Provider.of<UserProvider>(context, listen: false)
         .updateTripInvitationStatus(
       _loggedInUser.id,
@@ -101,12 +106,14 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
       tripId,
       invitationStatusResponse,
     );
+    //updates the notification status
     await Provider.of<NotificationProvider>(context, listen: false)
         .updateNotificationStatus(
       _loggedInUser.id,
       notificationId,
       invitationStatusResponse,
     );
+    //updates notifications unread status
     await Provider.of<NotificationProvider>(context, listen: false)
         .updatedNotificationUnread(
           _loggedInUser.id,
@@ -118,8 +125,28 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             Navigator.of(context).pop();
           }),
         );
+
+    // //get trip info to update group
+    // TripProvider trip =
+    //     Provider.of<TripsProvider>(context, listen: false).findById(tripId);
+    // //get group index to update
+    // int groupIndex =
+    //     trip.group.indexWhere((group) => group.id == _loggedInUser.id);
+    // //update group with response
+    // trip.group[groupIndex].invitationStatus = invitationStatusResponse;
+
+    // //update trip provider firestore with response
+    // await Provider.of<TripsProvider>(context, listen: false)
+    //     .updateGroupInvitationStatus(
+    //   tripId,
+    //   widget.currentLoggedInUser.tripInvites[tripIndex].organizerUserId,
+    //   _loggedInUser.id,
+    //   trip.group,
+    // );
+
   }
 
+  //for displaying confirmation dialog box for invitation responses
   Future<void> displayConfirmationDialog(
     BuildContext context,
   ) async {
@@ -319,7 +346,8 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
                                             'pending'
                                         ? displayNotificationInvitationResponse(
                                             context,
-                                            widget.currentLoggedInUser.tripInvites[0].invitationId,
+                                            widget.currentLoggedInUser
+                                                .tripInvites[0].invitationId,
                                             documents[index]
                                                 .data()['organizerFirstName'],
                                             documents[index]

@@ -153,6 +153,15 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
         currentLoggedInUser.lastName,
         loadedTrip.group);
 
+    for (int a = 0; a < tempCompanionIds.length; a++) {
+      //Add companion id to list of companions
+      await Provider.of<TripsProvider>(context, listen: false).addToCompanions(
+        loadedTrip.id,
+        loadedTrip.organizerId,
+        tempCompanionIds[a],
+      );
+    }
+
     for (int i = 0; i < tempCompanion.length; i++) {
       //check if user not already invited, if not invited, then
       //add notification and to trip invite list.
@@ -163,6 +172,10 @@ class _AddCompanionScreenState extends State<AddCompanionScreen> {
         await Provider.of<TripsProvider>(context, listen: false)
             .addTripToCompanion(
           tempCompanion[i].id,
+          loadedTrip.organizerId,
+          //assumes first group member added is the organizer
+          loadedTrip.group[0].firstName,
+          loadedTrip.group[0].lastName,
           currentLoggedInUser.id,
           currentLoggedInUser.firstName,
           currentLoggedInUser.lastName,
