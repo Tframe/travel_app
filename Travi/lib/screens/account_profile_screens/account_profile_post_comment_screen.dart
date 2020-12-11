@@ -111,6 +111,7 @@ class _AccountProfilePostCommentScreenState
     newPost.authorImageURL = loggedInUser.profilePicUrl;
   }
 
+  //App bar widget
   Widget appBar() {
     return AppBar(
       title: const Text('Add Post'),
@@ -200,7 +201,30 @@ class _AccountProfilePostCommentScreenState
         newPost.id,
         tagId,
       );
+      //If public post, add tag to public post too
+      if (newPost.audience == 'Public') {
+        await Provider.of<PostProvider>(context, listen: false)
+            .updatePublicPostTagId(
+          newPost.id,
+          tagId,
+        );
+      }
     }
+  }
+
+  //Returns the audience type as string
+  String getAudience() {
+    String audience = '';
+    if (_selectdAudience == 0) {
+      audience = 'Public';
+    } else if (_selectdAudience == 1) {
+      audience = 'Friends';
+    } else if (_selectdAudience == 2) {
+      audience = 'CloseFF';
+    } else if (_selectdAudience == 3) {
+      audience = 'Private';
+    }
+    return audience;
   }
 
   //Function called once post is tapped
@@ -218,26 +242,46 @@ class _AccountProfilePostCommentScreenState
 
         newPost.message = message;
 
+        //get audience of post
+        newPost.audience = getAudience();
+
         //add post to trip
         await Provider.of<PostProvider>(context, listen: false)
-            .addPostToUser(userId, newPost, loggedInUser);
+            .addPostToUser(userId, newPost);
         newPost.id =
             Provider.of<PostProvider>(context, listen: false).currentPost.id;
+
+        //If audience is public, add post to public posts
+        if (newPost.audience == 'Public') {
+          await Provider.of<PostProvider>(context, listen: false)
+              .addPublicPost(newPost);
+        }
+
         //store photo and set url
         if (_uploaded) {
           if (!_video) {
             await storePhotoAndSetUrl();
-            //update photo url into post and tag
+            //update photo url into posts
             await Provider.of<PostProvider>(context, listen: false)
                 .addPhotoUrlToPostUser(userId, newPost);
+            if (newPost.audience == 'Public') {
+              await Provider.of<PostProvider>(context, listen: false)
+                  .addPhotoUrlToPublicPost(newPost);
+            }
           }
+          //store video and set url
           if (_video) {
             await storeVideoAndSetUrl();
-            //update photo url into post and tag
+            //update photo url into posts
             await Provider.of<PostProvider>(context, listen: false)
                 .addVideoUrlToPostUser(userId, newPost);
+            if (newPost.audience == 'Public') {
+              await Provider.of<PostProvider>(context, listen: false)
+                  .addVideoUrlToPublicPost(newPost);
+            }
           }
         }
+
         //create or update tag
         await checkThenAddTags(context);
       } catch (error) {
@@ -570,7 +614,7 @@ class _AccountProfilePostCommentScreenState
                                                       selectedValue;
                                                 });
                                               },
-                                              focusNode: _thoughtsFocusNode,
+                                              focusNode: _audienceFocusNode,
                                             ),
                                           ),
                                         ],

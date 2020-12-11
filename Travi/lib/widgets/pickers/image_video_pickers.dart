@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for picking the video from user's
+ * phone storage.
+ */
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -13,6 +18,7 @@ class ImageVideoPicker extends StatefulWidget {
 }
 
 class _ImageVideoPickerState extends State<ImageVideoPicker> {
+  // ignore: unused_field
   File _pickedImage;
 
   Future<void> getImage() async {

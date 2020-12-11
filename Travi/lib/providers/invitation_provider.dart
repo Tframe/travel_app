@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Provider to creat an invitation object
+ */
 import 'package:flutter/foundation.dart';
 
 class Invites extends ChangeNotifier {

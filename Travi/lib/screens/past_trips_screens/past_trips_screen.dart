@@ -1,6 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen to display layout for past trips list
+ */
 import 'package:flutter/material.dart';
-
-
 import '../../widgets/past_trip_card_list.dart';
 
 class PastTripsScreen extends StatefulWidget {

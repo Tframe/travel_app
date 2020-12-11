@@ -3,7 +3,6 @@
  * Description: Post provider creats the PostProvider object,
  * and methods used for CRUD commands for updating firestore.
  */
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:groupy/providers/user_provider.dart';
@@ -32,6 +31,7 @@ class PostProvider extends ChangeNotifier {
   List<String> tagIds;
   String photosURL;
   String videosURL;
+  String audience;
 
   PostProvider({
     this.id,
@@ -56,6 +56,7 @@ class PostProvider extends ChangeNotifier {
     this.photosURL,
     this.videosURL,
     this.comments,
+    this.audience,
   });
 
   PostProvider _currentPost;
@@ -66,6 +67,7 @@ class PostProvider extends ChangeNotifier {
 
   //***************  Posts to trip ********************
 
+  //adds a post to a trip
   Future<void> addPostToTrip(
     String organizerId,
     String tripId,
@@ -79,6 +81,7 @@ class PostProvider extends ChangeNotifier {
           .doc('$tripId')
           .collection('posts')
           .add({
+        'audience': post.audience,
         'authorId': post.authorId,
         'authorFirstName': post.authorFirstName,
         'authorLastName': post.authorLastName,
@@ -373,7 +376,6 @@ class PostProvider extends ChangeNotifier {
   Future<void> addPostToUser(
     String userId,
     PostProvider post,
-    UserProvider currentUser,
   ) async {
     try {
       await FirebaseFirestore.instance
@@ -381,6 +383,7 @@ class PostProvider extends ChangeNotifier {
           .doc('$userId')
           .collection('posts')
           .add({
+        'audience': post.audience,
         'authorId': post.authorId,
         'authorFirstName': post.authorFirstName,
         'authorLastName': post.authorLastName,
@@ -406,6 +409,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //adds photo url to user profile posts
   Future<void> addPhotoUrlToPostUser(
     String userId,
     PostProvider post,
@@ -429,6 +433,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //adds video url to user profile post
   Future<void> addVideoUrlToPostUser(
     String userId,
     PostProvider post,
@@ -449,6 +454,7 @@ class PostProvider extends ChangeNotifier {
     }
   }
 
+  //adds any tagids to the saved post
   Future<void> updateTagIdToPostUser(
     String userId,
     String postId,
@@ -549,6 +555,7 @@ class PostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  //decrement the like count for a user profile post
   Future<void> decrementLikePostUser(
     String organizerId,
     String postId,
@@ -629,6 +636,104 @@ class PostProvider extends ChangeNotifier {
           .doc('$commentId')
           .delete()
           .then((value) => print('comment deleted from post'));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //***************  Create public post ********************
+
+  //Adds post to public posts, but reuses same post id as trip or user post
+  Future<void> addPublicPost(
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc(post.id)
+          .set({
+        'audience': post.audience,
+        'authorId': post.authorId,
+        'authorFirstName': post.authorFirstName,
+        'authorLastName': post.authorLastName,
+        'authorImageURL': post.authorImageURL,
+        'message': post.message,
+        'dateTime': post.dateTime,
+        'tripId': post.tripId,
+        'activityId': post.activityId,
+        'lodgingId': post.lodgingId,
+        'flightId': post.flightId,
+        'transportationId': post.transportationId,
+        'restaurantId': post.restaurantId,
+        'eventName': post.eventName,
+        'locationLatitude': post.locationLatitude,
+        'locationLongitude': post.locationLatitude,
+        'location': post.location,
+        'photosURL': post.photosURL,
+        'videosURL': post.videosURL,
+        'likes': 0,
+        'userLikes': [],
+        'tagIds': [],
+      }).then((docRef) {
+        print('post added to trip');
+      });
+    } catch (error) {
+      throw error;
+    }
+    _currentPost = post;
+    notifyListeners();
+  }
+
+  //add tagId to post's array of tagIds
+  Future<void> updatePublicPostTagId(
+    String postId,
+    String tagId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('$postId')
+          .update({
+        'tagIds': FieldValue.arrayUnion([tagId]),
+      }).then((docRef) {
+        print('Added tag ids');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+//adds photo url to public posts
+  Future<void> addPhotoUrlToPublicPost(
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('${post.id}')
+          .update({
+        'photosURL': post.photosURL,
+      }).then((value) {
+        print('Added photo url to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //adds video url to public post
+  Future<void> addVideoUrlToPublicPost(
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('${post.id}')
+          .update({
+        'videosURL': post.videosURL,
+      }).then((value) {
+        print('Added video url to user post');
+      });
     } catch (error) {
       throw error;
     }

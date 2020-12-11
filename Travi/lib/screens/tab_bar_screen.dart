@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Layout used for seeing the different
+ * tabs used for navigating between the discover, current trips, and
+ * past trips screens.
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import './current_trip_screens/current_trips_screen.dart';
@@ -6,7 +12,6 @@ import '../screens/past_trips_screens/past_trips_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/notification_end_drawer.dart';
 import '../providers/user_provider.dart';
-import '../providers/notification_provider.dart';
 
 class TabBarScreen extends StatefulWidget {
   static const routeName = '/tab-bar-screen';
@@ -21,7 +26,6 @@ class _TabBarScreenState extends State<TabBarScreen> {
   int _selectedPageIndex = 1;
   String currentUserId;
   UserProvider currentLoggedInUser;
-  List<NotificationProvider> notifications;
 
   @override
   void initState() {
@@ -60,7 +64,6 @@ class _TabBarScreenState extends State<TabBarScreen> {
           .setLoggedInUser(currentUserId);
 
       await getListOfInvitations();
-      await getNotifications();
     } catch (error) {
       print(error);
       return;
@@ -74,18 +77,6 @@ class _TabBarScreenState extends State<TabBarScreen> {
     setState(() {
       currentLoggedInUser =
           Provider.of<UserProvider>(context, listen: false).currentLoggedInUser;
-    });
-  }
-
-  //after loading user, get all notifications for user.
-  Future<void> getNotifications() async {
-    await Provider.of<NotificationProvider>(context, listen: false)
-        .getNotifications(currentUserId);
-    notifications =
-        Provider.of<NotificationProvider>(context, listen: false).notifications;
-    setState(() {
-      notifications.sort(
-          (a, b) => b.notificationDateTime.compareTo(a.notificationDateTime));
     });
   }
 
@@ -120,53 +111,26 @@ class _TabBarScreenState extends State<TabBarScreen> {
               ),
               onPressed: () {
                 _scaffoldKey.currentState.openEndDrawer();
-                if (_scaffoldKey.currentState.isEndDrawerOpen) {
-                  setState(() {
-                    Provider.of<NotificationProvider>(context, listen: false)
-                        .clearNotificationsList();
-                    // //After viewing, update all unread notifications to be read.
-                    for (int i = 0; i < notifications.length; i++) {
-                      if (notifications[i].unread) {
-                        Provider.of<NotificationProvider>(context,
-                                listen: false)
-                            .updatedNotificationUnread(
-                          currentLoggedInUser.id,
-                          notifications[i].id,
-                          false,
-                        );
-                      }
-                    }
-                  });
-                }
+                // if (_scaffoldKey.currentState.isEndDrawerOpen) {
+                //   setState(() {
+                //     Provider.of<NotificationProvider>(context, listen: false)
+                //         .clearNotificationsList();
+                //     // //After viewing, update all unread notifications to be read.
+                //     for (int i = 0; i < notifications.length; i++) {
+                //       if (notifications[i].unread) {
+                //         Provider.of<NotificationProvider>(context,
+                //                 listen: false)
+                //             .updatedNotificationUnread(
+                //           currentLoggedInUser.id,
+                //           notifications[i].id,
+                //           false,
+                //         );
+                //       }
+                //     }
+                //   });
+                // }
               },
             ),
-            notifications != null
-                ? notifications
-                            .where(
-                                (notification) => notification.unread == true)
-                            .length >
-                        0
-                    ? Container(
-                        height: 25,
-                        width: 25,
-                        child: Card(
-                          elevation: 5,
-                          color: Colors.red,
-                          child: Text(
-                            '${notifications.where((notification) => notification.unread).length}',
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        width: 1,
-                      )
-                : Container(
-                    width: 1,
-                  ),
           ],
         ),
       ],
@@ -181,7 +145,7 @@ class _TabBarScreenState extends State<TabBarScreen> {
       key: _scaffoldKey,
       appBar: _builderAppBar(context),
       drawer: AppDrawer(),
-      body:  _pages[_selectedPageIndex]['page'],
+      body: _pages[_selectedPageIndex]['page'],
       endDrawer: Container(
           width: screenWidth * 0.9,
           child: NotificationEndDrawer(currentLoggedInUser)),

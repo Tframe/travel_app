@@ -1,6 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget used for picking he user image
+ * for updating
+ */
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 import 'package:image_picker/image_picker.dart';
 
 class UserImagePicker extends StatefulWidget {

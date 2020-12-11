@@ -339,6 +339,11 @@ class UserProvider extends ChangeNotifier {
     String newStatus,
     String userId,
   ) async {
+
+    print(organizerId);
+    print(tripId);
+    print(userId);
+
     List<UserProvider> _tempGroup = [];
 
     //Get list of group in organizer's trip

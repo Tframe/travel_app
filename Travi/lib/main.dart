@@ -1,11 +1,14 @@
+/* Author: Trevor Frame
+ * Date: 10/27/2020
+ * Description: Main that binds dot env, creates the 
+ * app themes, creates notifiers, and establishes route names
+ */
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+//screens
 import './screens/discover_screens/discover_screen.dart';
 import './screens/current_trip_screens/current_trips_screen.dart';
 import './screens/past_trips_screens/past_trips_screen.dart';
@@ -14,7 +17,6 @@ import './screens/trip_details_screens/edit_trip_screen.dart';
 import './screens/authentication_screens/login_signup_screen.dart';
 import './screens/trip_details_screens/trip_detail_screen.dart';
 import './screens/authentication_screens/login_screen.dart';
-
 import './screens/signup_screens/signup_intro_screen.dart';
 import './screens/signup_screens/signup_name_screen.dart';
 import './screens/signup_screens/signup_photo_screen.dart';
@@ -48,10 +50,9 @@ import './screens/post_comments_screens/post_comment_screen.dart';
 import './screens/post_comments_screens/sub_comments_screen.dart';
 import './screens/account_profile_screens/account_profile_screen.dart';
 import './screens/account_profile_screens/account_profile_post_comment_screen.dart';
-
+//providers
 import './providers/user_provider.dart';
 import './providers/trip_provider.dart';
-
 import './providers/trips_provider.dart';
 import './providers/country_provider.dart';
 import './providers/city_provider.dart';

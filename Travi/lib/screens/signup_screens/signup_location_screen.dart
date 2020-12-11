@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - add your location
+ */
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import '../../providers/user_provider.dart';

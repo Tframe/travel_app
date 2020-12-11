@@ -189,6 +189,7 @@ class Flight extends ChangeNotifier {
     _flights = flightList;
   }
 
+  //get the list of flights and set as provider list
   Future<void> fetchAndSetFlights(
     String tripId,
     String userId,
@@ -196,6 +197,7 @@ class Flight extends ChangeNotifier {
   ) async {
     List<Flight> flightList = [];
     List<UserProvider> participantsList = [];
+
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -279,6 +281,7 @@ class Flight extends ChangeNotifier {
     notifyListeners();
   }
 
+  //removes flight from firestore
   Future<void> removeFlight(
     String tripId,
     String userId,

@@ -1,5 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - intro
+ */
 import 'package:flutter/material.dart';
-
 import './signup_name_screen.dart';
 
 class SignUpIntroScreen extends StatelessWidget {

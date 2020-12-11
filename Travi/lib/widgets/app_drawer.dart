@@ -1,8 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying main app drawer contnts
+ * Account profile, contact us, logout, etc.
+ */
 import 'package:flutter/material.dart';
-
 import '../screens/current_trip_screens/current_trips_screen.dart';
 import '../screens/account_info_screens/edit_account_profile_screen.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AppDrawer extends StatelessWidget {

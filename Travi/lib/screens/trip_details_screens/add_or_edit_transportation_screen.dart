@@ -1,3 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for displaying trip transportation.
+ * user can choose to add new transportation, select transportation to
+ * edit, or remove the transportation.
+ */
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

@@ -187,6 +187,7 @@ class Transportation extends ChangeNotifier {
     _transportations = transportationList;
   }
 
+  //Retreives list of transporations from firestore
   Future<void> fetchAndSetTransportations(
     String tripId,
     String userId,

@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen to post replies to a post
+ */
 import 'package:flutter/material.dart';
 
 class SubCommentsScreen extends StatefulWidget {

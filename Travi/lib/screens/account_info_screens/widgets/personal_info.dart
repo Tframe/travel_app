@@ -1,3 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile personal info
+ * widget.
+ */
 import 'package:flutter/material.dart';
 import '../../../providers/user_provider.dart';
 

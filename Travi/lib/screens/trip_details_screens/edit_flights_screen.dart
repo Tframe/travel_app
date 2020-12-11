@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for editing flight info
+ */
 import 'package:flutter/material.dart';
 import 'package:groupy/providers/flight_provider.dart';
 import 'package:provider/provider.dart';

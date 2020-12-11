@@ -1,7 +1,12 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for displaying trip restaurant.
+ * user can choose to add new restaurant, select restaurant to
+ * edit, or remove the restaurant.
+ */
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
 import '../../providers/trip_provider.dart';
 import '../../providers/restaurant_provider.dart';
 import '../../providers/trips_provider.dart';

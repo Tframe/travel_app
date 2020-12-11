@@ -1,7 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for displaying a timeline
+ * of the trip events
+ */
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-
 import '../../providers/trip_provider.dart';
 import '../../providers/lodging_provider.dart';
 import '../../providers/flight_provider.dart';

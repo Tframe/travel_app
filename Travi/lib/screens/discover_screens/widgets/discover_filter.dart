@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying the filter
+ * on the discover page. includs buttons and search fields
+ */
 import 'package:flutter/material.dart';
-
 import './keyword_search.dart';
 import './place_search.dart';
 

@@ -1,5 +1,8 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - enter anme
+ */
 import 'package:flutter/material.dart';
-
 import '../../providers/user_provider.dart';
 import './signup_location_screen.dart';
 

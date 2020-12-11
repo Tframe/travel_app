@@ -1,6 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for signing up using
+ * an email and password authentication with firebases
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
-
 import '../signup_screens/signup_intro_screen.dart';
 import './login_screen.dart';
 
@@ -110,20 +114,20 @@ class LoginSignupScreen extends StatelessWidget {
                   SizedBox(
                     height: screenHeight * 0.025,
                   ),
-                  Container(
-                    width: screenWidth * 0.7,
-                    child: FacebookSignInButton(
-                      //TODO
-                      onPressed: () {},
-                    ),
-                  ),      
-                  Container(
-                    width: screenWidth * 0.7,
-                    child: GoogleSignInButton(
-                      //TODO
-                      onPressed: () {},
-                    ),
-                  ),
+                  // Container(
+                  //   width: screenWidth * 0.7,
+                  //   child: FacebookSignInButton(
+                  //     //TODO
+                  //     onPressed: () {},
+                  //   ),
+                  // ),      
+                  // Container(
+                  //   width: screenWidth * 0.7,
+                  //   child: GoogleSignInButton(
+                  //     //TODO
+                  //     onPressed: () {},
+                  //   ),
+                  // ),
                 ],
               ),
             ),

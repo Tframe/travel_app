@@ -1,7 +1,15 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying notifications for
+ * logged in user. Stream started with firestore
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/user_provider.dart';
 import '../providers/notification_provider.dart';
+import '../providers/trips_provider.dart';
+import '../providers/trip_provider.dart';
 
 class NotificationEndDrawer extends StatefulWidget {
   final UserProvider currentLoggedInUser;
@@ -15,24 +23,28 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
   UserProvider _loggedInUser;
   List<NotificationProvider> notifications = [];
 
-  //get list of notifications and add to notification list.
-  Future<void> getNotifications() async {
-    _loggedInUser =
-        Provider.of<UserProvider>(context, listen: false).loggedInUser;
-
-    await Provider.of<NotificationProvider>(context, listen: false)
-        .getNotifications(_loggedInUser.id);
-    setState(() {
-      notifications = Provider.of<NotificationProvider>(context, listen: false)
-          .notifications;
-      notifications.sort(
-          (a, b) => b.notificationDateTime.compareTo(a.notificationDateTime));
-    });
+  @override
+  void initState() {
+    //getNotifications();
+    getUserInfo();
+    super.initState();
   }
 
+  //get user information.
+  Future<void> getUserInfo() async {
+    _loggedInUser =
+        Provider.of<UserProvider>(context, listen: false).loggedInUser;
+  }
+
+  //Display buttons for responses to invitation
   Future<void> displayNotificationInvitationResponse(
     BuildContext context,
-    int index,
+    String inviteId,
+    String organizerFirstName,
+    String organizerLastName,
+    String tripTitle,
+    String tripId,
+    String notificationId,
   ) async {
     await showDialog<Null>(
       context: context,
@@ -41,7 +53,7 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
           'Trip invitation',
         ),
         content: Text(
-          '${widget.currentLoggedInUser.tripInvites[index].organizerFirstName} ${widget.currentLoggedInUser.tripInvites[index].organizerLastName[0]}. has invited you on their ${widget.currentLoggedInUser.tripInvites[index].tripTitle} trip.',
+          '$organizerFirstName $organizerLastName. has invited you on their $tripTitle trip.',
         ),
         actions: <Widget>[
           FlatButton(
@@ -49,8 +61,9 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             onPressed: () {
               invitationResponse(
                 context,
-                index,
+                tripId,
                 'accepted',
+                notificationId,
               );
             },
           ),
@@ -59,8 +72,9 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             onPressed: () {
               invitationResponse(
                 context,
-                index,
+                tripId,
                 'declined',
+                notificationId,
               );
             },
           ),
@@ -69,25 +83,41 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
     );
   }
 
+  //This processes notification responses if applicable
+  //i.e. trip invitations accept/declines
   Future<void> invitationResponse(
     BuildContext context,
-    int index,
+    String tripId,
     String invitationStatusResponse,
+    String notificationId,
   ) async {
+    String inviteId;
+    //looks for trip id for notification response
+    for (int i = 0; i < widget.currentLoggedInUser.tripInvites.length; i++) {
+      if (widget.currentLoggedInUser.tripInvites[i].tripId == tripId) {
+        inviteId = widget.currentLoggedInUser.tripInvites[i].invitationId;
+      }
+    }
+    //updates invitation status
     await Provider.of<UserProvider>(context, listen: false)
         .updateTripInvitationStatus(
-      widget.currentLoggedInUser.id,
-      widget.currentLoggedInUser.tripInvites[index].invitationId,
-      widget.currentLoggedInUser.tripInvites[index].tripId,
+      _loggedInUser.id,
+      inviteId,
+      tripId,
       invitationStatusResponse,
     );
+    //updates the notification status
     await Provider.of<NotificationProvider>(context, listen: false)
-        .updateNotificationStatus(widget.currentLoggedInUser.id,
-            notifications[index].id, invitationStatusResponse);
+        .updateNotificationStatus(
+      _loggedInUser.id,
+      notificationId,
+      invitationStatusResponse,
+    );
+    //updates notifications unread status
     await Provider.of<NotificationProvider>(context, listen: false)
         .updatedNotificationUnread(
-          widget.currentLoggedInUser.id,
-          notifications[index].id,
+          _loggedInUser.id,
+          notificationId,
           false,
         )
         .then(
@@ -95,8 +125,28 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             Navigator.of(context).pop();
           }),
         );
+
+    // //get trip info to update group
+    // TripProvider trip =
+    //     Provider.of<TripsProvider>(context, listen: false).findById(tripId);
+    // //get group index to update
+    // int groupIndex =
+    //     trip.group.indexWhere((group) => group.id == _loggedInUser.id);
+    // //update group with response
+    // trip.group[groupIndex].invitationStatus = invitationStatusResponse;
+
+    // //update trip provider firestore with response
+    // await Provider.of<TripsProvider>(context, listen: false)
+    //     .updateGroupInvitationStatus(
+    //   tripId,
+    //   widget.currentLoggedInUser.tripInvites[tripIndex].organizerUserId,
+    //   _loggedInUser.id,
+    //   trip.group,
+    // );
+
   }
 
+  //for displaying confirmation dialog box for invitation responses
   Future<void> displayConfirmationDialog(
     BuildContext context,
   ) async {
@@ -127,50 +177,47 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
     );
   }
 
-  @override
-  void initState() {
-    getNotifications();
-    super.initState();
-  }
-
-  Widget getIcon(int index) {
-    if (notifications[index].notificationType == 'trip-invite') {
+  //returns a type of icon based on notification type
+  Widget getIcon(int index, String notificationType) {
+    if (notificationType == 'trip-invite') {
       return Icon(
         Icons.group,
       );
     }
-    if (notifications[index].notificationType == 'edit-flight' ||
-        notifications[index].notificationType == 'add-flight') {
+    if (notificationType == 'edit-flight' || notificationType == 'add-flight') {
       return Icon(
         Icons.flight,
       );
     }
-    if (notifications[index].notificationType == 'edit-lodging' ||
-        notifications[index].notificationType == 'add-lodging') {
+    if (notificationType == 'edit-lodging' ||
+        notificationType == 'add-lodging') {
       return Icon(
         Icons.hotel,
       );
     }
-    if (notifications[index].notificationType == 'edit-activity' ||
-        notifications[index].notificationType == 'add-activity') {
+    if (notificationType == 'edit-activity' ||
+        notificationType == 'add-activity') {
       return Icon(
         Icons.local_activity,
       );
     }
-    if (notifications[index].notificationType == 'edit-restaurant' ||
-        notifications[index].notificationType == 'add-restaurant') {
+    if (notificationType == 'edit-restaurant' ||
+        notificationType == 'add-restaurant') {
       return Icon(
         Icons.restaurant,
       );
     }
-    if (notifications[index].notificationType == 'edit-transportation' ||
-        notifications[index].notificationType == 'add-transportation') {
+    if (notificationType == 'edit-transportation' ||
+        notificationType == 'add-transportation') {
       return Icon(
         Icons.directions_car,
       );
     }
     return Container();
   }
+
+  //returns true if already likes post, false if not.
+  Future<void> checkIfRead(dynamic documents) async {}
 
   @override
   Widget build(BuildContext context) {
@@ -202,66 +249,122 @@ class _NotificationEndDrawerState extends State<NotificationEndDrawer> {
             SingleChildScrollView(
               child: Container(
                 height: screenHeight * 0.87,
-                child: ListView.builder(
-                  itemCount: notifications.length,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    return Container(
-                      color: notifications[index].unread
-                          ? Colors.grey[300]
-                          : Colors.grey[50],
-                      child: ListTile(
-                        leading: Container(
-                          width: 30,
-                          child: getIcon(index),
-                        ),
-                        title: Text(
-                          '${notifications[index].notificationMessage}',
-                        ),
-                        trailing: notifications[index].status == 'na'
-                            ? Container(
-                                width: 1,
-                              )
-                            : notifications[index].status == 'pending'
-                                ? Container(
-                                    width: 100,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.check),
-                                          onPressed: () => invitationResponse(
-                                              context, index, 'Accepted'),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.clear),
-                                          onPressed: () => invitationResponse(
-                                              context, index, 'Declined'),
-                                        ),
-                                      ],
+                child: StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc('${_loggedInUser.id}')
+                        .collection('notifications')
+                        .orderBy('notificationDateTime', descending: true)
+                        .snapshots(),
+                    builder: (ctx, streamSnapshot) {
+                      if (streamSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      final documents = streamSnapshot.data.documents;
+                      return FutureBuilder(
+                          future: checkIfRead(documents),
+                          builder: (context, snapShot) {
+                            if (snapShot.connectionState ==
+                                ConnectionState.none) {
+                              return Container();
+                            }
+                            return ListView.builder(
+                              itemCount: documents.length,
+                              itemBuilder: (BuildContext ctx, int index) {
+                                return Container(
+                                  color: !documents[index].data()['unread']
+                                      ? Colors.grey[300]
+                                      : Colors.grey[50],
+                                  child: ListTile(
+                                    leading: Container(
+                                      width: 30,
+                                      child: getIcon(
+                                          index,
+                                          documents[index]
+                                              .data()['notificationType']),
                                     ),
-                                  )
-                                : Container(
-                                    width: 65,
-                                    child: Text(
-                                      '${notifications[index].status}',
-                                      style: TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                      textAlign: TextAlign.center,
+                                    title: Text(
+                                      '${documents[index].data()['notificationMessage']}',
                                     ),
+                                    trailing: documents[index]
+                                                .data()['status'] ==
+                                            'na'
+                                        ? Container(
+                                            width: 1,
+                                          )
+                                        : documents[index].data()['status'] ==
+                                                'pending'
+                                            ? Container(
+                                                width: 100,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  children: [
+                                                    IconButton(
+                                                      icon: Icon(Icons.check),
+                                                      onPressed: () =>
+                                                          invitationResponse(
+                                                        context,
+                                                        documents[index]
+                                                            .data()['tripId'],
+                                                        'Accepted',
+                                                        documents[index]
+                                                            .data()['id'],
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(Icons.clear),
+                                                      onPressed: () =>
+                                                          invitationResponse(
+                                                        context,
+                                                        documents[index]
+                                                            .data()['tripId'],
+                                                        'Declined',
+                                                        documents[index]
+                                                            .data()['id'],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : Container(
+                                                width: 65,
+                                                child: Text(
+                                                  '${documents[index].data()['status']}',
+                                                  style: TextStyle(
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                    onTap: () => documents[index]
+                                                .data()['status'] ==
+                                            'pending'
+                                        ? displayNotificationInvitationResponse(
+                                            context,
+                                            widget.currentLoggedInUser
+                                                .tripInvites[0].invitationId,
+                                            documents[index]
+                                                .data()['organizerFirstName'],
+                                            documents[index]
+                                                .data()['organizerLastName'],
+                                            documents[index]
+                                                .data()['tripTitle'],
+                                            documents[index].data()['tripId'],
+                                            documents[index].data()['id'],
+                                          )
+                                        : null,
+                                    dense: true,
                                   ),
-                        onTap: () => notifications[index].status == 'pending'
-                            ? displayNotificationInvitationResponse(
-                                context,
-                                index,
-                              )
-                            : null,
-                        dense: true,
-                      ),
-                    );
-                  },
-                ),
+                                );
+                              },
+                            );
+                          });
+                    }),
               ),
             ),
           ],

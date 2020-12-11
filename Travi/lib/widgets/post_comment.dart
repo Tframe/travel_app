@@ -1,6 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying post comment
+ */
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../providers/user_provider.dart';
 import '../screens/post_comments_screens/post_comment_screen.dart';
 

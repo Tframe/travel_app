@@ -1,9 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile edit the
+ * about section scren.
+ */
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
-
 import 'package:provider/provider.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/user_provider.dart';
 
@@ -34,6 +36,7 @@ class _EditAboutScreenState extends State<EditAboutScreen> {
     super.dispose();
   }
 
+  //saves the form data
   void _saveContact() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!

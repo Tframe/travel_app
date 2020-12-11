@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile contact info
+ * widget.
+ */
 import 'package:flutter/material.dart';
-
 import '../../../providers/user_provider.dart';
 
 class ContactInfo extends StatelessWidget {

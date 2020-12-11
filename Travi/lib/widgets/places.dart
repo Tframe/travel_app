@@ -1,11 +1,16 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying search bars
+ * and using google places for autocompleting
+ * a places search. Can autocomplete for specific
+ * countries only, or sub regions of country like city,
+ * or metro areas. 
+ */
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_place/google_place.dart';
-
 import '../providers/country_provider.dart';
 import '../providers/city_provider.dart';
 
@@ -246,7 +251,7 @@ class _PlacesState extends State<Places> {
 
     country = tempCountry;
 
-    await Provider.of<Country>(context, listen: false).addCountry(country);
+    //await Provider.of<Country>(context, listen: false).addCountry(country);
 
     setState(() {
       predictions = [];
@@ -266,7 +271,7 @@ class _PlacesState extends State<Places> {
     );
 
     city = tempCity;
-    await Provider.of<City>(context, listen: false).addCity(city);
+    //await Provider.of<City>(context, listen: false).addCity(city);
 
     setState(() {
       _cityController.text = detailsResult.formattedAddress;

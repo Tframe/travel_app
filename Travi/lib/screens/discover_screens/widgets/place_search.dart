@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for displaying search by place bar
+ */
 import 'package:flutter/material.dart';
 
 class PlaceSearch extends StatefulWidget {

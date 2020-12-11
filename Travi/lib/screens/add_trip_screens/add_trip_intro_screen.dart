@@ -1,5 +1,9 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: Screen for displaying the intro to
+ * the create trip process.
+ */
 import 'package:flutter/material.dart';
-
 import './add_trip_title_screen.dart';
 
 class AddTripIntroScreen extends StatelessWidget {

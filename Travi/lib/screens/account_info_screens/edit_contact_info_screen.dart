@@ -1,8 +1,11 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: User Profile edit contact
+ * information screen
+ */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:provider/provider.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/user_provider.dart';
 
@@ -34,6 +37,7 @@ class _EditContactInfoScreenState extends State<EditContactInfoScreen> {
     super.dispose();
   }
 
+  //save form data
   void _saveContact() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!

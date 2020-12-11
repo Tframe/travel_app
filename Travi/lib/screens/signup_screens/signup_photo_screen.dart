@@ -1,6 +1,10 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: screen for signup process - add photo screen
+ * NOT IMPLEMENTED YET
+ */
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 import '../../providers/user_provider.dart';
 import './signup_location_screen.dart';
 import '../../widgets/pickers/user_image_picker.dart';

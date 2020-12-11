@@ -1,3 +1,7 @@
+/* Author: Trevor Frame
+ * Date: 12/07/2020
+ * Description: widget for keyword search bar
+ */
 import 'package:flutter/material.dart';
 
 class KeywordSearch extends StatefulWidget {
