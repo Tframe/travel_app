@@ -31,6 +31,7 @@ class PostProvider extends ChangeNotifier {
   List<String> tagIds;
   String photosURL;
   String videosURL;
+  String audience;
 
   PostProvider({
     this.id,
@@ -55,6 +56,7 @@ class PostProvider extends ChangeNotifier {
     this.photosURL,
     this.videosURL,
     this.comments,
+    this.audience,
   });
 
   PostProvider _currentPost;
@@ -79,6 +81,7 @@ class PostProvider extends ChangeNotifier {
           .doc('$tripId')
           .collection('posts')
           .add({
+        'audience': post.audience,
         'authorId': post.authorId,
         'authorFirstName': post.authorFirstName,
         'authorLastName': post.authorLastName,
@@ -373,7 +376,6 @@ class PostProvider extends ChangeNotifier {
   Future<void> addPostToUser(
     String userId,
     PostProvider post,
-    UserProvider currentUser,
   ) async {
     try {
       await FirebaseFirestore.instance
@@ -381,6 +383,7 @@ class PostProvider extends ChangeNotifier {
           .doc('$userId')
           .collection('posts')
           .add({
+        'audience': post.audience,
         'authorId': post.authorId,
         'authorFirstName': post.authorFirstName,
         'authorLastName': post.authorLastName,
@@ -639,19 +642,100 @@ class PostProvider extends ChangeNotifier {
   }
 
   //***************  Create public post ********************
-  Future<void> addPublicPost(
 
+  //Adds post to public posts, but reuses same post id as trip or user post
+  Future<void> addPublicPost(
+    PostProvider post,
   ) async {
     try {
       await FirebaseFirestore.instance
           .collection('public-posts')
-          .add({
+          .doc(post.id)
+          .set({
+        'audience': post.audience,
+        'authorId': post.authorId,
+        'authorFirstName': post.authorFirstName,
+        'authorLastName': post.authorLastName,
+        'authorImageURL': post.authorImageURL,
+        'message': post.message,
+        'dateTime': post.dateTime,
+        'tripId': post.tripId,
+        'activityId': post.activityId,
+        'lodgingId': post.lodgingId,
+        'flightId': post.flightId,
+        'transportationId': post.transportationId,
+        'restaurantId': post.restaurantId,
+        'eventName': post.eventName,
+        'locationLatitude': post.locationLatitude,
+        'locationLongitude': post.locationLatitude,
+        'location': post.location,
+        'photosURL': post.photosURL,
+        'videosURL': post.videosURL,
+        'likes': 0,
+        'userLikes': [],
+        'tagIds': [],
+      }).then((docRef) {
+        print('post added to trip');
+      });
+    } catch (error) {
+      throw error;
+    }
+    _currentPost = post;
+    notifyListeners();
+  }
 
-          })
-          .then((value) => print('Post made public'));
+  //add tagId to post's array of tagIds
+  Future<void> updatePublicPostTagId(
+    String postId,
+    String tagId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('$postId')
+          .update({
+        'tagIds': FieldValue.arrayUnion([tagId]),
+      }).then((docRef) {
+        print('Added tag ids');
+      });
     } catch (error) {
       throw error;
     }
   }
 
+//adds photo url to public posts
+  Future<void> addPhotoUrlToPublicPost(
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('${post.id}')
+          .update({
+        'photosURL': post.photosURL,
+      }).then((value) {
+        print('Added photo url to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //adds video url to public post
+  Future<void> addVideoUrlToPublicPost(
+    PostProvider post,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('public-posts')
+          .doc('${post.id}')
+          .update({
+        'videosURL': post.videosURL,
+      }).then((value) {
+        print('Added video url to user post');
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
 }

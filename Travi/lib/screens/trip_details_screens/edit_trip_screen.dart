@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import '../../providers/trips_provider.dart';
 import '../../providers/trip_provider.dart';
 
-const kGoogleApiKey = "AIzaSyDCPPoOx6ihjBCfPF5nWPsUJ3OWO83u-QM";
 
 final homeScaffoldKey = GlobalKey<ScaffoldState>();
 final searchScaffoldKey = GlobalKey<ScaffoldState>();

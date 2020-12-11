@@ -454,6 +454,21 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
     currentTrip = Provider.of<TripProvider>(context, listen: false).currentTrip;
   }
 
+  //Returns the audience type as string
+  String getAudience() {
+    String audience = '';
+    if (_selectdAudience == 0) {
+      audience = 'Public';
+    } else if (_selectdAudience == 1) {
+      audience = 'Friends';
+    } else if (_selectdAudience == 2) {
+      audience = 'CloseFF';
+    } else if (_selectdAudience == 3) {
+      audience = 'Private';
+    }
+    return audience;
+  }
+
   //Function called once post is tapped
   void submitPost(BuildContext context) async {
     if (!_formKey.currentState.validate()) {
@@ -469,6 +484,8 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
 
         newPost.message = message;
 
+        newPost.audience = getAudience();
+
         getPostLocation();
         //add post to trip
         await Provider.of<PostProvider>(context, listen: false)
@@ -482,26 +499,23 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
             //update photo url into post and tag
             await Provider.of<PostProvider>(context, listen: false)
                 .addPhotoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+            if (newPost.audience == 'Public') {
+              await Provider.of<PostProvider>(context, listen: false)
+                  .addPhotoUrlToPublicPost(newPost);
+            }
           }
+          //store video and set url
           if (_video) {
             await storeVideoAndSetUrl();
             //update photo url into post and tag
             await Provider.of<PostProvider>(context, listen: false)
                 .addVideoUrl(currentTrip.organizerId, currentTrip.id, newPost);
+            if (newPost.audience == 'Public') {
+              await Provider.of<PostProvider>(context, listen: false)
+                  .addVideoUrlToPublicPost(newPost);
+            }
           }
         }
-        //Make post public
-        if (_selectdAudience == 0) {
-          print('public');
-        } else if (_selectdAudience == 1) {
-          print('friends');
-        } else if (_selectdAudience == 2) {
-          print('close friends and family');
-        } else if (_selectdAudience == 3) {
-          print('private');
-        }
-        //If post is public, create the public post
-        //await Provider.of<PostProvider>(context, listen: false).
 
         //create or update tag
         await checkThenAddTags(context);
