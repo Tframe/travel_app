@@ -201,6 +201,7 @@ class _EditFlightsScreenState extends State<EditFlightsScreen> {
         onPressed: () => addOrEditFlight(-1),
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

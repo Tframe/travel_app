@@ -209,6 +209,7 @@ class _EditTransportationsScreenState extends State<EditTransportationsScreen> {
         onPressed: () => addOrEditTransportation(-1),
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

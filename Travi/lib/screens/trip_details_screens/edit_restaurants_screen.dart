@@ -220,6 +220,7 @@ class _EditRestaurantsScreenState extends State<EditRestaurantsScreen> {
         onPressed: () => _addOrEditRestaurant(-1),
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

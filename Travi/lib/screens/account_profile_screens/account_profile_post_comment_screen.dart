@@ -17,6 +17,7 @@ import '../../providers/post_provider.dart';
 import '../../widgets/pickers/image_video.dart';
 import '../../helpers/location_helper.dart';
 import '../../helpers/parse_strings.dart';
+import '../../helpers/size_config.dart';
 
 class AccountProfilePostCommentScreen extends StatefulWidget {
   static const routeName = '/account-profile-post-comment-screen';
@@ -492,8 +493,10 @@ class _AccountProfilePostCommentScreenState
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
+    // screenWidth = MediaQuery.of(context).size.width;
+    // screenHeight = MediaQuery.of(context).size.height;
+    screenHeight = SizeConfig.screenHeight;
+    screenWidth = SizeConfig.screenWidth;
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     userId = arguments['userId'];
 

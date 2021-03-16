@@ -55,6 +55,8 @@ class _PlacesState extends State<Places> {
   List<AutocompletePrediction> predictions = [];
   List<AutocompletePrediction> predictionCountries = [];
   List<AutocompletePrediction> predictionCities = [];
+  List<AutocompletePrediction> predictionEstablishments = [];
+
   GooglePlace googlePlace;
 
   void _scrollToBottom() {
@@ -89,7 +91,7 @@ class _PlacesState extends State<Places> {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        height: screenHeight * 0.1 * (predictions.length + 1),
+        height: (screenHeight * 0.1 * (predictions.length + 1)) + 65,
         width: screenWidth,
         margin: EdgeInsets.only(
           right: 5,
@@ -171,6 +173,11 @@ class _PlacesState extends State<Places> {
                 },
               ),
             ),
+            Container(
+              height: 25,
+              margin: EdgeInsets.only(top: 20, bottom: 10),
+              child: Image.asset("assets/images/powered_by_google_on_white.png"),
+            ),
           ],
         ),
       ),
@@ -188,7 +195,6 @@ class _PlacesState extends State<Places> {
       });
 
       setState(() {
-        //predictions = result.predictions;
         predictions = predictionCountries;
       });
       predictionCountries = [];
@@ -216,11 +222,38 @@ class _PlacesState extends State<Places> {
         }
       });
       setState(() {
-        //predictions = result.predictions;
         predictions = predictionCities;
       });
       predictionCities = [];
     }
+    Timer(Duration(milliseconds: 100), () => _scrollToBottom());
+  }
+
+  //Find list of establishments to provide to user.
+  void autoCompleteSearchEstablishment(String value) async {
+    var result = await googlePlace.autocomplete.get(value);
+    if (result != null && result.predictions != null && mounted) {
+      result.predictions.forEach((prediction) {
+        var countryCheck = '';
+        if (widget.currentCountry == 'United States') {
+          countryCheck = 'USA';
+        } else {
+          countryCheck = widget.currentCountry;
+        }
+        if (prediction.description.contains(countryCheck)) {
+          prediction.types
+              .where((types) => types == 'establishment')
+              .forEach((found) {
+            predictionEstablishments.add(prediction);
+          });
+        }
+      });
+      setState(() {
+        predictions = predictionEstablishments;
+      });
+      predictionEstablishments = [];
+    }
+
     Timer(Duration(milliseconds: 100), () => _scrollToBottom());
   }
 
@@ -282,6 +315,16 @@ class _PlacesState extends State<Places> {
 
   Future<void> getDetails(String placeId) async {
     var details = await this.googlePlace.details.get(placeId);
+
+    //GET ADDRESS
+    var address = details.result.formattedAddress;
+
+    //GET PHONE
+    var phoneNumber = details.result.formattedPhoneNumber;
+
+    //GET WEBSITE
+    var website = details.result.website;
+
     if (details != null && details.result != null && mounted) {
       setState(() {
         detailsResult = details.result;

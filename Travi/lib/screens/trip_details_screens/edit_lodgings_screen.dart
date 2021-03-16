@@ -227,6 +227,7 @@ class _EditLodgingsScreenState extends State<EditLodgingsScreen> {
         onPressed: () => _addOrEditLodging(-1),
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

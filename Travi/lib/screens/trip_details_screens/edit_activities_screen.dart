@@ -206,6 +206,7 @@ class _EditActivitiesScreenState extends State<EditActivitiesScreen> {
         onPressed: () => addOrEditActivity(-1),
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

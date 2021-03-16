@@ -63,12 +63,12 @@ class _CurrentTripsScreenState extends State<CurrentTripsScreen> {
     for (int i = 0; i < tripsList.length; i++) {
       await Provider.of<Country>(context, listen: false)
           .fetchAndSetCountries(tripsList[i].organizerId, tripsList[i].id);
-      //set countryList
       tripsList[i].countries = Provider.of<Country>(context, listen: false)
           .getCountryListByTripId(tripsList[i].id);
-      await Provider.of<TripsProvider>(context, listen: false)
-          .setCountriesToTrip(tripsList);
     }
+
+    await Provider.of<TripsProvider>(context, listen: false)
+        .setCountriesToTrip(tripsList);
   }
 
   @override

@@ -101,18 +101,22 @@ class Country extends ChangeNotifier {
       'tripId': tripId,
       'countryList': countryList,
     });
-    print('Trip id added ${_mapTripCountries[_mapTripCountries.length - 1]['tripId']}');
   }
 
   List<Country> getCountryListByTripId(String tripId) {
     List<Country> tempList = [];
     int mapIndex = -1;
     int attempts = 0;
-    do{
-      mapIndex = _mapTripCountries.indexWhere((country) => country['tripId'] == tripId);
+    do {
+      mapIndex = _mapTripCountries
+          .indexWhere((country) => country['tripId'] == tripId);
       attempts++;
     } while (mapIndex == -1 && attempts < 50);
-    tempList = _mapTripCountries[mapIndex]['countryList'];
+    if (attempts >= 50) {
+      tempList = [];
+    } else {
+      tempList = _mapTripCountries[mapIndex]['countryList'];
+    }
     return tempList;
   }
 
@@ -123,8 +127,6 @@ class Country extends ChangeNotifier {
   ) async {
     List<Country> countryList = [];
     bool collection = false;
-    print('userId is $userId');
-    print('tripId is $tripId');
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -134,32 +136,28 @@ class Country extends ChangeNotifier {
           .collection('countries')
           .get()
           .then(
-            (country) => {
-              if (country.docs.length > 0)
-                {
-                  collection = true,
-                  country.docs.asMap().forEach(
-                    (index, countryData) {
-                      countryList.add(
-                        Country(
-                          id: country.docs[index].id,
-                          country: countryData.data()['country'],
-                          latitude: countryData.data()['latitude'],
-                          longitude: countryData.data()['longitude'],
-                          countryImageUrl:
-                              countryData.data()['countryImageUrl'],
-                        ),
-                      );
-                    },
+        (country) {
+          if (country.docs.length > 0) {
+            collection = true;
+            country.docs.asMap().forEach(
+              (index, countryData) {
+                countryList.add(
+                  Country(
+                    id: country.docs[index].id,
+                    country: countryData.data()['country'],
+                    latitude: countryData.data()['latitude'],
+                    longitude: countryData.data()['longitude'],
+                    countryImageUrl: countryData.data()['countryImageUrl'],
                   ),
-                }
-              else
-                collection = false,
-            },
-          )
-          .then(
-            (value) => print('Fetched countries'),
-          );
+                );
+              },
+            );
+          } else
+            collection = false;
+        },
+      ).then(
+        (value) => print('Fetched countries'),
+      );
     } catch (error) {
       throw error;
     }

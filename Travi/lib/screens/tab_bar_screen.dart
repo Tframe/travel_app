@@ -12,6 +12,7 @@ import '../screens/past_trips_screens/past_trips_screen.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/notification_end_drawer.dart';
 import '../providers/user_provider.dart';
+import '../helpers/size_config.dart';
 
 class TabBarScreen extends StatefulWidget {
   static const routeName = '/tab-bar-screen';
@@ -140,7 +141,9 @@ class _TabBarScreenState extends State<TabBarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    //initialize screen sizes
+    SizeConfig().init(context);
+    double screenWidth = SizeConfig.screenWidth;
     return Scaffold(
       key: _scaffoldKey,
       appBar: _builderAppBar(context),

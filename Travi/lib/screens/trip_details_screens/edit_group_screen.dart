@@ -93,16 +93,19 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                   '${loadedTrip.group[index].firstName} ${loadedTrip.group[index].lastName}',
                                 ),
                                 //Display trip acception status
-                                trailing: loadedTrip.group[index].invitationStatus ==
-                                        'accepted'
-                                    ? Text('Accepted')
-                                    : loadedTrip.group[index].invitationStatus ==
-                                            'pending'
-                                        ? Text('Pending...')
-                                        : loadedTrip.group[index].invitationStatus ==
-                                                'declined'
-                                            ? Text('Declined')
-                                            : Text(''),
+                                trailing:
+                                    loadedTrip.group[index].invitationStatus ==
+                                            'accepted'
+                                        ? Text('Accepted')
+                                        : loadedTrip.group[index]
+                                                    .invitationStatus ==
+                                                'pending'
+                                            ? Text('Pending...')
+                                            : loadedTrip.group[index]
+                                                        .invitationStatus ==
+                                                    'declined'
+                                                ? Text('Declined')
+                                                : Text(''),
                                 //TODO Navigate to the user profile page
                                 onTap: () {},
                               ),
@@ -134,8 +137,8 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
                                           setState(() {
                                             Provider.of<TripsProvider>(context,
                                                     listen: false)
-                                                .removeCompanion(loadedTrip,
-                                                    index);
+                                                .removeCompanion(
+                                                    loadedTrip, index);
                                           });
                                           Navigator.of(context).pop();
                                         },
@@ -164,6 +167,7 @@ class _EditGroupScreenState extends State<EditGroupScreen> {
         onPressed: addCompanion,
         child: Icon(
           Icons.add,
+          color: Theme.of(context).accentColor,
         ),
       ),
     );

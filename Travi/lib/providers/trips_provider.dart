@@ -24,7 +24,6 @@ class TripsProvider extends ChangeNotifier {
 
   //find trip by id
   TripProvider findById(String id) {
-    print(id);
     return _trips.firstWhere((trip) => trip.id == id);
   }
 
@@ -155,6 +154,7 @@ class TripsProvider extends ChangeNotifier {
                         ));
                       })
                     : [],
+                countries: [],
                 isPrivate: trip.docs[index].data()['isPrivate'],
               );
               loadedTrips.add(tempTrip);
@@ -218,6 +218,7 @@ class TripsProvider extends ChangeNotifier {
                     ));
                   })
                 : [],
+            countries: [],
             isPrivate: doc.data()['isPrivate'],
           );
           loadedTrips.add(tempTrip);
@@ -386,8 +387,6 @@ class TripsProvider extends ChangeNotifier {
   ) async {
     final tripIndex = _trips.indexWhere((trip) => trip.id == currentTrip.id);
 
-    print(_trips[tripIndex].group[groupIndex].id);
-
     final companionsIndex = _trips[tripIndex].companionsId.indexWhere(
         (companion) => companion == _trips[tripIndex].group[groupIndex].id);
 
@@ -427,7 +426,6 @@ class TripsProvider extends ChangeNotifier {
     //If companions index is 0 or greater, means companion was found in list,
     //so remove from list. Otherwise, skip it.
     if (companionsIndex >= 0) {
-      print('found companion in list');
       //remove fromo list of companions on trip collection
       await removeFromCompanionsList(
           currentTrip.id, currentTrip.organizerId, tripIndex, companionsIndex);

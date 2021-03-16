@@ -65,6 +65,8 @@ import './providers/restaurant_provider.dart';
 import './providers/post_provider.dart';
 import './providers/tag_provider.dart';
 
+import './helpers/size_config.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await DotEnv().load('.env');
@@ -186,6 +188,7 @@ class MyApp extends StatelessWidget {
           floatingActionButtonTheme: FloatingActionButtonThemeData(
             backgroundColor: sandyBrown,
           ),
+          highlightColor: sandyBrown,
           buttonTheme: ButtonTheme.of(context).copyWith(
             buttonColor: sandyBrown,
             textTheme: ButtonTextTheme.primary,
