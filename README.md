@@ -17,6 +17,7 @@ and reminisce your past adventures.
 
 - Traveler travel statistics
 - Discover trip acivities, lodgings, restaurants, or other inspirations
+- Create a bucket list of places to visit
 - Lookup prices for acivities, lodgings, restaurants, flights, or other transportations
 
 ### Built With
