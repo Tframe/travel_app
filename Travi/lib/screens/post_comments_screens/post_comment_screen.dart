@@ -738,7 +738,7 @@ class _PostCommentScreenState extends State<PostCommentScreen> {
         child: Scaffold(
           appBar: appBar(),
           resizeToAvoidBottomInset: false,
-          resizeToAvoidBottomPadding: false,
+          //resizeToAvoidBottomPadding: false,
           body: SingleChildScrollView(
             child: Column(
               children: [
