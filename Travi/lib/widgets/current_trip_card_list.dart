@@ -20,9 +20,9 @@ class CurrentTripCardList extends StatelessWidget {
         .toList();
 
     //sort list by start date
-    tripsList.sort((a, b) => a.startDate.compareTo(b.startDate));
+    //tripsList.sort((a, b) => a.startDate.compareTo(b.startDate));
 
-    return tripsList.length == 0
+    return tripsList.length <= 0
         ? AlertDialog(
             title: Text(
               'No Trips Found',

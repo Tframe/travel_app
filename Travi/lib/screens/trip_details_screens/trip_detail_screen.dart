@@ -151,35 +151,39 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   //get list of cities for each country
   Future<void> getCities() async {
     //for each country get list of citiestripsList[tripIndex].countries
-    for (int i = 0; i < loadedTrip.countries.length; i++) {
-      await Provider.of<City>(context, listen: false).fetchAndSetCities(
-        loadedTrip.organizerId,
-        loadedTrip.id,
-        loadedTrip.countries[i].id,
-      );
-      List<City> cityList = Provider.of<City>(context, listen: false).cities;
-      loadedTrip.countries[i].cities = cityList;
+    if (loadedTrip.countries != null) {
+      for (int i = 0; i < loadedTrip.countries.length; i++) {
+        await Provider.of<City>(context, listen: false).fetchAndSetCities(
+          loadedTrip.organizerId,
+          loadedTrip.id,
+          loadedTrip.countries[i].id,
+        );
+        List<City> cityList = Provider.of<City>(context, listen: false).cities;
+        loadedTrip.countries[i].cities = cityList;
+      }
+      await getLodgings();
+      await getActivities();
+      await getTransportations();
+      await getRestaurants();
     }
-    await getLodgings();
-    await getActivities();
-    await getTransportations();
-    await getRestaurants();
   }
 
   //get list of flights for trip
   Future<void> getFlights() async {
-    for (int i = 0; i < loadedTrip.countries.length; i++) {
-      //get flights from firebase
-      await Provider.of<Flight>(context, listen: false).fetchAndSetFlights(
-        tripId,
-        loadedTrip.organizerId,
-        loadedTrip.countries[i].id,
-      );
-      if (Provider.of<Flight>(context, listen: false).assertFlightList()) {
-        loadedFlights = Provider.of<Flight>(context, listen: false).flights;
-        setState(() {
-          loadedTrip.countries[i].flights = loadedFlights;
-        });
+    if (loadedTrip.countries != null) {
+      for (int i = 0; i < loadedTrip.countries.length; i++) {
+        //get flights from firebase
+        await Provider.of<Flight>(context, listen: false).fetchAndSetFlights(
+          tripId,
+          loadedTrip.organizerId,
+          loadedTrip.countries[i].id,
+        );
+        if (Provider.of<Flight>(context, listen: false).assertFlightList()) {
+          loadedFlights = Provider.of<Flight>(context, listen: false).flights;
+          setState(() {
+            loadedTrip.countries[i].flights = loadedFlights;
+          });
+        }
       }
     }
   }
@@ -271,9 +275,11 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
   //Returns a text string of countries
   String listCountries() {
     String textString = '';
-    for (int i = 0; i < loadedTrip.countries.length; i++) {
-      textString = textString +
-          '${loadedTrip.countries[i].country}${loadedTrip.countries.length > 1 && loadedTrip.countries.length != i + 1 ? ', ' : ''}';
+    if (loadedTrip.countries != null) {
+      for (int i = 0; i < loadedTrip.countries.length; i++) {
+        textString = textString +
+            '${loadedTrip.countries[i].country}${loadedTrip.countries.length > 1 && loadedTrip.countries.length != i + 1 ? ', ' : ''}';
+      }
     }
     return textString;
   }
@@ -1962,41 +1968,46 @@ class _TripDetailsScreenState extends State<TripDetailsScreen> {
                                 ],
                               ),
                             ),
-                            loadedTrip.countries[countryIndex].flights != null
-                                ? loadedTrip.countries[countryIndex].flights
-                                            .length >
-                                        0
+                            loadedTrip.countries != null
+                                ? loadedTrip.countries[countryIndex].flights !=
+                                        null
+                                    ? loadedTrip.countries[countryIndex].flights
+                                                .length >
+                                            0
+                                        ? Column(
+                                            children: [
+                                              Divider(
+                                                thickness: 10,
+                                              ),
+                                              cardScroller(
+                                                'Flights',
+                                                1,
+                                                flightOrTransportationTile(
+                                                  'Flight',
+                                                ),
+                                                context,
+                                              ),
+                                            ],
+                                          )
+                                        : Container()
+                                    : Container()
+                                : Container(),
+                            loadedTrip.countries != null
+                                ? loadedTrip.countries.length > 0
                                     ? Column(
                                         children: [
                                           Divider(
                                             thickness: 10,
                                           ),
                                           cardScroller(
-                                            'Flights',
+                                            'Destinations',
                                             1,
-                                            flightOrTransportationTile(
-                                              'Flight',
-                                            ),
+                                            cardWidget('Destinations'),
                                             context,
                                           ),
                                         ],
                                       )
                                     : Container()
-                                : Container(),
-                            loadedTrip.countries.length > 0
-                                ? Column(
-                                    children: [
-                                      Divider(
-                                        thickness: 10,
-                                      ),
-                                      cardScroller(
-                                        'Destinations',
-                                        1,
-                                        cardWidget('Destinations'),
-                                        context,
-                                      ),
-                                    ],
-                                  )
                                 : Container(),
                             loadedTrip.countries[countryIndex].cities[cityIndex]
                                         .lodgings !=
